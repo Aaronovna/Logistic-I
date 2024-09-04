@@ -23,15 +23,14 @@ export default function Login({ status, canResetPassword }) {
     return (
         <div className='flex'>
             <Head title="Log in" />
-            <div className='w-1/2 h-screen py-1p'>
+            <div className='w-3/5 h-screen py-1p'>
                 <div className='bus-bg w-full h-full'></div>
             </div>
             {/* <img src="../../assets/images/bus-background-croped.png" alt="Background" className='w-1/2 h-screen py-1p'/> */}
-            <div className='py-4 flex flex-col items-center w-1/2'>
+            <div className='py-4 flex flex-col items-center w-2/5'>
 
                 <div>
-                    <p className='font-bold text-5xl w-full text-center mt-4 text-[#004369]'>BUS TRANSPORTATION</p>
-                    <p className='font-bold text-5xl w-full text-center mt-4 text-[#004369]'>MANAGEMENT SYSTEM</p>
+                    <p className='font-bold text-5xl w-full text-center mt-4 text-[#004369]'>Bus Transportation Management System</p>
                 </div>
                 <p className='font-semibold text-3xl text-center mt-10 text-[#004369]'>Logistic I</p>
 

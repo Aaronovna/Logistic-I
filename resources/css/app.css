@@ -22,26 +22,6 @@
     box-shadow: 0px 0px 16px 2px rgba(0, 0, 0, 0.1);
 }
 
-.gradient-background {
-    background: linear-gradient(313deg, #d0db47, #8feed9, #fdd0b0, #bcaace);
-    background-size: 240% 240%;
-    animation: gradient-animation 24s ease infinite;
-}
-
-@keyframes gradient-animation {
-    0% {
-        background-position: 0% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
-    }
-
-    100% {
-        background-position: 0% 50%;
-    }
-}
-
 .py-1p{
     padding-top: 1%;
     padding-bottom: 1%;
@@ -52,3 +32,21 @@
     background-repeat: no-repeat;
     background-image: url('../../public/assets/images/bus-background-croped.png')
 }
+
+/* ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+    border-radius: 10px;
+  }
+  
+  ::-webkit-scrollbar-track {
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: #30b591;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: #267E66;
+  } */
