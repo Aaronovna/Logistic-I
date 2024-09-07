@@ -93,7 +93,7 @@ export default function Category({ auth }) {
   const handleAddSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/category', addFormData);
+      const response = await axios.post('/category/create', addFormData);
 
       setAddFormData({ name: '', description: '' });
       toast.success('Category added successfully');

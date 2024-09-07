@@ -13,15 +13,18 @@ Route::redirect('/', 'login');
 
 Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/dashboard', fn () => Inertia::render('Dashboard'))->name('dashboard');
+    Route::get('/category', fn () => Inertia::render('Category'))->name('category');
+    
     Route::get('/report', fn () => Inertia::render('Report'))->name('report');
     Route::get('/incoming', [Batchcontroller::class, 'index'])->name('incoming');
     Route::get('/product', [ProductController::class, 'index'])->name('product');
-    Route::get('/category', [CategoryController::class, 'index'])->name('category');
     
-    Route::get('/category/get/count', [CategoryController::class, 'getCount'])->name('category.getCount');
-    Route::post('/category', [CategoryController::class, 'store'])->name('category.store');
+    Route::get('/category/get', [CategoryController::class, 'index'])->name('category.index');
+    Route::post('/category/create', [CategoryController::class, 'store'])->name('category.store');
     Route::delete('/category/delete/{id}', [CategoryController::class, 'destroy'])->name('category.destroy');
     Route::patch('category/update/{id}', [CategoryController::class, 'update'])->name('category.update');
+    
+    Route::get('/category/get/count', [CategoryController::class, 'getCount'])->name('category.getCount');
 });
 
 Route::middleware('auth')->group(function () {

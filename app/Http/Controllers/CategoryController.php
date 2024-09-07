@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
-use Inertia\Inertia;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -13,18 +12,9 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::withCount('products')->get();
+        $categories = Category::all();
+        return response()->json($categories);
 
-        // Return data to an Inertia component
-        return Inertia::render('Category');
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -49,14 +39,6 @@ class CategoryController extends Controller
      * Display the specified resource.
      */
     public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
     {
         //
     }
