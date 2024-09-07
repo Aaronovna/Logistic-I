@@ -11,6 +11,8 @@ import { TbClipboardList } from "react-icons/tb";
 import { TbSettingsCog } from "react-icons/tb";
 import { TbCategory } from "react-icons/tb";
 
+import { Toaster } from 'react-hot-toast';
+
 const analyticsRoutes = ['dashboard', 'report'];
 const inventoryRoutes = ['incoming', 'product'];
 const managementRoutes = ['category'];
@@ -20,6 +22,17 @@ export default function Authenticated({ user, header, children }) {
 
   return (
     <div className="flex h-screen">
+      <Toaster 
+        position="top-right"
+        reverseOrder={false}
+        toastOptions={{
+          className: 'border-card',
+          style: {
+            padding: '18px',
+            marginRight: '1%',
+          },
+        }}
+      />
 
       <aside className='bg-[#F3F8FF] w-80 hidden md:block'>
 

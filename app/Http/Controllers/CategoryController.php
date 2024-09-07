@@ -16,9 +16,7 @@ class CategoryController extends Controller
         $categories = Category::withCount('products')->get();
 
         // Return data to an Inertia component
-        return Inertia::render('Category', [
-            'categories' => $categories,
-        ]);
+        return Inertia::render('Category');
     }
 
     /**

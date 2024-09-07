@@ -1,11 +1,14 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { Head } from '@inertiajs/react';
 import { useState, useCallback, useEffect } from 'react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+
 import { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
-import { Head } from '@inertiajs/react';
+
 import Modal from '@/Components/Modal';
-import axios from 'axios';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
 import { TbCategory } from "react-icons/tb";
 import { TbPlus } from "react-icons/tb";
@@ -20,23 +23,26 @@ export default function Category({ auth }) {
   const [selectedData, setSelectedData] = useState(null);
   const [gridApi, setGridApi] = useState(null);
 
-  
-
   const onGridReady = useCallback((params) => {
     setGridApi(params.api);
   }, []);
 
-  const [editData, setEditData] = useState({
+  const onSelectionChanged = (event) => {
+    const selectedRows = event.api.getSelectedRows();
+    setSelectedData(selectedRows[0] || null);
+  };
+
+  const [editFormData, setEditFormData] = useState({
     name: '',
     description: ''
   });
 
-  const [formData, setFormData] = useState({
+  const [addFormData, setAddFormData] = useState({
     name: '',
     description: ''
   });
 
-  const [colDefs, setColDefs] = useState([
+  const colDefs = [
     { field: "id", filter: true, flex: 1 },
     { field: "name", filter: true, flex: 1 },
     { field: "products_count", headerName: 'Products Count' },
@@ -53,7 +59,7 @@ export default function Category({ auth }) {
               className='hover:bg-[#B2E9FF] p-2 rounded-full'
               onClick={() => {
                 setOpenEditModal(true);
-                setEditData({
+                setEditFormData({
                   id: params.data.id,
                   name: params.data.name,
                   description: params.data.description
@@ -72,35 +78,29 @@ export default function Category({ auth }) {
         );
       }
     }
-  ]);
+  ];
 
-  const onSelectionChanged = (event) => {
-    const selectedRows = event.api.getSelectedRows();
-    setSelectedData(selectedRows[0] || null);
-  };
-
-  const handleInputChange = (e) => {
+  const handleAddInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setAddFormData({ ...addFormData, [name]: value });
   };
 
   const handleEditInputChange = (e) => {
     const { name, value } = e.target;
-    setEditData({ ...editData, [name]: value });
+    setEditFormData({ ...editFormData, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleAddSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/category', formData);
+      const response = await axios.post('/category', addFormData);
 
-      setRowData([...rowData, response.data]);
-      setOpenAddModal(false);
-      setFormData({ name: '', description: '' });
+      setAddFormData({ name: '', description: '' });
+      toast.success('Category added successfully');
       fetchCategories();
-
+      setOpenAddModal(false);
     } catch (error) {
-      console.error('Error adding category:', error);
+      toast.error('Failed to add category' + error);
     }
   };
 
@@ -108,16 +108,13 @@ export default function Category({ auth }) {
     e.preventDefault();
 
     try {
-      const response = await axios.patch(`/category/update/${editData.id}`, editData);
-  
-      if (response.status === 200) {
-        alert('Category updated successfully');
-        fetchCategories();
-        setOpenEditModal(false);
-      }
+      const response = await axios.patch(`/category/update/${editFormData.id}`, editFormData);
+
+      toast.success('Category updated successfully');
+      fetchCategories();
+      setOpenEditModal(false);
     } catch (error) {
-      console.error('Error:', error);
-      alert('Failed to update category');
+      toast.error('Failed to add category' + error);
     }
   };
 
@@ -125,8 +122,9 @@ export default function Category({ auth }) {
     try {
       await axios.delete(`/category/delete/${id}}`);
       fetchCategories();
+      toast.success('Category deleted successfully');
     } catch (error) {
-      console.error('Error deleting category:', error);
+      toast.error('Error deleting category:', error);
     }
   };
 
@@ -197,14 +195,14 @@ export default function Category({ auth }) {
 
       {/* MODAL FOR CREATING NEW CATEGORY */}
       <Modal show={openAddModal} onClose={() => setOpenAddModal(false)}>
-        <form onSubmit={handleSubmit} className="p-4">
+        <form onSubmit={handleAddSubmit} className="p-4">
           <p className='font-semibold text-xl mt-2 mb-4'>Add New Category</p>
           <input
             type="text"
             name="name"
             id="name"
-            value={formData.name}
-            onChange={handleInputChange}
+            value={addFormData.name}
+            onChange={handleAddInputChange}
             placeholder="Category Name"
             className="mb-2 p-2 border rounded w-full"
           />
@@ -212,8 +210,8 @@ export default function Category({ auth }) {
             type="text"
             name="description"
             id="description"
-            value={formData.description}
-            onChange={handleInputChange}
+            value={addFormData.description}
+            onChange={handleAddInputChange}
             placeholder="Category Description"
             className="mb-2 p-2 border rounded w-full"
           />
@@ -229,7 +227,7 @@ export default function Category({ auth }) {
             type="text"
             name="name"
             id="name"
-            value={editData.name}
+            value={editFormData.name}
             onChange={handleEditInputChange}
             placeholder="Category Name"
             className="mb-2 p-2 border rounded w-full"
@@ -238,7 +236,7 @@ export default function Category({ auth }) {
             type="text"
             name="description"
             id="description"
-            value={editData.description}
+            value={editFormData.description}
             onChange={handleEditInputChange}
             placeholder="Category Description"
             className="mb-2 p-2 border rounded w-full"
