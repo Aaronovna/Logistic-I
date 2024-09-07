@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* *{
-    outline: 1px solid black;
+    outline: 1px solid rgba(0, 0, 0, 0.2);
 } */
 
 .poppins-regular {
@@ -31,6 +31,10 @@
     background-size:100% 100%;
     background-repeat: no-repeat;
     background-image: url('../../public/assets/images/bus-background-croped.png')
+}
+
+.border-card{
+    @apply border-gray-300 border rounded-lg;
 }
 
 /* ::-webkit-scrollbar {

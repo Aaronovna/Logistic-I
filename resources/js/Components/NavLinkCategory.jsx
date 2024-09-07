@@ -7,10 +7,12 @@ export default function ({routes = [], Icon, label = 'Label', href = '/', classN
             </span>
             <p className={
                 ' ml-10 flex p-2 w-full rounded-xl font-semibold text-[#004369] ' +
-                (routes.some(r => route().current(r)) ? 'bg-[#004369] text-white' : 'bg-[#E7F6FF]')}
+                (routes.some(r => route().current(r)) ? 'bg-[#004369] text-white' : 'bg-[#d6ebf8]')}
             >
-                <Icon className='mr-1' />
-                {label}
+                <span className="flex items-baseline">
+                    <Icon className='mr-1' />
+                    {label}
+                </span>
             </p>
         </a>
     )
