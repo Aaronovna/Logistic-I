@@ -10,19 +10,20 @@ import { TbBuildingWarehouse } from "react-icons/tb";
 import { TbClipboardList } from "react-icons/tb";
 import { TbSettingsCog } from "react-icons/tb";
 import { TbCategory } from "react-icons/tb";
+import { TbUserCog } from "react-icons/tb";
 
 import { Toaster } from 'react-hot-toast';
 
 const analyticsRoutes = ['dashboard', 'report'];
 const inventoryRoutes = ['incoming', 'product'];
-const managementRoutes = ['category'];
+const managementRoutes = ['category', 'user'];
 
 export default function Authenticated({ user, header, children }) {
   const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
   return (
     <div className="flex h-screen">
-      <Toaster 
+      <Toaster
         position="top-right"
         reverseOrder={false}
         toastOptions={{
@@ -34,7 +35,7 @@ export default function Authenticated({ user, header, children }) {
         }}
       />
 
-      <aside className='bg-[#F3F8FF] w-80 hidden md:block'>
+      <aside className='bg-[#F3F8FF] w-80 hidden md:block border border-gray-300'>
 
         <p className='m-4 mb-16 font-bold text-xl text-center'>BTMS - Logistic I</p>
 
@@ -42,13 +43,13 @@ export default function Authenticated({ user, header, children }) {
 
           <NavLinkCategory routes={analyticsRoutes} Icon={TbChartHistogram} href='dashboard' label='Analytics' className='mr-4' />
           <NavLink href={route('dashboard')} active={route().current('dashboard')}>
-            <span className='flex items-center'>
+            <span className='flex items-center gap-1 px-1'>
               <TbLayoutDashboard className='mr-1' />
               <p>Dashboard</p>
             </span>
           </NavLink>
           <NavLink href={route('report')} active={route().current('report')}>
-            <span className='flex items-center'>
+            <span className='flex items-center gap-1 px-1'>
               <TbClipboardList className='mr-1' />
               <p>Report</p>
             </span>
@@ -64,9 +65,15 @@ export default function Authenticated({ user, header, children }) {
 
           <NavLinkCategory routes={managementRoutes} Icon={TbSettingsCog} href='category' label='Management' className='mr-4' />
           <NavLink href={route('category')} active={route().current('category')}>
-            <span className='flex items-center'>
+            <span className='flex items-center gap-1 px-1'>
               <TbCategory className='mr-1' />
               <p>Category</p>
+            </span>
+          </NavLink>
+          <NavLink href={route('user')} active={route().current('user')}>
+            <span className='flex items-center gap-1 px-1'>
+              <TbUserCog className='mr-1' />
+              <p>User</p>
             </span>
           </NavLink>
         </div>
@@ -74,9 +81,14 @@ export default function Authenticated({ user, header, children }) {
       </aside>
 
       <div className='flex flex-col w-full h-screen overflow-y-scroll'>
-        <nav className='sticky top-0 z-10 bg-white'>
+        <nav className='sticky top-0 z-10 bg-white-10/50 backdrop-blur-sm'>
           <div className="flex w-full">
-            <div className="ml-auto relative">
+            <div className="relative flex justify-between w-full">
+              {header && (
+                <header>
+                  <div className="m-4">{header}</div>
+                </header>
+              )}
               <Dropdown>
                 <Dropdown.Trigger>
                   <span className="inline-flex m-4">
@@ -158,12 +170,6 @@ export default function Authenticated({ user, header, children }) {
               </div>
             </div>
           </div>
-
-          {header && (
-            <header>
-              <div className="mx-8 my-4">{header}</div>
-            </header>
-          )}
         </nav>
 
         {children}

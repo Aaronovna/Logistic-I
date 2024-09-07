@@ -43,9 +43,9 @@ export default function Category({ auth }) {
   });
 
   const colDefs = [
-    { field: "id", filter: true, flex: 1 },
+    { field: "id", filter: true, flex: 1, minWidth: 70, maxWidth: 90,},
     { field: "name", filter: true, flex: 1 },
-    { field: "products_count", headerName: 'Products Count' },
+    { field: "products_count", headerName: 'Products Count', minWidth: 120,maxWidth: 150, },
     { field: "description", flex: 2, sortable: false, },
     {
       field: "action",
@@ -150,7 +150,7 @@ export default function Category({ auth }) {
 
       <div className="m-8">
         <div className='flex flex-col gap-4'>
-          <div className='flex'>
+          <div className='flex items-center'>
             <div className='flex rounded-lg py-2 p-4 items-center bg-[#EEF9FF] w-fit border-gray-300 border'>
               <span className='flex justify-center items-center rounded-full aspect-square w-fit h-fit'>
                 <TbCategory size={46} title='Category' />
@@ -162,9 +162,10 @@ export default function Category({ auth }) {
             </div>
             <button
               onClick={() => setOpenAddModal(true)}
-              className='border-card py-3 px-5 bg-[#B2E9FF] ml-auto hover:scale-105 hover:shadow-xl duration-200 aspect-square'
+              className='text-white border-card h-fit py-2 px-2 bg-[#004369] ml-auto hover:scale-105 hover:shadow-xl duration-200 flex items-center'
             >
-              <TbPlus size={32} />
+              <TbPlus size={18} />
+              <p className='ml-1'>Add Category</p>
             </button>
           </div>
 
