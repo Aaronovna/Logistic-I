@@ -15,7 +15,7 @@ import { TbUserCog } from "react-icons/tb";
 import { Toaster } from 'react-hot-toast';
 
 const analyticsRoutes = ['dashboard', 'report'];
-const inventoryRoutes = ['incoming', 'product'];
+const inventoryRoutes = [ 'product'];
 const managementRoutes = ['category', 'user'];
 
 export default function Authenticated({ user, header, children }) {
@@ -56,9 +56,6 @@ export default function Authenticated({ user, header, children }) {
           </NavLink>
 
           <NavLinkCategory routes={inventoryRoutes} Icon={TbBuildingWarehouse} href='product' label='Analytics' className='mr-4' />
-          <NavLink href={route('incoming')} active={route().current('incoming')}>
-            Incoming
-          </NavLink>
           <NavLink href={route('product')} active={route().current('product')}>
             Product
           </NavLink>
