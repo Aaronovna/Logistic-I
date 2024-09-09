@@ -8,6 +8,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 
 import Modal from '@/Components/Modal';
+import Card from '@/Components/Card';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
 import { TbCategory } from "react-icons/tb";
@@ -151,18 +152,10 @@ export default function Category({ auth }) {
       <div className="m-8">
         <div className='flex flex-col gap-4'>
           <div className='flex items-center'>
-            <div className='flex rounded-lg py-2 p-4 items-center bg-[#EEF9FF] w-fit border-gray-300 border'>
-              <span className='flex justify-center items-center rounded-full aspect-square w-fit h-fit'>
-                <TbCategory size={46} title='Category' />
-              </span>
-              <span className='ml-4'>
-                <p className='font-semibold text-2xl text-right'>{categories ? categories.length : '-'}</p>
-                <p className='text-sm text-gray-400'>Category</p>
-              </span>
-            </div>
+            <Card data={categories ? categories.length : "-"} name="Categories" Icon={TbCategory} />
             <button
               onClick={() => setOpenAddModal(true)}
-              className='text-white border-card h-fit py-2 px-2 bg-[#004369] ml-auto hover:scale-105 hover:shadow-xl duration-200 flex items-center'
+              className='text-white rounded-lg h-fit py-2 px-2 bg-[#004369] ml-auto hover:scale-105 hover:shadow-xl duration-200 flex items-center'
             >
               <TbPlus size={18} />
               <p className='ml-1'>Add Category</p>

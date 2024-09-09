@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PositionController;
+use App\Http\Controllers\UserController;
 
 Route::redirect('/', 'login');
 
@@ -26,6 +27,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/category/get/count', [CategoryController::class, 'getCount'])->name('category.getCount');
     
     Route::get('/position', [PositionController::class, 'index'])->name('position.index');
+    Route::get('/user/get', [UserController::class, 'index'])->name('user.index');
 });
 
 Route::middleware('auth')->group(function () {

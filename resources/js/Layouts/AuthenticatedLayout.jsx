@@ -83,7 +83,7 @@ export default function Authenticated({ user, header, children }) {
             <div className="relative flex justify-between w-full">
               {header && (
                 <header>
-                  <div className="m-4">{header}</div>
+                  <div className="mx-8 my-4">{header}</div>
                 </header>
               )}
               <Dropdown>
