@@ -39,7 +39,7 @@ export default function Authenticated({ user, header, children }) {
 
         <p className='m-4 mb-16 font-bold text-xl text-center'>Celeris Transport Systems</p>
 
-        <div className="flex flex-col">
+        <div className="flex flex-col mr-4">
 
           <NavLinkCategory routes={analyticsRoutes} Icon={TbChartHistogram} href='dashboard' label='Analytics' className='mr-4' />
           <NavLink href={route('dashboard')} active={route().current('dashboard')}>

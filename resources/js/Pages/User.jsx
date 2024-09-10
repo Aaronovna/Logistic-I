@@ -237,7 +237,7 @@ export default function User({ auth }) {
       </div>
 
       <Modal show={openAddUserModal} onClose={() => setOpenAddUserModal(false)}>
-
+      
       </Modal>
     </AuthenticatedLayout>
   );

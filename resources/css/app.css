@@ -37,6 +37,10 @@
     @apply border-gray-300 border rounded-lg;
 }
 
+.outline-card{
+    @apply outline-gray-300 outline outline-1 rounded-lg;
+}
+
 input{
     @apply border-gray-300 border p-2;
 }
@@ -70,6 +74,6 @@ input:focus{
     background: linear-gradient(0deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 75%);
   }
 
-  ::selection {
+::selection {
     background: #B2E9FF;
-  }
+}
