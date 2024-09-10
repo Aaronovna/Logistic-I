@@ -15,7 +15,7 @@ import { TbUserCog } from "react-icons/tb";
 import { Toaster } from 'react-hot-toast';
 
 const analyticsRoutes = ['dashboard', 'report'];
-const inventoryRoutes = [ 'product'];
+const inventoryRoutes = ['product'];
 const managementRoutes = ['category', 'user'];
 
 export default function Authenticated({ user, header, children }) {
@@ -37,7 +37,7 @@ export default function Authenticated({ user, header, children }) {
 
       <aside className='bg-[#F3F8FF] w-80 hidden md:block border border-gray-300'>
 
-        <p className='m-4 mb-16 font-bold text-xl text-center'>BTMS - Logistic I</p>
+        <p className='m-4 mb-16 font-bold text-xl text-center'>Celeris Transport Systems</p>
 
         <div className="flex flex-col">
 
@@ -55,7 +55,7 @@ export default function Authenticated({ user, header, children }) {
             </span>
           </NavLink>
 
-          <NavLinkCategory routes={inventoryRoutes} Icon={TbBuildingWarehouse} href='product' label='Analytics' className='mr-4' />
+          <NavLinkCategory routes={inventoryRoutes} Icon={TbBuildingWarehouse} href='product' label='Inventory' className='mr-4' />
           <NavLink href={route('product')} active={route().current('product')}>
             Product
           </NavLink>

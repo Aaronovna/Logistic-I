@@ -21,7 +21,15 @@ class PositionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $position = Position::create([
+            'name' => $request->name,
+        ]);
+
+        return response()->json($position);
     }
 
     /**
@@ -37,7 +45,19 @@ class PositionController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $position = Position::findOrFail($id);
+
+        $position->name = $request->input('name');
+        $position->save();
+
+        return response()->json([
+            'message' => 'Position updated successfully',
+            'position' => $position
+        ], 200);
     }
 
     /**
@@ -45,6 +65,7 @@ class PositionController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $position = Position::findOrFail($id);
+        $position->delete();
     }
 }

@@ -27,6 +27,10 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/category/get/count', [CategoryController::class, 'getCount'])->name('category.getCount');
     
     Route::get('/position', [PositionController::class, 'index'])->name('position.index');
+    Route::post('/position/create', [PositionController::class, 'store'])->name('position.store');
+    Route::delete('/position/delete/{id}', [PositionController::class, 'destroy'])->name('position.destroy');
+    Route::patch('/position/update/{id}', [PositionController::class, 'update'])->name('position.update');
+
     Route::get('/user/get', [UserController::class, 'index'])->name('user.index');
 });
 

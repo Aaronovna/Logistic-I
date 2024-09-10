@@ -18,7 +18,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        DB::statement('ALTER TABLE positions AUTO_INCREMENT = 100;');
+        DB::statement('ALTER TABLE positions AUTO_INCREMENT = 2000;');
     }
 
     /**
