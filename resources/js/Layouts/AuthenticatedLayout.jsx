@@ -35,7 +35,7 @@ export default function Authenticated({ user, header, children }) {
         }}
       />
 
-      <aside className='bg-[#F3F8FF] w-80 hidden md:block border border-gray-300'>
+      <aside className='bg-[#F3F8FF] w-80 hidden md:block border border-gray-300 m-4 mr-0 rounded-lg overflow-hidden'>
 
         <p className='m-4 mb-16 font-bold text-xl text-center'>Celeris Transport Systems</p>
 
@@ -78,17 +78,39 @@ export default function Authenticated({ user, header, children }) {
       </aside>
 
       <div className='flex flex-col w-full h-screen overflow-y-scroll'>
-        <nav className='sticky top-0 z-10 bg-white-10/50 backdrop-blur-sm'>
+        <nav className='md:sticky block md:w-auto top-4 z-10 bg-white-10/50 backdrop-blur-sm border-card m-4'>
+
           <div className="flex w-full">
+            <div className="-me-2 flex items-center sm:hidden">
+              <button
+                onClick={() => setShowingNavigationDropdown((previousState) => !previousState)}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out"
+              >
+                <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                  <path
+                    className={!showingNavigationDropdown ? 'inline-flex' : 'hidden'}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                  <path
+                    className={showingNavigationDropdown ? 'inline-flex' : 'hidden'}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
             <div className="relative flex justify-between w-full">
               {header && (
-                <header>
-                  <div className="mx-8 my-4">{header}</div>
-                </header>
+                  <div className="mx-4 my-4">{header}</div>
               )}
               <Dropdown>
                 <Dropdown.Trigger>
-                  <span className="inline-flex m-4">
+                  <span className="m-4 md:inline-flex hidden">
                     <button
                       type="button"
                       className="inline-flex items-center px-3 py-2 font-medium transition ease-in-out duration-150"
@@ -120,36 +142,17 @@ export default function Authenticated({ user, header, children }) {
               </Dropdown>
             </div>
           </div>
-          <hr />
-
-          <div className="-me-2 flex items-center sm:hidden">
-            <button
-              onClick={() => setShowingNavigationDropdown((previousState) => !previousState)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out"
-            >
-              <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                <path
-                  className={!showingNavigationDropdown ? 'inline-flex' : 'hidden'}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-                <path
-                  className={showingNavigationDropdown ? 'inline-flex' : 'hidden'}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
 
           <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden'}>
             <div className="pt-2 pb-3 space-y-1">
               <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>
                 Dashboard
+              </ResponsiveNavLink>
+              <ResponsiveNavLink href={route('category')} active={route().current('category')}>
+                Category
+              </ResponsiveNavLink>
+              <ResponsiveNavLink href={route('user')} active={route().current('user')}>
+                User
               </ResponsiveNavLink>
             </div>
 

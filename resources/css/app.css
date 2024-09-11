@@ -77,3 +77,7 @@ input:focus{
 ::selection {
     background: #B2E9FF;
 }
+
+[type=checkbox]:checked + span.check {/* <-- Style its checked state */
+    background: #004369;
+  }

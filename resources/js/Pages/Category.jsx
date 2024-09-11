@@ -149,7 +149,7 @@ export default function Category({ auth }) {
     >
       <Head title="Category" />
 
-      <div className="m-8">
+      <div className="mx-4">
         <div className='flex flex-col gap-4'>
           <div className='flex items-center'>
             <Card data={categories ? categories.length : "-"} name="Categories" Icon={TbCategory} />

@@ -32,6 +32,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::patch('/position/update/{id}', [PositionController::class, 'update'])->name('position.update');
 
     Route::get('/user/get', [UserController::class, 'index'])->name('user.index');
+    Route::post('/user/create', [UserController::class, 'store'])->name('user.store');
 });
 
 Route::middleware('auth')->group(function () {

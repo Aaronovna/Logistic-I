@@ -11,7 +11,7 @@ export default function Product({ auth, suppliers }) {
     >
       <Head title="Product" />
 
-      <div className="m-8">
+      <div className="m-4">
         <div className='flex gap-4'>
           <div className='shadow-lg rounded-lg p-2 w-40 h-44'>
             <p>Suppliers</p>

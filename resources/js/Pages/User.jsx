@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
@@ -17,6 +17,29 @@ import { TbX } from "react-icons/tb";
 import Card from '@/Components/Card';
 import Modal from '@/Components/Modal';
 
+import { roles } from '@/Constants/roles';
+
+const dummyEmployeesData = [
+  {
+    fname: 'Saika',
+    sname: 'Kaede',
+    email: 'saika.kaede@app.net',
+    employeeId: '1212',
+  },
+  {
+    fname: 'Karen',
+    sname: 'Ishikawa',
+    email: 'karen.ishikawa@app.net',
+    employeeId: '3434',
+  },
+  {
+    fname: 'Mio',
+    sname: 'kawakita',
+    email: 'mio.kawakita@app.net',
+    employeeId: '5656',
+  },
+]
+
 export default function User({ auth }) {
 
   const [users, setUsers] = useState(null);
@@ -31,9 +54,10 @@ export default function User({ auth }) {
     setGridApi(params.api);
   }, []);
 
-  const onSelectionChanged = (event) => {
+  const [userSelectedData, setUserSelectedData] = useState(null)
+  const onUserSelectionChanged = (event) => {
     const selectedRows = event.api.getSelectedRows();
-    setSelectedData(selectedRows[0] || null);
+    setUserSelectedData(selectedRows[0] || null);
   };
 
   const [positionSelectedData, setPositionSelectedData] = useState(null)
@@ -46,10 +70,30 @@ export default function User({ auth }) {
   const [addPositionName, setAddPositionName] = useState("");
   const [editPositionName, setEditPositionName] = useState("");
 
+  const [addUserFormData, setAddUserFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+  });
+
+  const handleAddUserInputChange = (e) => {
+    const { name, value } = e.target;
+    setAddUserFormData({ ...addFormData, [name]: value });
+  };
+
+  const handleAddUserInput = (employee) => {
+    setAddUserFormData({
+      ...addUserFormData,
+      name: employee.fname + " " + employee.sname,
+      email: employee.email,
+      password: userPasswordGenerator(employee)
+    });
+  };
+
   const handleAddPositionSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/position/create', {name: addPositionName});
+      const response = await axios.post('/position/create', { name: addPositionName });
 
       setAddPositionName("");
       toast.success('Position added successfully');
@@ -63,7 +107,7 @@ export default function User({ auth }) {
   const handleEditPositionSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.patch(`/position/update/${positionSelectedData.id}`, {name: editPositionName});
+      const response = await axios.patch(`/position/update/${positionSelectedData.id}`, { name: editPositionName });
 
       toast.success('Position updated successfully');
       setEditPositionName("");
@@ -85,21 +129,33 @@ export default function User({ auth }) {
     }
   };
 
+  const handleAddUserSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('/user/create', addUserFormData);
+
+      toast.success('User added successfully');
+      fetchUsers();
+      setOpenAddUserModal(false);
+    } catch (error) {
+      toast.error('Failed to add user' + error);
+    }
+  };
 
   const userColDefs = [
     { field: "id", filter: true, flex: 1, minWidth: 70, maxWidth: 90, },
-    { field: "name", filter: true, flex: 1, minWidth: 200 },
-    { field: "email", filter: true, flex: 1, minWidth: 200 },
+    { field: "name", filter: true, flex: 2, minWidth: 200 },
+    { field: "email", filter: true, flex: 2, minWidth: 200 },
     {
-      field: "action",
-      minWidth: 70,
-      maxWidth: 90,
+      field: "email_verified_at", filter: true, flex: 1, headerName: "Status",
       cellRenderer: (params) => {
         return (
-          <p>ads</p>
+          <span className='flex flex-col w-full justify-center items-center h-full'>
+            <p>{params.data.email_verified_at ? 'Verified' : 'Unverified'}</p>
+          </span>
         )
       }
-    }
+    },
   ];
 
   const positionColDefs = [
@@ -125,6 +181,65 @@ export default function User({ auth }) {
     }
   };
 
+  const [openEmployeeDropdown, setOpenEmployeeDropdown] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState("");
+  const [searchedEmployee, setSearchedEmployee] = useState("");
+  const [filteredEmployees, setFilteredEmployees] = useState([]);
+  const employeeDropdownRef = useRef(null);
+
+  //MULTIPLE FIELD SEARCH
+  const handleSearchEmployee = (e) => {
+    const searchQuery = e.target.value.toLowerCase();
+    setSearchedEmployee(searchQuery);
+
+    if (searchQuery.trim() === "") {
+      setFilteredEmployees([]);
+      return;
+    }
+
+    const filtered = dummyEmployeesData.filter(employee =>
+      employee.fname.toLowerCase().includes(searchQuery) ||
+      employee.sname.toLowerCase().includes(searchQuery) ||
+      employee.email.toLowerCase().includes(searchQuery) ||
+      employee.employeeId.toLowerCase().includes(searchQuery)
+    );
+
+    setFilteredEmployees(filtered);
+    setOpenEmployeeDropdown(true);
+  };
+
+  //SINGLE FIELD SEARCH
+  /* const handleSearchEmployee = e => {
+    const searchQuery = e.target.value;
+    setSearchedEmployee(searchQuery);
+
+    if (searchQuery.trim() === "") {
+      setFilteredEmployees([]);
+      return;
+    }
+
+    const filtered = dummyEmployeesData.filter(employee =>
+      employee.fname.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredEmployees(filtered);
+    setOpenEmployeeDropdown(true);
+  }; */
+
+  const userPasswordGenerator = (employee) => {
+    const firstPart = employee.fname.slice(0, 2).toUpperCase();
+    const secondPart = employee.sname.slice(0, 2).toUpperCase();
+    const lastFourDigits = employee.employeeId.toString().slice(-4);
+
+    const password = `#${firstPart}${secondPart}${lastFourDigits}`;
+    return password;
+  }
+
+  const handleSelectEmployee = employee => {
+    setSelectedEmployee(employee);
+    setSearchedEmployee(employee);
+    setOpenEmployeeDropdown(false);
+  };
+
   useEffect(() => {
     fetchUsers();
     fetchPositions();
@@ -133,11 +248,11 @@ export default function User({ auth }) {
   return (
     <AuthenticatedLayout
       user={auth.user}
-      header={<h2 className="font-medium text-3xl text-[#004369]">Manage Users</h2>}
+      header={<h2 className="font-medium md:text-3xl text-xl text-[#004369]">Manage Users</h2>}
     >
       <Head title="Users" />
 
-      <div className='flex m-8 flex-col'>
+      <div className='flex mx-4 flex-col'>
 
         <div className='flex items-center gap-6'>
           <Card data={users ? users.length : "-"} name="Users" Icon={TbUser} />
@@ -160,7 +275,7 @@ export default function User({ auth }) {
                 columnDefs={userColDefs}
                 rowSelection='single'
                 onGridReady={onGridReady}
-                onSelectionChanged={onSelectionChanged}
+                onSelectionChanged={onUserSelectionChanged}
               />
             </div>
 
@@ -222,22 +337,78 @@ export default function User({ auth }) {
                   type="text"
                   name="name"
                   id="name"
-                  placeholder={positionSelectedData?positionSelectedData.name:''}
+                  placeholder={positionSelectedData ? positionSelectedData.name : ''}
                   value={editPositionName}
                   onChange={(e) => setEditPositionName(e.target.value)}
                 />
                 <button type='submit' className='p-2 mt-2 font-semibold bg-[#004369] text-white border-card'>Update</button>
-                <button type='button' className='p-2 mt-2 font-semibold bg-[#f2a5a5] text-white border-card' onClick={()=>handleDeletePosition(positionSelectedData.id)}>Remove</button>
+                <button type='button' className='p-2 mt-2 font-semibold bg-[#f2a5a5] text-white border-card' onClick={() => handleDeletePosition(positionSelectedData.id)}>Remove</button>
               </form>
             </div>
           </div>
         </div>
 
-        <div className='border-card my-8'>{positionSelectedData ? positionSelectedData.id : 'asd'}</div>
+        <div className={`border-card my-4 p-4 ${userSelectedData ? 'block' : 'hidden'}`}>
+          <p className='text-xl font-medium'>Edit User</p>
+          <p className='text-lg'><p className='inline font-medium'>Name:</p> {userSelectedData ? userSelectedData.name : ''}</p>
+          <form action="" className='my-4'>
+            <p className='text-lg font-medium'>Edit User Roles</p>
+            <div className='my-2 relative border-card p-1 bg-[#EEF9FF] grid grid-cols-3 grid-rows-3 grid-flow-col'>
+              <div className={`${userSelectedData && userSelectedData.email_verified_at ? ' hidden ' : ' absolute '}   bg-white/50 p-1 top-0 left-0 border-card backdrop-blur-sm w-full h-full flex justify-center items-center`}>
+                <p className='text-xl font-semibold'>User is not verified yet</p>
+              </div>
+              {roles.map((role, index) => {
+                return (
+                  <label htmlFor={role.code} className='flex m-1 w-fit h-fit gap-2 items-center' key={index}>
+                    <input type="checkbox" className='h-0 w-0 absolute block invisible overflow-hidden' name={role.alias} id={role.code} />
+                    <span className='check w-5 h-5 bg-white inline-block rounded border border-gray-300'></span>
+                    <p>{role.alias}</p>
+                  </label>
+                )
+              })}
+            </div>
+            <button className={`bg-[#004369] text-white font-semibold p-2 border-card`}>Save</button>
+          </form>
+        </div>
       </div>
 
-      <Modal show={openAddUserModal} onClose={() => setOpenAddUserModal(false)}>
-      
+      <Modal show={openAddUserModal} onClose={() => setOpenAddUserModal(false)} maxWidth={'2xl'}>
+        <div className='p-4'>
+          <p className='font-semibold text-xl mt-2 mb-4'>Create User</p>
+          <form onSubmit={handleAddUserSubmit} className='flex gap-2'>
+            <div className='w-1/2'>
+              <input readOnly={true} value={addUserFormData.name} className='border-card w-full mb-2' type="text" name="name" id="name" placeholder='Name' />
+              <input readOnly={true} value={addUserFormData.email} className='border-card w-full mb-2' type="email" name='email' id='email' placeholder='email' />
+              <input readOnly={true} value={addUserFormData.password} className='border-card w-full mb-2' type="text" name='password' id='password' placeholder='password' />
+              <button type="submit" className="bg-blue-500 text-white p-2 rounded">Submit</button>
+            </div>
+            <div className='relative w-1/2'>
+              <input
+                type="text"
+                placeholder="Search for an employee..."
+                className='border-card w-full mb-2'
+                value={searchedEmployee}
+                onChange={handleSearchEmployee}
+                onClick={() => setOpenEmployeeDropdown(!openEmployeeDropdown)}
+              />
+              {openEmployeeDropdown &&
+                <div
+                  ref={employeeDropdownRef}
+                  className="absolute w-full rounded-md max-h-36 overflow-y-auto z-50 bg-white"
+                >
+                  {searchedEmployee.trim() === ""
+                    ? <p className="bg-white p-2">Search Employee</p>
+                    : filteredEmployees.length > 0
+                      ? filteredEmployees.map((employee, index) =>
+                        <button key={index} className="block p-2 hover:bg-[#EEF9FF] w-full text-left" onClick={() => { handleSelectEmployee(employee.fname); handleAddUserInput(employee); }}>
+                          {`${employee.fname} ${employee.sname}`}
+                        </button>)
+                      : <p className="p-2 text-[#F2A5A5]">No Employee Found</p>
+                  }
+                </div>}
+            </div>
+          </form>
+        </div>
       </Modal>
     </AuthenticatedLayout>
   );
