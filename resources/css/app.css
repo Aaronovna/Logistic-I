@@ -14,6 +14,7 @@
 
 * {
     @apply poppins-regular;
+    @apply duration-200;
 }
 
 .shad {
@@ -38,6 +39,9 @@
 }
 
 .outline-card{
+    @apply outline-gray-300 outline outline-1 rounded-lg;
+}
+.h-outline-card:hover{
     @apply outline-gray-300 outline outline-1 rounded-lg;
 }
 

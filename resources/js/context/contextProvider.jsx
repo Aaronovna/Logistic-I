@@ -4,12 +4,13 @@ const StateContext = createContext();
 
 export const ContextProvider = ({ children }) => {
     const [theme, setTheme] = useState('default');
+    const [userPermissions, setUserPermissions] = useState();
 
     return (
         <StateContext.Provider
             value={{
                 theme, setTheme,
-                
+                userPermissions, setUserPermissions,
             }}
         >
             {children}

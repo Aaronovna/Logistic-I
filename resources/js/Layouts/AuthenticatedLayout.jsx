@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import NavLinkCategory from '@/Components/NavLinkCategory';
@@ -17,9 +17,15 @@ import { Toaster } from 'react-hot-toast';
 const analyticsRoutes = ['dashboard', 'report'];
 const inventoryRoutes = ['product'];
 const managementRoutes = ['category', 'user'];
+import { useStateContext } from '@/context/contextProvider';
 
 export default function Authenticated({ user, header, children }) {
   const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
+  const { setUserPermissions } = useStateContext();
+
+  useEffect(()=>{
+    setUserPermissions(user.permissions);
+  },[])
 
   return (
     <div className="flex h-screen">
@@ -37,7 +43,7 @@ export default function Authenticated({ user, header, children }) {
 
       <aside className='bg-[#F3F8FF] w-80 hidden md:block border border-gray-300 m-4 mr-0 rounded-lg overflow-hidden'>
 
-        <p className='m-4 mb-16 font-bold text-xl text-center'>Celeris Transport Systems</p>
+        <p className='m-4 mb-12 font-bold text-2xl text-center text-[#004369]'>NextFleet Dynamics</p>
 
         <div className="flex flex-col mr-4">
 
@@ -79,7 +85,6 @@ export default function Authenticated({ user, header, children }) {
 
       <div className='flex flex-col w-full h-screen overflow-y-scroll'>
         <nav className='md:sticky block md:w-auto top-4 z-10 bg-white-10/50 backdrop-blur-sm border-card m-4'>
-
           <div className="flex w-full">
             <div className="-me-2 flex items-center sm:hidden">
               <button

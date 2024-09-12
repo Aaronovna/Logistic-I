@@ -19,6 +19,8 @@ import Modal from '@/Components/Modal';
 
 import { roles } from '@/Constants/roles';
 
+import { useStateContext } from '@/context/contextProvider';
+
 const dummyEmployeesData = [
   {
     fname: 'Saika',
@@ -41,6 +43,8 @@ const dummyEmployeesData = [
 ]
 
 export default function User({ auth }) {
+
+  const { userPermissions } = useStateContext();
 
   const [users, setUsers] = useState(null);
   const [positions, setPositions] = useState(null);
@@ -264,7 +268,7 @@ export default function User({ auth }) {
           <div className="md:w-2/3 w-full realtive p-1">
             <span className='flex justify-between h-14 items-center'>
               <p className='text-xl text-[#004369] font-semibold h-fit'>Users</p>
-              <button className='bg-[#004369] text-white m-2 mr-0 p-2 rounded-md flex items-center gap-1' onClick={() => setOpenAddUserModal(true)}>
+              <button disabled={userPermissions === '000' ? true : false} className='bg-[#004369] text-white m-2 mr-0 p-2 rounded-md flex items-center gap-1' onClick={() => setOpenAddUserModal(true)}>
                 <TbUserPlus />
                 <p className='md:block hidden'>Add Users</p>
               </button>
@@ -350,7 +354,7 @@ export default function User({ auth }) {
 
         <div className={`border-card my-4 p-4 ${userSelectedData ? 'block' : 'hidden'}`}>
           <p className='text-xl font-medium'>Edit User</p>
-          <p className='text-lg'><p className='inline font-medium'>Name:</p> {userSelectedData ? userSelectedData.name : ''}</p>
+          <p className='text-lg'><span className='inline font-medium'>Name:</span> {userSelectedData ? userSelectedData.name : ''}</p>
           <form action="" className='my-4'>
             <p className='text-lg font-medium'>Edit User Roles</p>
             <div className='my-2 relative border-card p-1 bg-[#EEF9FF] grid grid-cols-3 grid-rows-3 grid-flow-col'>
@@ -359,7 +363,7 @@ export default function User({ auth }) {
               </div>
               {roles.map((role, index) => {
                 return (
-                  <label htmlFor={role.code} className='flex m-1 w-fit h-fit gap-2 items-center' key={index}>
+                  <label htmlFor={role.code} className='flex m-1 w-fit h-fit gap-2 items-center select-none cursor-pointer' key={index}>
                     <input type="checkbox" className='h-0 w-0 absolute block invisible overflow-hidden' name={role.alias} id={role.code} />
                     <span className='check w-5 h-5 bg-white inline-block rounded border border-gray-300'></span>
                     <p>{role.alias}</p>

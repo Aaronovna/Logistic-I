@@ -26,8 +26,7 @@ export default function Login({ status, canResetPassword }) {
             <div className='w-3/5 h-screen py-1p'>
                 <div className='bus-bg w-full h-full'></div>
             </div>
-            {/* <img src="../../assets/images/bus-background-croped.png" alt="Background" className='w-1/2 h-screen py-1p'/> */}
-            <div className='py-4 flex flex-col items-center w-2/5'>
+            <div className='flex flex-col py-4 w-2/5 mt-6 items-center'>
 
                 <div>
                     <p className='font-bold text-5xl w-full text-center mt-4 text-[#004369]'>Bus Transportation Management System</p>
