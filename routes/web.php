@@ -24,7 +24,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post('/category/create', [CategoryController::class, 'store'])->name('category.store');
     Route::delete('/category/delete/{id}', [CategoryController::class, 'destroy'])->name('category.destroy');
     Route::patch('category/update/{id}', [CategoryController::class, 'update'])->name('category.update');
-    Route::get('/category/get/count', [CategoryController::class, 'getCount'])->name('category.getCount');
+    Route::get('/category/get/count', [CategoryController::class, 'get_count'])->name('category.get_count');
     
     Route::get('/position', [PositionController::class, 'index'])->name('position.index');
     Route::post('/position/create', [PositionController::class, 'store'])->name('position.store');
@@ -33,6 +33,8 @@ Route::middleware(["auth", "verified"])->group(function () {
 
     Route::get('/user/get', [UserController::class, 'index'])->name('user.index');
     Route::post('/user/create', [UserController::class, 'store'])->name('user.store');
+    Route::patch('/user/update/permission/{id}', [UserController::class, 'update_permission'])->name('user.update_permission');
+    Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.destroy');
 });
 
 Route::middleware('auth')->group(function () {

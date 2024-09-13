@@ -14,7 +14,6 @@
 
 * {
     @apply poppins-regular;
-    @apply duration-200;
 }
 
 .shad {
@@ -23,33 +22,34 @@
     box-shadow: 0px 0px 16px 2px rgba(0, 0, 0, 0.1);
 }
 
-.py-1p{
+.py-1p {
     padding-top: 1%;
     padding-bottom: 1%;
 }
 
-.bus-bg{
-    background-size:100% 100%;
+.bus-bg {
+    background-size: 100% 100%;
     background-repeat: no-repeat;
     background-image: url('../../public/assets/images/bus-background-croped.png')
 }
 
-.border-card{
+.border-card {
     @apply border-gray-300 border rounded-lg;
 }
 
-.outline-card{
-    @apply outline-gray-300 outline outline-1 rounded-lg;
-}
-.h-outline-card:hover{
+.outline-card {
     @apply outline-gray-300 outline outline-1 rounded-lg;
 }
 
-input{
+.h-outline-card:hover {
+    @apply outline-gray-300 outline outline-1 rounded-lg;
+}
+
+input {
     @apply border-gray-300 border p-2;
 }
 
-input:focus{
+input:focus {
     outline: none;
 }
 
@@ -57,31 +57,32 @@ input:focus{
     width: 10px;
     height: 10px;
     border-radius: 10px;
-  }
+}
 
 /*   ::-webkit-scrollbar-track {
   } */
-  
-  ::-webkit-scrollbar-thumb {
+
+::-webkit-scrollbar-thumb {
     border-radius: 4px;
     background-color: #004369;
-  }
-  
-  ::-webkit-scrollbar-thumb:hover {
-    background-color: #003151;
-  }
+}
 
-  .w-t-grad{
-    background: rgb(255,255,255);
-    background: -moz-linear-gradient(0deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 75%);
-    background: -webkit-linear-gradient(0deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 75%);
-    background: linear-gradient(0deg, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 75%);
-  }
+::-webkit-scrollbar-thumb:hover {
+    background-color: #003151;
+}
+
+.w-t-grad {
+    background: rgb(255, 255, 255);
+    background: -moz-linear-gradient(0deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 75%);
+    background: -webkit-linear-gradient(0deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 75%);
+    background: linear-gradient(0deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 75%);
+}
 
 ::selection {
     background: #B2E9FF;
 }
 
-[type=checkbox]:checked + span.check {/* <-- Style its checked state */
+[type=checkbox]:checked+span.check {
+    /* <-- Style its checked state */
     background: #004369;
-  }
+}

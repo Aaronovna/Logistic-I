@@ -21,6 +21,9 @@ import { roles } from '@/Constants/roles';
 
 import { useStateContext } from '@/context/contextProvider';
 
+import { generatePassword } from '@/functions/passwordGenerator';
+import { convertPermissions } from '@/functions/permissionsConverter';
+
 const dummyEmployeesData = [
   {
     fname: 'Saika',
@@ -52,6 +55,40 @@ export default function User({ auth }) {
   const [openAddPositionModal, setOpenAddPositionModal] = useState(false);
   const [openEditPositionModal, setOpenEditPositionModal] = useState(false);
 
+  const [selectUserPermissionsForm, setSelectUserPermissionsForm] = useState(
+    roles.map((role) => ({
+      [role.code]: false,
+    }))
+  );
+
+  const resetUserPermissionsForm = () => {
+    const resetPermissions = selectUserPermissionsForm.map((permission) => {
+      const roleCode = Object.keys(permission)[0];
+      return { [roleCode]: false };
+    });
+
+    setSelectUserPermissionsForm(resetPermissions); // Update the state with the reset values
+  };
+
+  const handleUserPermissionsCheckBoxesChange = (e, index, role) => {
+    const newPermissions = [...selectUserPermissionsForm];
+    newPermissions[index] = { ...newPermissions[index], [role.code]: e.target.checked };
+    setSelectUserPermissionsForm(newPermissions);
+    console.log(selectUserPermissionsForm);
+  };
+
+  const handleEditUserPermissionsSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.patch(`/user/update/permission/${userSelectedData.id}`, { permissions: selectUserPermissionsForm });
+
+      toast.success('User permissions updated successfully');
+      fetchUsers();
+    } catch (error) {
+      toast.error('Failed to update user permissions' + error);
+    }
+  }
+
   const [openAddUserModal, setOpenAddUserModal] = useState(false);
 
   const onGridReady = useCallback((params) => {
@@ -59,9 +96,20 @@ export default function User({ auth }) {
   }, []);
 
   const [userSelectedData, setUserSelectedData] = useState(null)
+
   const onUserSelectionChanged = (event) => {
     const selectedRows = event.api.getSelectedRows();
-    setUserSelectedData(selectedRows[0] || null);
+    const selectedUser = selectedRows[0] || null;
+
+    setUserSelectedData(selectedUser);
+    resetUserPermissionsForm();
+
+    if (selectedUser && selectedUser.permissions) {
+      const permissions = convertPermissions(selectedUser.permissions);
+      setSelectUserPermissionsForm(permissions);
+    } else {
+      resetUserPermissionsForm(); // Ensure permissions form is reset if no user or permissions
+    }
   };
 
   const [positionSelectedData, setPositionSelectedData] = useState(null)
@@ -90,7 +138,7 @@ export default function User({ auth }) {
       ...addUserFormData,
       name: employee.fname + " " + employee.sname,
       email: employee.email,
-      password: userPasswordGenerator(employee)
+      password: generatePassword(employee)
     });
   };
 
@@ -143,6 +191,16 @@ export default function User({ auth }) {
       setOpenAddUserModal(false);
     } catch (error) {
       toast.error('Failed to add user' + error);
+    }
+  };
+
+  const handleDeleteUser = async (id) => {
+    try {
+      await axios.delete(`/user/delete/${id}}`);
+      fetchUsers();
+      toast.success('User deleted successfully');
+    } catch (error) {
+      toast.error('Error deleting user:', error);
     }
   };
 
@@ -211,32 +269,6 @@ export default function User({ auth }) {
     setFilteredEmployees(filtered);
     setOpenEmployeeDropdown(true);
   };
-
-  //SINGLE FIELD SEARCH
-  /* const handleSearchEmployee = e => {
-    const searchQuery = e.target.value;
-    setSearchedEmployee(searchQuery);
-
-    if (searchQuery.trim() === "") {
-      setFilteredEmployees([]);
-      return;
-    }
-
-    const filtered = dummyEmployeesData.filter(employee =>
-      employee.fname.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setFilteredEmployees(filtered);
-    setOpenEmployeeDropdown(true);
-  }; */
-
-  const userPasswordGenerator = (employee) => {
-    const firstPart = employee.fname.slice(0, 2).toUpperCase();
-    const secondPart = employee.sname.slice(0, 2).toUpperCase();
-    const lastFourDigits = employee.employeeId.toString().slice(-4);
-
-    const password = `#${firstPart}${secondPart}${lastFourDigits}`;
-    return password;
-  }
 
   const handleSelectEmployee = employee => {
     setSelectedEmployee(employee);
@@ -345,33 +377,60 @@ export default function User({ auth }) {
                   value={editPositionName}
                   onChange={(e) => setEditPositionName(e.target.value)}
                 />
-                <button type='submit' className='p-2 mt-2 font-semibold bg-[#004369] text-white border-card'>Update</button>
-                <button type='button' className='p-2 mt-2 font-semibold bg-[#f2a5a5] text-white border-card' onClick={() => handleDeletePosition(positionSelectedData.id)}>Remove</button>
+                <span className='flex gap-2'>
+                  <button type='button' className='flex-1 p-2 mt-2 font-semibold bg-[#f2a5a5] text-white border-card' onClick={() => handleDeletePosition(positionSelectedData.id)}>Remove</button>
+                  <button type='submit' className='flex-1 p-2 mt-2 font-semibold bg-[#004369] text-white border-card'>Update</button>
+                </span>
+                <button type='button' className='p-2 mt-2 font-semibold bg-[#003151] text-white border-card'>Edit Permissions</button>
               </form>
             </div>
           </div>
         </div>
 
-        <div className={`border-card my-4 p-4 ${userSelectedData ? 'block' : 'hidden'}`}>
+        <div className={`border-card my-4 p-4`}>
           <p className='text-xl font-medium'>Edit User</p>
           <p className='text-lg'><span className='inline font-medium'>Name:</span> {userSelectedData ? userSelectedData.name : ''}</p>
-          <form action="" className='my-4'>
-            <p className='text-lg font-medium'>Edit User Roles</p>
+          <form onSubmit={handleEditUserPermissionsSubmit} className='my-4'>
+            <div className='flex justify-between'>
+              <p className='text-lg font-medium'>Edit User Permissions</p>
+              <span>
+                <p className='inline-block text-lg font-medium'>Template: </p>
+                <select className="inline-block" name="position_list" id="position_list" disabled={userSelectedData && userSelectedData.email_verified_at ? false : true}>
+                  <option value="none">None</option>
+                  {positions && positions.map((position, index) => {
+                    return (
+                      <option value={position.id} key={index}>{`${position.id} ${position.name}`}</option>
+                    )
+                  })}
+                </select>
+              </span>
+            </div>
             <div className='my-2 relative border-card p-1 bg-[#EEF9FF] grid grid-cols-3 grid-rows-3 grid-flow-col'>
-              <div className={`${userSelectedData && userSelectedData.email_verified_at ? ' hidden ' : ' absolute '}   bg-white/50 p-1 top-0 left-0 border-card backdrop-blur-sm w-full h-full flex justify-center items-center`}>
+              <div className={`${userSelectedData === null ? 'hidden' : userSelectedData && userSelectedData.email_verified_at ? ' hidden ' : ' absolute '}   bg-white/50 top-0 left-0 rounded-lg backdrop-blur w-full h-full flex justify-center items-center`}>
                 <p className='text-xl font-semibold'>User is not verified yet</p>
               </div>
               {roles.map((role, index) => {
                 return (
                   <label htmlFor={role.code} className='flex m-1 w-fit h-fit gap-2 items-center select-none cursor-pointer' key={index}>
-                    <input type="checkbox" className='h-0 w-0 absolute block invisible overflow-hidden' name={role.alias} id={role.code} />
+                    <input
+                      type="checkbox"
+                      className='h-0 w-0 absolute block invisible overflow-hidden'
+                      name={role.alias}
+                      id={role.code}
+                      checked={selectUserPermissionsForm[index][role.code]}
+                      onChange={(e) => handleUserPermissionsCheckBoxesChange(e, index, role)}
+                      disabled={userSelectedData && userSelectedData.email_verified_at ? false : true}
+                    />
                     <span className='check w-5 h-5 bg-white inline-block rounded border border-gray-300'></span>
                     <p>{role.alias}</p>
                   </label>
                 )
               })}
             </div>
-            <button className={`bg-[#004369] text-white font-semibold p-2 border-card`}>Save</button>
+            <div className='flex justify-between my-4'>
+              <button type='submit' className={`bg-[#004369] text-white font-semibold p-2 border-card disabled:bg-gray-400 disabled:cursor-not-allowed`} disabled={ userSelectedData ? false : true}>Save</button>
+              <button type='button' className={`bg-[#F2A5A5] text-white font-semibold p-2 border-card disabled:bg-gray-400 disabled:cursor-not-allowed`} disabled={ userSelectedData ? false : true} onClick={()=>handleDeleteUser(userSelectedData.id)}>Delete User</button>
+            </div>
           </form>
         </div>
       </div>
@@ -417,3 +476,20 @@ export default function User({ auth }) {
     </AuthenticatedLayout>
   );
 }
+
+//SINGLE FIELD SEARCH
+/* const handleSearchEmployee = e => {
+  const searchQuery = e.target.value;
+  setSearchedEmployee(searchQuery);
+
+  if (searchQuery.trim() === "") {
+    setFilteredEmployees([]);
+    return;
+  }
+
+  const filtered = dummyEmployeesData.filter(employee =>
+    employee.fname.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  setFilteredEmployees(filtered);
+  setOpenEmployeeDropdown(true);
+}; */

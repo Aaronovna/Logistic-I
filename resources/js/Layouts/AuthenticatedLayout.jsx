@@ -14,17 +14,19 @@ import { TbUserCog } from "react-icons/tb";
 
 import { Toaster } from 'react-hot-toast';
 
+import { useStateContext } from '@/context/contextProvider';
+import { convertPermissions } from '@/functions/permissionsConverter';
+
 const analyticsRoutes = ['dashboard', 'report'];
 const inventoryRoutes = ['product'];
 const managementRoutes = ['category', 'user'];
-import { useStateContext } from '@/context/contextProvider';
 
 export default function Authenticated({ user, header, children }) {
   const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
-  const { setUserPermissions } = useStateContext();
+  const { setUserPermissions } = useStateContext(convertPermissions(user.permissions));
 
   useEffect(()=>{
-    setUserPermissions(user.permissions);
+    setUserPermissions(convertPermissions(user.permissions));
   },[])
 
   return (

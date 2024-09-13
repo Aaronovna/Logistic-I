@@ -14,7 +14,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::select('id', 'name', 'email','email_verified_at')->get();
+        $users = User::select('id', 'name', 'email', 'email_verified_at','permissions')->get();
         return $users;
     }
 
@@ -25,7 +25,7 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
             'password' => ['required', Rules\Password::defaults()],
         ]);
 
@@ -61,6 +61,64 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $user = User::findOrFail($id);
+        $user->delete();
+    }
+
+    public function update_permission(Request $request, string $id)
+    {
+        // Validate the request input
+        $request->validate([
+            'permissions' => 'required|array', // Ensure 'permissions' is an array
+            'permissions.*' => 'array', // Each item in the 'permissions' array should be an array
+            'permissions.*.*' => 'boolean' // Each value in the array should be a boolean
+        ]);
+
+        // Find the user by ID
+        $user = User::findOrFail($id); // Throws 404 if the user is not found
+
+        // Retrieve the permissions from the request
+        $newPermissions = $request->input('permissions');
+
+        // Process the permissions data
+        $processedPermissions = [];
+        foreach ($newPermissions as $permission) {
+            // Each item is an associative array like ["100" => false]
+            foreach ($permission as $key => $value) {
+                $processedPermissions[$key] = $value;
+            }
+        }
+
+        // Update the user's permissions
+        $user->permissions = $processedPermissions;
+
+        // Save the updated user
+        $user->save();
+
+        // Return success response
+        return response()->json([
+            'message' => 'User permissions updated successfully!',
+            'permissions' => $user->permissions
+        ], 200);
+    }
+
+    public function get_permissions(string $id)
+    {
+        // Find the user by ID
+        $user = User::findOrFail($id); // Throws 404 if user is not found
+
+        // Retrieve the permissions from the user
+        $permissions = $user->permissions;
+
+        // Format the permissions to match the exact structure sent
+        $formattedPermissions = [];
+        foreach ($permissions as $key => $value) {
+            $formattedPermissions[] = [$key => $value];
+        }
+
+        // Return the formatted permissions as JSON
+        return response()->json([
+            'permissions' => $formattedPermissions
+        ], 200);
     }
 }

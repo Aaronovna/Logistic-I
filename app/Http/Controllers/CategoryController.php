@@ -79,7 +79,7 @@ class CategoryController extends Controller
         $category->delete();
     }
 
-    public function getCount()
+    public function get_count()
     {
         $categorycount = Category::withCount('products')->get();
 
