@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -16,10 +17,14 @@ return new class extends Migration
             $table->foreignId('category_id')->constrained('categories')->onDelete('restrict');
             $table->foreignId('supplier_id')->constrained('suppliers')->onDelete('restrict');
             $table->string('name');
+            $table->string('brand');
+            $table->string('model');
             $table->string('description');
             $table->decimal('price');
             $table->timestamps();
         });
+
+        DB::statement('ALTER TABLE products AUTO_INCREMENT = 100000;');
     } 
 
     /**

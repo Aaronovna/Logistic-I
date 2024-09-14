@@ -151,7 +151,7 @@ export default function Category({ auth }) {
 
       <div className="mx-4">
         <div className='flex flex-col gap-4'>
-          <div className='flex items-center'>
+          <div className='flex items-end'>
             <Card data={categories ? categories.length : "-"} name="Categories" Icon={TbCategory} />
             <button
               onClick={() => setOpenAddModal(true)}
@@ -163,11 +163,12 @@ export default function Category({ auth }) {
           </div>
 
           <div>
-            <div className='ag-theme-quartz h-96' style={{ height: '400px' }}>
+            <div className='ag-theme-quartz h-96' >
               <AgGridReact
                 rowData={categories}
                 columnDefs={colDefs}
                 rowSelection='single'
+                pagination={true}
                 onGridReady={onGridReady}
                 onSelectionChanged={onSelectionChanged}
               />

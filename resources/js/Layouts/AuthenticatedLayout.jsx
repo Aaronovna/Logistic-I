@@ -11,6 +11,7 @@ import { TbClipboardList } from "react-icons/tb";
 import { TbSettingsCog } from "react-icons/tb";
 import { TbCategory } from "react-icons/tb";
 import { TbUserCog } from "react-icons/tb";
+import { TbBox } from "react-icons/tb";
 
 import { Toaster } from 'react-hot-toast';
 
@@ -25,9 +26,9 @@ export default function Authenticated({ user, header, children }) {
   const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
   const { setUserPermissions } = useStateContext(convertPermissions(user.permissions));
 
-  useEffect(()=>{
+  useEffect(() => {
     setUserPermissions(convertPermissions(user.permissions));
-  },[])
+  }, [])
 
   return (
     <div className="flex h-screen">
@@ -65,7 +66,10 @@ export default function Authenticated({ user, header, children }) {
 
           <NavLinkCategory routes={inventoryRoutes} Icon={TbBuildingWarehouse} href='product' label='Inventory' className='mr-4' />
           <NavLink href={route('product')} active={route().current('product')}>
-            Product
+            <span className='flex items-center gap-1 px-1'>
+              <TbBox className='mr-1' />
+              <p>Product</p>
+            </span>
           </NavLink>
 
           <NavLinkCategory routes={managementRoutes} Icon={TbSettingsCog} href='category' label='Management' className='mr-4' />
@@ -113,7 +117,7 @@ export default function Authenticated({ user, header, children }) {
             </div>
             <div className="relative flex justify-between w-full">
               {header && (
-                  <div className="mx-4 my-4">{header}</div>
+                <div className="mx-4 my-4">{header}</div>
               )}
               <Dropdown>
                 <Dropdown.Trigger>
