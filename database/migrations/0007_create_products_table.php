@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('brand');
             $table->string('model');
             $table->string('description');
+            $table->string('image_url');
             $table->decimal('price');
             $table->timestamps();
         });
