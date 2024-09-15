@@ -1,4 +1,4 @@
-export const roles = [
+export const permissions = [
     {
         code: 100,
         alias: 'view_user',

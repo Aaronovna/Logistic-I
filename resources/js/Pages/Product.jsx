@@ -13,8 +13,11 @@ import { TbPlus } from "react-icons/tb";
 import { TbBox } from "react-icons/tb";
 
 import Card from '@/Components/Card';
+import { numberComparator } from '@/functions/comparators';
 
 export default function Product({ auth, suppliers }) {
+  const [products, setProducts] = useState(null);
+
   const [gridApi, setGridApi] = useState(null);
 
   const onGridReady = useCallback((params) => {
@@ -27,12 +30,36 @@ export default function Product({ auth, suppliers }) {
   };
 
   const productColDefs = [
+    {
+      headerName: "Image", autoHeight: true,
+      cellRenderer: (params) => {
+        return (
+          <div className='flex'>
+            <img src={params.data.image_url} alt={params.data.name} />
+          </div>
+        )
+      }
+    },
     { field: "id", filter: true, flex: 1, minWidth: 70, maxWidth: 90, },
     { field: "name", filter: true, flex: 1 },
-    { field: "price", filter: true, flex: 1, minWidth: 100, maxWidth: 140, },
+    { field: "price", filter: true, flex: 1, minWidth: 100, maxWidth: 140, comparator: numberComparator },
     { field: "brand", filter: true, flex: 1 },
     { field: "model", filter: true, flex: 1 },
-  ]; 
+    { field: "category_name", headerName: "Category", filter: true, flex: 1 },
+  ];
+
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get('/product/get');
+      setProducts(response.data);
+    } catch (error) {
+      toast.error('Error fetching products:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   return (
     <AuthenticatedLayout
@@ -41,26 +68,58 @@ export default function Product({ auth, suppliers }) {
     >
       <Head title="Product" />
 
-      <div className="mx-4">
+      <div className="content">
         <div className='flex items-end mb-4'>
-        <Card data={productDummyData && productDummyData.length} name="Products" Icon={TbBox}/>
-            <button
-              className='text-white rounded-lg h-fit py-2 px-2 bg-[#004369] ml-auto hover:scale-105 hover:shadow-xl duration-200 flex items-center'
-            >
-              <TbPlus size={18} />
-              <p className='ml-1'>Add Product</p>
-            </button>
-          </div>
-        <div className='ag-theme-quartz h-96'>
+          <Card data={products && products.length} name="Products" Icon={TbBox} />
+          <button
+            className='text-white rounded-lg h-fit py-2 px-2 bg-[#004369] ml-auto hover:scale-105 hover:shadow-xl duration-200 flex items-center'
+          >
+            <TbPlus size={18} />
+            <p className='ml-1'>Add Product</p>
+          </button>
+        </div>
+
+        <div className=''>
+          {products && products.map((product, index) => {
+            return (
+              <div className='p-2 border-card flex h-28 mb-2' key={index}>
+                <img
+                  src={product.image_url}
+                  alt={product.name}
+                  className={`w-24 aspect-square outline outline-1 outline-gray-300 rounded-md inline-block`}
+                />
+                <div className='flex flex-col mx-4'>
+                  <p className='text-xl font-semibold text-[#004369]'>{`${product.name} ${product.model}`}</p>
+                  <p className='font-medium text-gray-400'>{product.brand}</p>
+                  <p className='mt-auto text-gray-400'>{product.category_name}</p>
+                </div>
+                <span className='h-full bg-gray-300 rounded-sm ml-auto mx-4' style={{ width: '2px' }}></span>
+                <div className='w-96 gap-2'>
+                  <p className='block mb-2 font-semibold'>{product.supplier_name}</p>
+                  <span className='inline-block mr-4'>
+                    <p className='text-gray-400'>Buying Price</p>
+                    <p className='text-xl font-semibold'>{product.price}</p>
+                  </span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+
+        {/* <div className='ag-theme-quartz' style={{height: '512px'}}>
           <AgGridReact
-            rowData={productDummyData}
+            rowData={products}
             columnDefs={productColDefs}
             rowSelection='single'
             onGridReady={onGridReady}
             pagination={true}
-            /* onSelectionChanged={onSelectionChanged} */
+            paginationPageSize={20}
+            paginationPageSizeSelector={[20,40,80,100]}
+            onSelectionChanged={onSelectionChanged}
           />
-        </div>
+        </div> */}
+
       </div>
     </AuthenticatedLayout>
   );

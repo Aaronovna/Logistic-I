@@ -86,3 +86,7 @@ input:focus {
     /* <-- Style its checked state */
     background: #004369;
 }
+
+.content{
+    @apply mx-4 mb-4;
+}

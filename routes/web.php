@@ -17,8 +17,9 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/category', fn () => Inertia::render('Category'))->name('category');
     Route::get('/user', fn () => Inertia::render('User'))->name('user');
     Route::get('/report', fn () => Inertia::render('Report'))->name('report');
-    
     Route::get('/product', fn () => Inertia::render('Product'))->name('product');
+    
+    Route::get('/product/get', [ProductController::class, 'index'])->name('product.index');
 
     Route::get('/category/get', [CategoryController::class, 'index'])->name('category.index');
     Route::post('/category/create', [CategoryController::class, 'store'])->name('category.store');

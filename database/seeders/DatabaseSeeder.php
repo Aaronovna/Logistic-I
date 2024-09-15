@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Supplier;
 use App\Models\User;
-use App\Models\Position;
+use App\Models\Product;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -20,7 +20,9 @@ class DatabaseSeeder extends Seeder
             PositionSeeder::class,
         ]);
         
-        /* Supplier::factory(10)->create(); */
+        Supplier::factory(10)->create();
         User::factory(2)->create();
+        Product::factory(100)->create();
+
     }
 }

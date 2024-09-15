@@ -17,7 +17,7 @@ import { TbX } from "react-icons/tb";
 import Card from '@/Components/Card';
 import Modal from '@/Components/Modal';
 
-import { roles } from '@/Constants/roles';
+import { permissions } from '@/Constants/permissions';
 
 import { useStateContext } from '@/context/contextProvider';
 
@@ -56,8 +56,8 @@ export default function User({ auth }) {
   const [openEditPositionModal, setOpenEditPositionModal] = useState(false);
 
   const [selectUserPermissionsForm, setSelectUserPermissionsForm] = useState(
-    roles.map((role) => ({
-      [role.code]: false,
+    permissions.map((permission) => ({
+      [permission.code]: false,
     }))
   );
 
@@ -409,7 +409,7 @@ export default function User({ auth }) {
               <div className={`${userSelectedData === null ? 'hidden' : userSelectedData && userSelectedData.email_verified_at ? ' hidden ' : ' absolute '}   bg-white/50 top-0 left-0 rounded-lg backdrop-blur w-full h-full flex justify-center items-center`}>
                 <p className='text-xl font-semibold'>User is not verified yet</p>
               </div>
-              {roles.map((role, index) => {
+              {permissions.map((role, index) => {
                 return (
                   <label htmlFor={role.code} className='flex m-1 w-fit h-fit gap-2 items-center select-none cursor-pointer' key={index}>
                     <input

@@ -1,9 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\Supplier;
-use Inertia\Inertia;
 use Illuminate\Http\Request;
+use App\Models\Product;
 
 class ProductController extends Controller
 {
@@ -12,20 +11,24 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $suppliers = Supplier::all();
+        
+    $products = Product::all();
 
-        // Return data to an Inertia component
-        return Inertia::render('Product', [
-            'suppliers' => $suppliers,
-        ]);
-    }
+    $products = $products->map(function ($product) {
+        return [
+            'id' => $product->id,
+            'name' => $product->name,
+            'brand' => $product->brand,
+            'model' => $product->model,
+            'description' => $product->description,
+            'image_url' => $product->image_url,
+            'price' => $product->price,
+            'category_name' => $product->category->name ?? 'N/A',
+            'supplier_name' => $product->supplier->name ?? 'N/A',
+        ];
+    });
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+    return response()->json($products);
     }
 
     /**
@@ -40,14 +43,6 @@ class ProductController extends Controller
      * Display the specified resource.
      */
     public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
     {
         //
     }
