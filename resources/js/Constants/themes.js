@@ -1,3 +1,24 @@
+export const light = {
+    _name: 'light',
+    _type: 'light',
+    text: '#000000',
+    background: '#ffffff',
+    primary: '#008ee0',
+    secondary: '#b3e9ff',
+    accent: '#00446b',
+    border: '#d1d5db',
+}
+
+export const dark = {
+    _name: 'dark',
+    _type: 'dark',
+    text: '#ffffff',
+    background: '#000000',
+    primary: '#1fadff',
+    secondary: '#00374d',
+    accent: '#94d8ff',
+}
+
 export const defaultTheme = {
     _name: 'Default Theme',
     _type: ' light ',

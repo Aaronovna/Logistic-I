@@ -24,14 +24,14 @@ const managementRoutes = ['category', 'user'];
 
 export default function Authenticated({ user, header, children }) {
   const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
-  const { setUserPermissions } = useStateContext(convertPermissions(user.permissions));
+  const { setUserPermissions, theme, setThemePreference } = useStateContext(convertPermissions(user.permissions));
 
   useEffect(() => {
     setUserPermissions(convertPermissions(user.permissions));
   }, [])
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen" style={{backgroundColor: theme.background}}>
       <Toaster
         position="top-right"
         reverseOrder={false}
@@ -44,9 +44,12 @@ export default function Authenticated({ user, header, children }) {
         }}
       />
 
-      <aside className='bg-[#F3F8FF] w-80 hidden md:block border border-gray-300 m-4 mr-0 rounded-lg overflow-hidden'>
+      <aside
+        className='w-80 hidden md:flex md:flex-col border m-4 mr-0 rounded-lg overflow-hidden'
+        style={{ background: theme.background, borderColor: theme.border }}
+      >
 
-        <p className='m-4 mb-12 font-bold text-2xl text-center text-[#004369]'>NextFleet Dynamics</p>
+        <p className='m-4 mb-12 font-bold text-2xl text-center' style={{ color: theme.accent }}>NextFleet Dynamics</p>
 
         <div className="flex flex-col mr-4">
 
@@ -87,10 +90,18 @@ export default function Authenticated({ user, header, children }) {
           </NavLink>
         </div>
 
+        <button
+          className='p-2 border-card mt-auto'
+          style={{color: theme.text}}
+          onClick={() => { setThemePreference(theme._name === 'light' ? 'dark' : 'light'); }}
+        >
+          {theme._name === 'light' ? 'Dark Mode' : 'Light Mode'}
+        </button>
+
       </aside>
 
       <div className='flex flex-col w-full h-screen overflow-y-scroll'>
-        <nav className='md:sticky block md:w-auto top-4 z-10 bg-white-10/50 backdrop-blur-sm border-card m-4'>
+        <nav className='md:sticky block md:w-auto top-4 z-10 bg-white/50 backdrop-blur-sm border-card m-4'>
           <div className="flex w-full">
             <div className="-me-2 flex items-center sm:hidden">
               <button
