@@ -8,7 +8,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 
 import Modal from '@/Components/Modal';
-import Card from '@/Components/Card';
+import { Card } from '@/Components/Cards';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 
 import { TbCategory } from "react-icons/tb";

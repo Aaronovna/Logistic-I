@@ -14,7 +14,7 @@ import { TbUserPlus } from "react-icons/tb";
 import { TbPlus } from "react-icons/tb";
 import { TbX } from "react-icons/tb";
 
-import Card from '@/Components/Card';
+import { Card } from '@/Components/Cards';
 import Modal from '@/Components/Modal';
 
 import { permissions } from '@/Constants/permissions';
