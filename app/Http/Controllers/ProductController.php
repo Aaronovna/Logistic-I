@@ -23,6 +23,7 @@ class ProductController extends Controller
             'description' => $product->description,
             'image_url' => $product->image_url,
             'price' => $product->price,
+            'stock' => $product->stock,
             'category_name' => $product->category->name ?? 'N/A',
             'supplier_name' => $product->supplier->name ?? 'N/A',
         ];

@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('description');
             $table->string('image_url');
             $table->decimal('price');
-            $table->decimal('stock');
+            $table->integer('stock');
             $table->timestamps();
         });
 
