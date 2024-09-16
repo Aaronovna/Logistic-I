@@ -1,22 +1,30 @@
 export const light = {
     _name: 'light',
     _type: 'light',
-    text: '#000000',
-    background: '#ffffff',
+    text: '#050315',
+    background: '#fbfbfe',
     primary: '#008ee0',
     secondary: '#b3e9ff',
     accent: '#00446b',
     border: '#d1d5db',
+    blur: 'rgba(251, 251, 254, 0.102)',
 }
 
 export const dark = {
     _name: 'dark',
     _type: 'dark',
-    text: '#ffffff',
-    background: '#000000',
+    text: '#fbfbfe',
+    background: '#050315',
     primary: '#1fadff',
     secondary: '#00374d',
     accent: '#94d8ff',
+    border: '#4b5563',
+    blur: 'rgba(5, 3, 21, 0.102)',
+}
+
+export const gradients = {
+    evening_night: 'linear-gradient(to right, #005aa7, #fffde4)',
+    blue_raspberry: 'linear-gradient(to right, #00b4db, #0083b0)',
 }
 
 export const defaultTheme = {
@@ -42,6 +50,8 @@ export const defaultTheme = {
     linkColor: '  ',
     linkHoverColor: '  ',
 };
+
+
 
 
 const templateTheme = {

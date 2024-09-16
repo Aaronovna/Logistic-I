@@ -13,12 +13,13 @@ export default function ({routes = [], Icon, label = 'Label', href = '/', classN
             }
         >
             </span>
-            <p className={'ml-8 flex w-full p-1 rounded-xl font-semibold'}
+            <p className={'ml-8 flex w-full p-1 rounded-xl font-semibold outline outline-1'}
             style={{
-                color: theme.accent,
+                color: theme.text,
                 backgroundColor: routes.some(r => route().current(r))
                   ? theme.accent
-                  : theme.secondary,
+                  : theme.background,
+                outlineColor: theme.border,
                 ...(routes.some(r => route().current(r)) && { color: theme.background })
               }}
             >

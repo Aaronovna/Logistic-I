@@ -7,7 +7,7 @@ export default function NavLink({ active = false, className = '', children, ...p
         <div className='flex relative'>
             <Link
                 {...props}
-                className={'ml-8 flex p-1 w-full rounded-xl ' + (active ? 'outline-card' : null) + className }
+                className={'ml-8 flex p-1 w-full rounded-xl ' + (active ? null : null) + className }
                 style={active ? { color: theme.primary } : { color: theme.text }}
             >
                 {children}

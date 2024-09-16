@@ -31,7 +31,7 @@ export default function Authenticated({ user, header, children }) {
   }, [])
 
   return (
-    <div className="flex h-screen" style={{backgroundColor: theme.background}}>
+    <div className="flex h-screen" style={{background: theme.background}}>
       <Toaster
         position="top-right"
         reverseOrder={false}
@@ -101,7 +101,7 @@ export default function Authenticated({ user, header, children }) {
       </aside>
 
       <div className='flex flex-col w-full h-screen overflow-y-scroll'>
-        <nav className='md:sticky block md:w-auto top-4 z-10 bg-white/50 backdrop-blur-sm border-card m-4'>
+        <nav className='md:sticky block md:w-auto top-4 z-10 backdrop-blur-sm border-card m-4' style={{backgroundColor:theme.blur}}>
           <div className="flex w-full">
             <div className="-me-2 flex items-center sm:hidden">
               <button
