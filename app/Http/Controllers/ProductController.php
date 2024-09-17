@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
 use App\Models\Product;
 
@@ -11,25 +12,25 @@ class ProductController extends Controller
      */
     public function index()
     {
-        
-    $products = Product::all();
 
-    $products = $products->map(function ($product) {
-        return [
-            'id' => $product->id,
-            'name' => $product->name,
-            'brand' => $product->brand,
-            'model' => $product->model,
-            'description' => $product->description,
-            'image_url' => $product->image_url,
-            'price' => $product->price,
-            'stock' => $product->stock,
-            'category_name' => $product->category->name ?? 'N/A',
-            'supplier_name' => $product->supplier->name ?? 'N/A',
-        ];
-    });
+        $products = Product::all();
 
-    return response()->json($products);
+        $products = $products->map(function ($product) {
+            return [
+                'id' => $product->id,
+                'name' => $product->name,
+                'brand' => $product->brand,
+                'model' => $product['model'],
+                'description' => $product->description,
+                'image_url' => $product->image_url,
+                'price' => $product->price,
+                'stock' => $product->stock,
+                'category_name' => $product->category->name ?? 'N/A',
+                'supplier_name' => $product->supplier->name ?? 'N/A',
+            ];
+        });
+
+        return response()->json($products);
     }
 
     /**
