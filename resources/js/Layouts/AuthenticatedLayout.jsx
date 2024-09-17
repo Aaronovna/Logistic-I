@@ -44,6 +44,9 @@ export default function Authenticated({ user, header, children }) {
         }}
       />
 
+      <div className='w-full h-4 absolute z-30 -left-2' style={{background:theme.background}}></div>
+      <div className='w-full h-4 absolute z-30 bottom-0 -left-2' style={{background:theme.background}}></div>
+
       <aside
         className='w-80 hidden md:flex md:flex-col border m-4 mr-0 rounded-lg overflow-hidden'
         style={{ background: theme.background, borderColor: theme.border }}
@@ -101,7 +104,7 @@ export default function Authenticated({ user, header, children }) {
       </aside>
 
       <div className='flex flex-col w-full h-screen overflow-y-scroll'>
-        <nav className='md:sticky block md:w-auto top-4 z-10 backdrop-blur-sm border-card m-4' style={{backgroundColor:theme.blur}}>
+        <nav className='md:sticky block md:w-auto top-4 z-10 backdrop-blur-sm border-card m-4 bg-white' style={{backgroundColor:theme.blur}}>
           <div className="flex w-full">
             <div className="-me-2 flex items-center sm:hidden">
               <button
@@ -135,6 +138,7 @@ export default function Authenticated({ user, header, children }) {
                   <span className="m-4 md:inline-flex hidden">
                     <button
                       type="button"
+                      style={{color:theme.text}}
                       className="inline-flex items-center px-3 py-2 font-medium transition ease-in-out duration-150"
                     >
                       {user.name}
