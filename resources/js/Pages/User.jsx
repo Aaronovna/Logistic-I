@@ -345,7 +345,7 @@ export default function User({ auth }) {
             {/* MODAL FOR ADD POSITION */}
             <div className={`z-10 absolute h-full w-full top-0 left-0 p-1 backdrop-blur-sm duration-300 rounded-md ${openAddPositionModal ? 'visible opacity-100' : 'invisible opacity-0'}`}>
               <span className='h-14 flex justify-end items-center rounded-md'>
-                <button className='font-semibold bg-[#f2a5a5] m-2 mr-0 p-2 rounded-md flex' style={{ color: theme.background }}
+                <button className='font-semibold m-2 mr-0 p-2 rounded-md flex' style={{ color: theme.background, background: theme.danger }}
                   onClick={() => setOpenAddPositionModal(false)}
                 >
                   <TbX size={24} />
@@ -368,7 +368,7 @@ export default function User({ auth }) {
             {/* MODAL FOR EDITING AND DELETING POSITION */}
             <div className={`z-10 absolute h-full w-full top-0 left-0 p-1 backdrop-blur-sm duration-300 ${openEditPositionModal ? 'visible opacity-100' : 'invisible opacity-0'}`}>
               <span className='h-14 flex justify-end items-center rounded-md'>
-                <button className='font-semibold bg-[#f2a5a5] m-2 mr-0 p-2 rounded-md flex' style={{ color: theme.background }}
+                <button className='font-semibold m-2 mr-0 p-2 rounded-md flex' style={{ color: theme.background, background: theme.danger }}
                   onClick={() => setOpenEditPositionModal(false)}
                 >
                   <TbX size={24} />
@@ -386,10 +386,17 @@ export default function User({ auth }) {
                   onChange={(e) => setEditPositionName(e.target.value)}
                 />
                 <span className='flex gap-2'>
-                  <button type='button' className='flex-1 p-2 mt-2 font-semibold bg-[#f2a5a5] text-white border-card' style={{ color: theme.text, borderColor: theme.border }} onClick={() => handleDeletePosition(positionSelectedData.id)}>Remove</button>
-                  <button type='submit' className='flex-1 p-2 mt-2 font-semibold border-card' style={{ background: theme.primary, color: theme.text, borderColor: theme.border }}>Update</button>
+                  <button type='button' className='flex-1 p-2 mt-2 font-medium text-white border-card'
+                    style={{ color: theme.background, borderColor: theme.border, background: theme.danger }}
+                    onClick={() => handleDeletePosition(positionSelectedData.id)}>
+                    Remove
+                  </button>
+                  <button type='submit' className='flex-1 p-2 mt-2 font-medium border-card'
+                    style={{ background: theme.primary, color: theme.background, borderColor: theme.border }}>
+                    Update
+                  </button>
                 </span>
-                <button type='button' className='p-2 mt-2 font-semibold border-card' style={{ background: theme.secondary, color: theme.text, borderColor: theme.border }}>Edit Permissions</button>
+                <button type='button' className='p-2 mt-2 font-medium border-card' style={{ background: theme.secondary, color: theme.text, borderColor: theme.border }}>Edit Permissions</button>
               </form>
             </div>
           </div>
@@ -441,13 +448,13 @@ export default function User({ auth }) {
             </div>
             <div className='flex justify-between my-4'>
               <button type='submit' disabled={userSelectedData ? false : true}
-                className={`p-2 border-card disabled:cursor-not-allowed`}
-                style={{ background: theme.accent, color: theme.background, borderColor:theme.border }}>
+                className={`p-2 border-card font-medium disabled:cursor-not-allowed`}
+                style={{ background: theme.accent, color: theme.background, borderColor: theme.border }}>
                 Save
               </button>
               <button type='button' disabled={userSelectedData ? false : true}
-                className={`bg-[#F2A5A5] p-2 border-card disabled:cursor-not-allowed`}
-                style={{ color: theme.text, borderColor:theme.border }}
+                className={`p-2 border-card font-medium disabled:cursor-not-allowed`}
+                style={{ color: theme.background, borderColor: theme.border, background: theme.danger }}
                 onClick={() => handleDeleteUser(userSelectedData.id)}>
                 Delete User
               </button>
