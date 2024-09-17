@@ -14,7 +14,7 @@ export const dark = {
     _name: 'dark',
     _type: 'dark',
     text: '#fbfbfe',
-    background: '#050315',
+    background: '#1F2936',
     primary: '#1fadff',
     secondary: '#00374d',
     accent: '#94d8ff',

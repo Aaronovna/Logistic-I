@@ -47,7 +47,7 @@ const dummyEmployeesData = [
 
 export default function User({ auth }) {
 
-  const { userPermissions } = useStateContext();
+  const { theme, themePreference, userPermissions } = useStateContext();
 
   const [users, setUsers] = useState(null);
   const [positions, setPositions] = useState(null);
@@ -284,7 +284,7 @@ export default function User({ auth }) {
   return (
     <AuthenticatedLayout
       user={auth.user}
-      header={<h2 className="font-medium md:text-3xl text-xl text-[#004369]">Manage Users</h2>}
+      header={<h2 className="font-medium md:text-3xl text-xl" style={{ color: theme.text }}>Manage Users</h2>}
     >
       <Head title="Users" />
 
@@ -299,13 +299,18 @@ export default function User({ auth }) {
 
           <div className="md:w-2/3 w-full realtive p-1">
             <span className='flex justify-between h-14 items-center'>
-              <p className='text-xl text-[#004369] font-semibold h-fit'>Users</p>
-              <button disabled={userPermissions === '000' ? true : false} className='bg-[#004369] text-white m-2 mr-0 p-2 rounded-md flex items-center gap-1' onClick={() => setOpenAddUserModal(true)}>
+              <p className='text-xl font-semibold h-fit' style={{ color: theme.text }}>Users</p>
+
+              <button style={{ background: theme.accent, color: theme.background }}
+                disabled={userPermissions === '000' ? true : false}
+                className='m-2 mr-0 p-2 rounded-md flex items-center gap-1'
+                onClick={() => setOpenAddUserModal(true)}>
                 <TbUserPlus />
                 <p className='md:block hidden'>Add Users</p>
               </button>
+
             </span>
-            <div className='ag-theme-quartz' style={{ height: '400px' }}>
+            <div className={themePreference === 'light' ? 'ag-theme-quartz ' : 'ag-theme-quartz-dark'} style={{ height: '380px' }}>
               <AgGridReact
                 rowData={users}
                 columnDefs={userColDefs}
@@ -318,12 +323,15 @@ export default function User({ auth }) {
           </div>
           <div className="md:w-1/3 w-full relative p-1">
             <span className='flex justify-between h-14 items-center'>
-              <p className='text-xl text-[#004369] font-semibold h-fit'>Positions</p>
-              <button className='bg-[#004369] text-white m-2 mr-0 p-2 rounded-md flex items-center gap-1' onClick={() => setOpenAddPositionModal(true)}>
+              <p className='text-xl font-semibold h-fit' style={{ color: theme.text }}>Positions</p>
+              <button
+                className='m-2 mr-0 p-2 rounded-md flex items-center gap-1'
+                style={{ background: theme.accent, color: theme.background }}
+                onClick={() => setOpenAddPositionModal(true)}>
                 <TbPlus size={24} />
               </button>
             </span>
-            <div className='ag-theme-quartz' style={{ height: '400px' }}>
+            <div className={themePreference === 'light' ? 'ag-theme-quartz ' : 'ag-theme-quartz-dark'} style={{ height: '380px' }}>
               <AgGridReact
                 rowData={positions}
                 columnDefs={positionColDefs}
@@ -335,16 +343,16 @@ export default function User({ auth }) {
             </div>
 
             {/* MODAL FOR ADD POSITION */}
-            <div className={`w-t-grad z-10 absolute h-full w-full top-0 left-0 p-1 bg-white/50 backdrop-blur-sm duration-300 ${openAddPositionModal ? 'visible opacity-100' : 'invisible opacity-0'}`}>
+            <div className={`z-10 absolute h-full w-full top-0 left-0 p-1 backdrop-blur-sm duration-300 rounded-md ${openAddPositionModal ? 'visible opacity-100' : 'invisible opacity-0'}`}>
               <span className='h-14 flex justify-end items-center rounded-md'>
-                <button className='font-semibold bg-[#f2a5a5] m-2 mr-0 p-2 rounded-md flex text-white'
+                <button className='font-semibold bg-[#f2a5a5] m-2 mr-0 p-2 rounded-md flex' style={{ color: theme.background }}
                   onClick={() => setOpenAddPositionModal(false)}
                 >
                   <TbX size={24} />
                 </button>
               </span>
-              <form onSubmit={handleAddPositionSubmit} className='flex flex-col p-2 border-card' action="">
-                <p className='font-semibold text-2xl inline-block h-fit text-[#004369] w-full text-center mb-2'>Add Position</p>
+              <form onSubmit={handleAddPositionSubmit} className='flex flex-col p-2 border-card' style={{ borderColor: theme.border }}>
+                <p style={{ color: theme.text }} className='font-semibold text-2xl inline-block h-fit w-full text-center mb-2'>Add Position</p>
                 <input
                   className='border-card'
                   type="text"
@@ -353,21 +361,21 @@ export default function User({ auth }) {
                   value={addPositionName}
                   onChange={(e) => setAddPositionName(e.target.value)}
                 />
-                <button className='p-2 mt-2 font-semibold bg-[#004369] text-white border-card'>Create</button>
+                <button className='p-2 mt-2 font-semibold border-card' style={{ background: theme.primary, text: theme.text, borderColor: theme.border }}>Create</button>
               </form>
             </div>
 
             {/* MODAL FOR EDITING AND DELETING POSITION */}
-            <div className={`w-t-grad z-10 absolute h-full w-full top-0 left-0 p-1 bg-white/50 backdrop-blur-sm duration-300 ${openEditPositionModal ? 'visible opacity-100' : 'invisible opacity-0'}`}>
+            <div className={`z-10 absolute h-full w-full top-0 left-0 p-1 backdrop-blur-sm duration-300 ${openEditPositionModal ? 'visible opacity-100' : 'invisible opacity-0'}`}>
               <span className='h-14 flex justify-end items-center rounded-md'>
-                <button className='font-semibold bg-[#f2a5a5] m-2 mr-0 p-2 rounded-md flex text-white'
+                <button className='font-semibold bg-[#f2a5a5] m-2 mr-0 p-2 rounded-md flex' style={{ color: theme.background }}
                   onClick={() => setOpenEditPositionModal(false)}
                 >
                   <TbX size={24} />
                 </button>
               </span>
-              <form onSubmit={handleEditPositionSubmit} className='flex flex-col p-2 border-card' action="">
-                <p className='font-semibold text-2xl inline-block h-fit text-[#004369] w-full text-center mb-2'>Edit Position</p>
+              <form onSubmit={handleEditPositionSubmit} className='flex flex-col p-2 border-card' style={{ borderColor: theme.border }}>
+                <p className='font-semibold text-2xl inline-block h-fit w-full text-center mb-2' style={{ color: theme.text }}>Edit Position</p>
                 <input
                   className='border-card'
                   type="text"
@@ -378,24 +386,28 @@ export default function User({ auth }) {
                   onChange={(e) => setEditPositionName(e.target.value)}
                 />
                 <span className='flex gap-2'>
-                  <button type='button' className='flex-1 p-2 mt-2 font-semibold bg-[#f2a5a5] text-white border-card' onClick={() => handleDeletePosition(positionSelectedData.id)}>Remove</button>
-                  <button type='submit' className='flex-1 p-2 mt-2 font-semibold bg-[#004369] text-white border-card'>Update</button>
+                  <button type='button' className='flex-1 p-2 mt-2 font-semibold bg-[#f2a5a5] text-white border-card' style={{ color: theme.text, borderColor: theme.border }} onClick={() => handleDeletePosition(positionSelectedData.id)}>Remove</button>
+                  <button type='submit' className='flex-1 p-2 mt-2 font-semibold border-card' style={{ background: theme.primary, color: theme.text, borderColor: theme.border }}>Update</button>
                 </span>
-                <button type='button' className='p-2 mt-2 font-semibold bg-[#003151] text-white border-card'>Edit Permissions</button>
+                <button type='button' className='p-2 mt-2 font-semibold border-card' style={{ background: theme.secondary, color: theme.text, borderColor: theme.border }}>Edit Permissions</button>
               </form>
             </div>
           </div>
         </div>
 
-        <div className={`border-card my-4 p-4`}>
-          <p className='text-xl font-medium'>Edit User</p>
-          <p className='text-lg'><span className='inline font-medium'>Name:</span> {userSelectedData ? userSelectedData.name : ''}</p>
+        <div className='border-card my-4 p-4' style={{ borderColor: theme.border }}>
+          <p className='text-xl font-medium' style={{ color: theme.text }}>Edit User</p>
+          <p className='text-lg' style={{ color: theme.text }}><span className='inline font-medium'>Name:</span> {userSelectedData ? userSelectedData.name : ''}</p>
           <form onSubmit={handleEditUserPermissionsSubmit} className='my-4'>
             <div className='flex justify-between'>
-              <p className='text-lg font-medium'>Edit User Permissions</p>
+              <p className='text-lg font-medium' style={{ color: theme.text }}>Edit User Permissions</p>
               <span>
-                <p className='inline-block text-lg font-medium'>Template: </p>
-                <select className="inline-block" name="position_list" id="position_list" disabled={userSelectedData && userSelectedData.email_verified_at ? false : true}>
+                <p className='inline-block text-lg font-medium' style={{ color: theme.text }}>Template: </p>
+                <select
+                  style={{ color: theme.text, background: theme.background }}
+                  className="inline-block" name="position_list" id="position_list"
+                  disabled={userSelectedData && userSelectedData.email_verified_at ? false : true}>
+
                   <option value="none">None</option>
                   {positions && positions.map((position, index) => {
                     return (
@@ -405,8 +417,8 @@ export default function User({ auth }) {
                 </select>
               </span>
             </div>
-            <div className='my-2 relative border-card p-1 bg-[#EEF9FF] grid grid-cols-3 grid-rows-3 grid-flow-col'>
-              <div className={`${userSelectedData === null ? 'hidden' : userSelectedData && userSelectedData.email_verified_at ? ' hidden ' : ' absolute '}   bg-white/50 top-0 left-0 rounded-lg backdrop-blur w-full h-full flex justify-center items-center`}>
+            <div className='my-2 relative border-card p-1 grid grid-cols-3 grid-rows-3 grid-flow-col' style={{ color: theme.text, borderColor: theme.border }}>
+              <div className={`${userSelectedData === null ? 'hidden' : userSelectedData && userSelectedData.email_verified_at ? ' hidden ' : ' absolute '} top-0 left-0 rounded-lg backdrop-blur w-full h-full flex justify-center items-center`}>
                 <p className='text-xl font-semibold'>User is not verified yet</p>
               </div>
               {permissions.map((role, index) => {
@@ -414,22 +426,31 @@ export default function User({ auth }) {
                   <label htmlFor={role.code} className='flex m-1 w-fit h-fit gap-2 items-center select-none cursor-pointer' key={index}>
                     <input
                       type="checkbox"
-                      className='h-0 w-0 absolute block invisible overflow-hidden'
+                      className={`h-0 w-0 absolute block invisible overflow-hidden ${themePreference === 'light' ? 'l' : 'd'}`}
                       name={role.alias}
                       id={role.code}
                       checked={selectUserPermissionsForm[index][role.code]}
                       onChange={(e) => handleUserPermissionsCheckBoxesChange(e, index, role)}
                       disabled={userSelectedData && userSelectedData.email_verified_at ? false : true}
                     />
-                    <span className='check w-5 h-5 bg-white inline-block rounded border border-gray-300'></span>
+                    <span className='check w-5 h-5 inline-block rounded border' style={{ borderColor: theme.border }}></span>
                     <p>{role.alias}</p>
                   </label>
                 )
               })}
             </div>
             <div className='flex justify-between my-4'>
-              <button type='submit' className={`bg-[#004369] text-white font-semibold p-2 border-card disabled:bg-gray-400 disabled:cursor-not-allowed`} disabled={ userSelectedData ? false : true}>Save</button>
-              <button type='button' className={`bg-[#F2A5A5] text-white font-semibold p-2 border-card disabled:bg-gray-400 disabled:cursor-not-allowed`} disabled={ userSelectedData ? false : true} onClick={()=>handleDeleteUser(userSelectedData.id)}>Delete User</button>
+              <button type='submit' disabled={userSelectedData ? false : true}
+                className={`p-2 border-card disabled:cursor-not-allowed`}
+                style={{ background: theme.accent, color: theme.background, borderColor:theme.border }}>
+                Save
+              </button>
+              <button type='button' disabled={userSelectedData ? false : true}
+                className={`bg-[#F2A5A5] p-2 border-card disabled:cursor-not-allowed`}
+                style={{ color: theme.text, borderColor:theme.border }}
+                onClick={() => handleDeleteUser(userSelectedData.id)}>
+                Delete User
+              </button>
             </div>
           </form>
         </div>

@@ -34,15 +34,15 @@
 }
 
 .border-card {
-    @apply border-gray-300 border rounded-lg;
+    @apply border rounded-lg;
 }
 
 .outline-card {
-    @apply outline-gray-300 outline outline-1 rounded-lg;
+    @apply outline outline-1 rounded-lg;
 }
 
 .h-outline-card:hover {
-    @apply outline-gray-300 outline outline-1 rounded-lg;
+    @apply outline outline-1 rounded-lg;
 }
 
 input {
@@ -82,11 +82,19 @@ input:focus {
     background: #B2E9FF;
 }
 
-[type=checkbox]:checked+span.check {
-    /* <-- Style its checked state */
-    background: #004369;
+[type=checkbox]:checked.l+span.check {
+    background: #00446b;
 }
 
-.content{
+[type=checkbox]:checked.d+span.check {
+    background: #94d8ff;
+}
+
+
+.content {
     @apply mx-4 mb-4;
+}
+
+* {
+    @apply duration-100;
 }
