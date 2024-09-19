@@ -20,9 +20,10 @@ return new class extends Migration
             $table->string('brand');
             $table->string('model');
             $table->string('description');
-            $table->string('image_url');
+            $table->string('image_url')->default('');
             $table->decimal('price');
-            $table->integer('stock');
+            $table->integer('stock')->default(0);
+            $table->integer('restock_point');
             $table->timestamps();
         });
 
