@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const PopperMenu = ({ list = [''], actions = [() => { }], className = "", children, renderButton, containerStyle = {} }) => {
+const PopperMenu = ({ list = [''], actions = [() => {}], className = "", children, renderButton, containerStyle = {} }) => {
   const [open, setOpen] = useState(false);
   const popperRef = useRef(null);
   const buttonRef = useRef(null);
@@ -38,7 +38,7 @@ const PopperMenu = ({ list = [''], actions = [() => { }], className = "", childr
       {open && (
         <div
           ref={popperRef}
-          className={'absolute right-0 z-50 overflow-clip'}
+          className={'absolute right-0 z-40 overflow-clip'}
           style={containerStyle}  
         >
           {children

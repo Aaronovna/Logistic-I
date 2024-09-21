@@ -22,6 +22,8 @@ Route::middleware(["auth", "verified"])->group(function () {
     
     Route::get('/product/get', [ProductController::class, 'index'])->name('product.index');
     Route::post('/product/store', [ProductController::class, 'store'])->name('product.store');
+    Route::patch('/product/update/{id}', [ProductController::class, 'update'])->name('product.update');
+    Route::delete('/product/delete/{id}', [ProductController::class, 'destroy'])->name('product.destroy');
 
     Route::get('/supplier/get', [SupplierController::class, 'index'])->name('supplier.index');
 

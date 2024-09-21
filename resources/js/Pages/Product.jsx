@@ -14,8 +14,9 @@ import { TbUpload } from "react-icons/tb";
 
 import { useStateContext } from '@/context/contextProvider';
 
-import { Card2, ProductCard } from '@/Components/Cards';
-import PopperMenu from '@/Components/PopperMenu';
+import { Card2 } from '@/Components/Cards';
+import { ProductCard } from '@/Components/cards/ProductCard';
+
 import Modal from '@/Components/Modal';
 
 export default function Product({ auth }) {
@@ -34,6 +35,10 @@ export default function Product({ auth }) {
     } catch (error) {
       toast.error('Error fetching products:', error);
     }
+  };
+
+  const updateData = () => {
+    fetchProducts();
   };
 
   const [filteredProducts, setFilteredProducts] = useState(null);
@@ -185,6 +190,9 @@ export default function Product({ auth }) {
           products={products}
           filteredProducts={filteredProducts}
           searchedProduct={searchedProduct}
+          categories={categories}
+          suppliers={suppliers}
+          update={updateData}
         />
 
         {/* ALTERNATIVE LOGIC */}
@@ -276,13 +284,12 @@ export default function Product({ auth }) {
           </div>
         </Modal>
 
-
       </div>
     </AuthenticatedLayout>
   );
 }
 
-const Pagination = ({ products, filteredProducts, searchedProduct }) => {
+const Pagination = ({ products, filteredProducts, searchedProduct, categories, suppliers, update }) => {
   const { theme } = useStateContext();
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -318,11 +325,26 @@ const Pagination = ({ products, filteredProducts, searchedProduct }) => {
       <div className=''>
         {filteredProducts && filteredProducts.length > 0 ? (
           filteredProducts.map((product, index) => (
-            <ProductCard product={product} key={index} />
+            <ProductCard
+              product={product}
+              key={index}
+              list={['Edit', 'Delete']}
+              categories={categories}
+              suppliers={suppliers}
+              update={update}
+            />
           ))
         ) : (
           currentData && currentData.map((product, index) => (
-            <ProductCard product={product} key={index} className={`${searchedProduct !== '' ? 'hidden' : 'block'}`} />
+            <ProductCard
+              product={product}
+              key={index}
+              list={['Edit', 'Delete']}
+              categories={categories}
+              suppliers={suppliers}
+              update={update}
+              className={`${searchedProduct !== '' ? 'hidden' : 'block'}`}
+            />
           ))
         )}
       </div>
