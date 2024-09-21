@@ -36,10 +36,12 @@ export default function Authenticated({ user, header, children }) {
         position="top-right"
         reverseOrder={false}
         toastOptions={{
-          className: 'border-card',
           style: {
             padding: '18px',
-            marginRight: '1%',
+            border: '1px solid',
+            background: theme.background,
+            color: theme.text,
+            borderColor: theme.border,
           },
         }}
       />

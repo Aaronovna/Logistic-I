@@ -465,18 +465,12 @@ export default function User({ auth }) {
 
       <Modal show={openAddUserModal} onClose={() => setOpenAddUserModal(false)} maxWidth={'2xl'}>
         <div className='p-4'>
-          <p className='font-semibold text-xl mt-2 mb-4'>Create User</p>
-          <form onSubmit={handleAddUserSubmit} className='flex gap-2'>
-            <div className='w-1/2'>
-              <input readOnly={true} value={addUserFormData.name} className='border-card w-full mb-2' type="text" name="name" id="name" placeholder='Name' />
-              <input readOnly={true} value={addUserFormData.email} className='border-card w-full mb-2' type="email" name='email' id='email' placeholder='email' />
-              <input readOnly={true} value={addUserFormData.password} className='border-card w-full mb-2' type="text" name='password' id='password' placeholder='password' />
-              <button type="submit" className="bg-blue-500 text-white p-2 rounded">Submit</button>
-            </div>
-            <div className='relative w-1/2'>
+          <p className='font-semibold text-xl mt-2 mb-4' style={{ color: theme.text }}>Create User</p>
+          <form onSubmit={handleAddUserSubmit} className='flex flex-col gap-2'>
+            <div className='relative w-full'>
               <input
                 type="text"
-                placeholder="Search for an employee..."
+                placeholder="Search an employee..."
                 className='border-card w-full mb-2'
                 value={searchedEmployee}
                 onChange={handleSearchEmployee}
@@ -485,7 +479,7 @@ export default function User({ auth }) {
               {openEmployeeDropdown &&
                 <div
                   ref={employeeDropdownRef}
-                  className="absolute w-full rounded-md max-h-36 overflow-y-auto z-50 bg-white"
+                  className="absolute w-full rounded-md max-h-36 overflow-y-auto z-50 bg-white border-card"
                 >
                   {searchedEmployee.trim() === ""
                     ? <p className="bg-white p-2">Search Employee</p>
@@ -497,6 +491,12 @@ export default function User({ auth }) {
                       : <p className="p-2 text-[#F2A5A5]">No Employee Found</p>
                   }
                 </div>}
+            </div>
+            <div className='w-full mt-10'>
+              <input readOnly={true} value={addUserFormData.name} className='border-card w-3/5 mb-2' type="text" name="name" id="name" placeholder='Name' />
+              <input readOnly={true} value={addUserFormData.email} className='border-card w-3/5 mb-2' type="email" name='email' id='email' placeholder='email' />
+              <input readOnly={true} value={addUserFormData.password} className='border-card w-3/5 mb-2' type="text" name='password' id='password' placeholder='password' />
+              <button type="submit" className="block ml-auto text-white font-medium p-2 rounded-md" style={{ background: theme.primary }}>Submit</button>
             </div>
           </form>
         </div>

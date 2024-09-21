@@ -1,59 +1,31 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-
-import { AgGridReact } from 'ag-grid-react';
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
 
 import { TbPlus } from "react-icons/tb";
 import { TbBox } from "react-icons/tb";
 import { TbCurrencyPeso } from "react-icons/tb";
 import { TbSearch } from "react-icons/tb";
-
-import { Card2, ProductCard } from '@/Components/Cards';
-import { numberComparator } from '@/functions/comparators';
+import { TbDownload } from "react-icons/tb";
+import { TbUpload } from "react-icons/tb";
 
 import { useStateContext } from '@/context/contextProvider';
+
+import { Card2, ProductCard } from '@/Components/Cards';
+import PopperMenu from '@/Components/PopperMenu';
+import Modal from '@/Components/Modal';
 
 export default function Product({ auth }) {
   const [products, setProducts] = useState(null);
   const [totalProductValue, setTotalProductValue] = useState(0);
+  const [openAddProductModal, setOpenAddProductModal] = useState(false);
 
   const { theme } = useStateContext();
 
-  const [gridApi, setGridApi] = useState(null);
-
-  const onGridReady = useCallback((params) => {
-    setGridApi(params.api);
-  }, []);
-
-  const onSelectionChanged = (event) => {
-    const selectedRows = event.api.getSelectedRows();
-    setSelectedData(selectedRows[0] || null);
-  };
-
-  const productColDefs = [
-    {
-      headerName: "Image", autoHeight: true,
-      cellRenderer: (params) => {
-        return (
-          <div className='flex'>
-            <img src={params.data.image_url} alt={params.data.name} />
-          </div>
-        )
-      }
-    },
-    { field: "id", filter: true, flex: 1, minWidth: 70, maxWidth: 90, },
-    { field: "name", filter: true, flex: 1 },
-    { field: "price", filter: true, flex: 1, minWidth: 100, maxWidth: 140, comparator: numberComparator },
-    { field: "brand", filter: true, flex: 1 },
-    { field: "model", filter: true, flex: 1 },
-    { field: "category_name", headerName: "Category", filter: true, flex: 1 },
-  ];
+  const product_image_placeholder = 'https://psediting.websites.co.in/obaju-turquoise/img/product-placeholder.png';
 
   const fetchProducts = async () => {
     try {
@@ -89,8 +61,61 @@ export default function Product({ auth }) {
     setFilteredProducts(filtered);
   };
 
+  const [categories, setCategories] = useState([]);
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get('/category/get/count');
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  const [suppliers, setSuppliers] = useState([]);
+  const fetchSuppliers = async () => {
+    try {
+      const response = await axios.get('/supplier/get');
+      setSuppliers(response.data);
+    } catch (error) {
+      console.error('Error fetching suppliers:', error);
+    }
+  };
+
+  const [addProductFormData, setAddProductFormData] = useState({
+    name: '',
+    model: '',
+    brand: '',
+    description: '',
+    image_url: '',
+    price: '',
+    restock_point: '',
+    category_id: '',
+    supplier_id: '',
+    /* stock: 0, */
+  });
+
+  const handleAddProductInputChange = (e) => {
+    const { name, value } = e.target;
+    setAddProductFormData({ ...addProductFormData, [name]: value });
+  };
+
+  const handleAddProductSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('/product/store', addProductFormData);
+
+      toast.success('Product added successfully');
+      fetchProducts();
+      setOpenAddProductModal(false);
+    } catch (error) {
+      toast.error('Failed to add product' + error);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
+    fetchCategories();
+    fetchSuppliers();
   }, []);
 
   useEffect(() => {
@@ -142,6 +167,7 @@ export default function Product({ auth }) {
           </span>
           <button style={{ background: theme.accent, color: theme.background }}
             className='rounded-lg  h-fit py-2 px-2 hover:scale-105 hover:shadow-xl duration-200 flex items-center'
+            onClick={() => setOpenAddProductModal(true)}
           >
             <TbPlus size={18} />
             <p className='ml-1 text-nowrap'>Add Product</p>
@@ -155,21 +181,10 @@ export default function Product({ auth }) {
           No Product Found
         </p>
 
-        {/* <div className=''>
-          {filteredProducts && filteredProducts.length > 0 ? (
-            filteredProducts.map((product, index) => (
-              <ProductCard product={product} key={index} />
-            ))
-          ) : (
-            products && products.map((product, index) => (
-              <ProductCard product={product} key={index} />
-            ))
-          )}
-        </div> */}
-
         <Pagination
           products={products}
           filteredProducts={filteredProducts}
+          searchedProduct={searchedProduct}
         />
 
         {/* ALTERNATIVE LOGIC */}
@@ -179,25 +194,95 @@ export default function Product({ auth }) {
           ))}
         </div> */}
 
-        {/* <div className='ag-theme-quartz' style={{height: '512px'}}>
-          <AgGridReact
-            rowData={products}
-            columnDefs={productColDefs}
-            rowSelection='single'
-            onGridReady={onGridReady}
-            pagination={true}
-            paginationPageSize={20}
-            paginationPageSizeSelector={[20,40,80,100]}
-            onSelectionChanged={onSelectionChanged}
-          />
-        </div> */}
+        <Modal show={openAddProductModal} onClose={() => setOpenAddProductModal(false)} maxWidth={'2xl'}>
+          <div className='p-4'>
+            <p className='font-semibold text-xl mt-2 mb-4' style={{ color: theme.text }}>Add Product</p>
+            <form onSubmit={handleAddProductSubmit}>
+              <div className='flex gap-2 mb-4'>
+                <div className='w-52 aspect-square border-card overflow-hidden'
+                  style={{ background: `url(${product_image_placeholder})`, backgroundSize: '100%' }}>
+                  {addProductFormData.image_url === ''
+                    ? null
+                    : <img className='w-full h-full' src={addProductFormData.image_url} alt="Can't load image :(" />
+                  }
+                </div>
+                <div className='flex flex-col flex-1 gap-2'>
+                  <select className='border-card' name="category_id" id="category_id" onChange={handleAddProductInputChange}>
+                    <option value={null}>Select Category</option>
+                    {categories.map((category, index) => {
+                      return (
+                        <option key={index} value={category.id}>{category.name}</option>
+                      )
+                    })}
+                  </select>
+                  <select className='border-card' name="supplier_id" id="supplier_id" onChange={handleAddProductInputChange}>
+                    <option value={null}>Select Supplier</option>
+                    {suppliers.map((supplier, index) => {
+                      return (
+                        <option key={index} value={supplier.id}>{supplier.name}</option>
+                      )
+                    })}
+                  </select>
+                  <div className='flex gap-2'>
+                    <input type="number" name="price" id="price" placeholder="Price"
+                      className='border-card'
+                      value={addProductFormData.price}
+                      onChange={handleAddProductInputChange}
+                    />
+                    <input type="number" name="restock_point" id="restock_point" placeholder="Restock Point"
+                      className='border-card'
+                      value={addProductFormData.restock_point}
+                      onChange={handleAddProductInputChange}
+                    />
+                  </div>
+                  <input type="text" name="image_url" id="image_url" placeholder="Image URL"
+                    className='border-card'
+                    value={addProductFormData.image_url}
+                    onChange={handleAddProductInputChange}
+                  />
+                </div>
+              </div>
+              <div className='flex flex-col gap-2'>
+                <div className='flex gap-2'>
+                  <input type="text" name="name" id="name" placeholder="Name"
+                    className='border-card w-2/3'
+                    value={addProductFormData.name}
+                    onChange={handleAddProductInputChange}
+                  />
+                  <input type="text" name="model" id="model" placeholder="Model"
+                    className='border-card w-1/3'
+                    value={addProductFormData.model}
+                    onChange={handleAddProductInputChange}
+                  />
+                </div>
+                <input type="text" name="brand" id="brand" placeholder="Brand"
+                  className='border-card w-full'
+                  value={addProductFormData.brand}
+                  onChange={handleAddProductInputChange}
+                />
+                <textarea type="text" name="description" id="description" placeholder="Description"
+                  rows={6}
+                  className='border-card w-full resize-none'
+                  value={addProductFormData.description}
+                  onChange={handleAddProductInputChange}
+                />
+                <button
+                  style={{ background: theme.primary, borderColor: theme.border }}
+                  className='border-card p-2 font-medium ml-auto text-white'>
+                  Add Product
+                </button>
+              </div>
+            </form>
+          </div>
+        </Modal>
+
 
       </div>
     </AuthenticatedLayout>
   );
 }
 
-const Pagination = ({ products, filteredProducts }) => {
+const Pagination = ({ products, filteredProducts, searchedProduct }) => {
   const { theme } = useStateContext();
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -237,14 +322,13 @@ const Pagination = ({ products, filteredProducts }) => {
           ))
         ) : (
           currentData && currentData.map((product, index) => (
-            <ProductCard product={product} key={index} />
+            <ProductCard product={product} key={index} className={`${searchedProduct !== '' ? 'hidden' : 'block'}`} />
           ))
         )}
       </div>
-
       <div
         style={{ outlineColor: theme.border }}
-        className='w-full flex justify-center outline-card bottom-4 sticky'
+        className={`w-full flex outline-card bottom-4 sticky ml-auto backdrop-blur-sm ${searchedProduct === '' ? 'visible' : 'invisible'}`}
       >
         <button
           style={{ background: theme.accent, color: theme.background }}
@@ -252,14 +336,14 @@ const Pagination = ({ products, filteredProducts }) => {
           disabled={currentPage === 1}
           onClick={() => handlePageChange(currentPage - 1)}
         >
-          Prev
+          {'<'}
         </button>
         <button
           style={{ background: theme.accent, color: theme.background }}
           className='p-2'
           onClick={() => handlePageChange(1)}
         >
-          First
+          {'<<'}
         </button>
 
         {[...Array(20)].map((_, index) => {
@@ -282,7 +366,7 @@ const Pagination = ({ products, filteredProducts }) => {
             <button
               key={index}
               onClick={() => handlePageChange(pageNumber)}
-              className={`flex-1 backdrop-blur-sm`}
+              className={`flex-1`}
               style={{
                 background: currentPage === pageNumber ? theme.secondary : theme.blur,
                 color: theme.text,
@@ -298,7 +382,7 @@ const Pagination = ({ products, filteredProducts }) => {
           className='p-2'
           onClick={() => handlePageChange(totalPages)}
         >
-          Last
+          {'>>'}
         </button>
         <button
           style={{ background: theme.accent, color: theme.background }}
@@ -306,7 +390,7 @@ const Pagination = ({ products, filteredProducts }) => {
           disabled={currentPage === totalPages}
           onClick={() => handlePageChange(currentPage + 1)}
         >
-          Next
+          {'>'}
         </button>
       </div>
     </div>

@@ -46,10 +46,26 @@
 }
 
 input {
-    @apply border-gray-300 border p-2;
+    @apply border p-2;
 }
 
 input:focus {
+    outline: none;
+}
+
+textarea {
+    @apply border p-2;
+}
+
+textarea:focus {
+    outline: none;
+}
+
+select {
+    @apply border p-2;
+}
+
+select:focus {
     outline: none;
 }
 

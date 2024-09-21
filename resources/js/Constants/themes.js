@@ -51,9 +51,23 @@ export const gradients = {
     blue_raspberry: 'linear-gradient(to right, #00b4db, #0083b0)',
 }
 
-/* {
+const feedback={
+    success: '#8DD7B3',
+    warning: '#FFD580',
+    danger: '#FF9E8D',
+    info: '#80D6E7'
+}
+
+const feedbackVibrant={
+    success: '#36B37E',
+    warning: '#FFAB00',
+    danger: '#FF5630',
+    info: '#00B8D9'
+}
+
+const feedbackLight={
     success: '#D4F4E2',  // Very light green for success
     warning: '#FFECB3',  // Very light yellow-orange for warning
     danger:  '#FFDAD4',  // Very light red-pink for danger
     info:    '#B3EAF4'   // Very light blue for info
-  } */
+}

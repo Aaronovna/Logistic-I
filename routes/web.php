@@ -9,6 +9,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\SupplierController;
 
 Route::redirect('/', 'login');
 
@@ -20,6 +21,9 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/product', fn () => Inertia::render('Product'))->name('product');
     
     Route::get('/product/get', [ProductController::class, 'index'])->name('product.index');
+    Route::post('/product/store', [ProductController::class, 'store'])->name('product.store');
+
+    Route::get('/supplier/get', [SupplierController::class, 'index'])->name('supplier.index');
 
     Route::get('/category/get', [CategoryController::class, 'index'])->name('category.index');
     Route::post('/category/create', [CategoryController::class, 'store'])->name('category.store');
