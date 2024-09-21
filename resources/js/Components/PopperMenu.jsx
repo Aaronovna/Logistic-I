@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const PopperMenu = ({ list = [''], actions = [() => { }], className = "", children }) => {
+const PopperMenu = ({ list = [''], actions = [() => { }], className = "", children, renderButton, containerStyle = {} }) => {
   const [open, setOpen] = useState(false);
   const popperRef = useRef(null);
   const buttonRef = useRef(null);
@@ -30,23 +30,23 @@ const PopperMenu = ({ list = [''], actions = [() => { }], className = "", childr
     <div className="relative">
       <button
         ref={buttonRef}
-        className="px-4 py-2 bg-blue-500 text-white rounded-md"
         onClick={togglePopper}
       >
-        Options
+        {renderButton ? renderButton() : <div className={className}>button</div>}
       </button>
 
       {open && (
         <div
           ref={popperRef}
-          className={'absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg border z-50 overflow-clip ' + className}  
+          className={'absolute right-0 z-50 overflow-clip'}
+          style={containerStyle}  
         >
           {children
             ? children
             : <ul>
               {list && list.map((item, index) => {
                 return (
-                  <li key={index} className="px-4 py-2 hover:bg-gray-100 cursor-pointer" onClick={actions[index]}
+                  <li key={index} className="cursor-pointer text-nowrap py-1 px-2 hover:bg-gray-300/50 text-sm" onClick={actions[index]}
                   >
                     {item}
                   </li>

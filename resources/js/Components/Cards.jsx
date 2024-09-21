@@ -2,6 +2,11 @@ import { useStateContext } from "@/context/contextProvider";
 import { gradients } from "@/Constants/themes";
 import { useState } from "react";
 
+import { TbDots } from "react-icons/tb";
+import PopperMenu from "./PopperMenu";
+
+const product_image_placeholder = 'https://psediting.websites.co.in/obaju-turquoise/img/product-placeholder.png';
+
 export const Card = ({ data, Icon, name }) => {
   const { theme, themePreference } = useStateContext();
   return (
@@ -32,23 +37,21 @@ export const Card2 = ({ data, Icon, name, className = '' }) => {
   )
 }
 
-export const ProductCard = ({ product }) => {
+export const ProductCard = ({ product, isFlip = false, className = '' }) => {
   const { theme } = useStateContext();
-  const [flip, setflip] = useState(false);
+  const [flip, setflip] = useState(isFlip);
 
   return (
     <div style={{ color: theme.text, borderColor: theme.border }}
-      className={`p-2 flex mb-2 cursor-pointer border rounded-lg overflow-hidden`}
-      onClick={() => setflip(!flip)}
+      className={`p-2 flex mb-2 border rounded-lg overflow-hidden ` + className}
     >
       <div className="flex flex-col w-full">
-        <div className="flex">
-          <div style={{ outlineColor: theme.border }}
+        <div className="flex cursor-pointer" onClick={() => setflip(!flip)}>
+          <div style={{ outlineColor: theme.border, background: `url(${product_image_placeholder})`, backgroundSize: '100%' }}
             className='w-24 h-24 aspect-square outline outline-1 rounded-md inline-block overflow-hidden'
           >
             <img
-              src={`https://picsum.photos/seed/${product.id}/200/200`}
-              alt={product.name}
+              src={product.image_url || `https://picsum.photos/seed/${product.id}/200/200`}
               className={`w-full h-full`}
             />
           </div>
@@ -67,11 +70,27 @@ export const ProductCard = ({ product }) => {
       <span className='h-auto rounded-sm mx-4' style={{ width: '2px', background: theme.border }}></span>
 
       <div className='w-96 h-fit'>
-        <p className='block mb-2 font-semibold'>{product.supplier_name}</p>
+        <span className="flex justify-between">
+          <p className='block mb-2 font-semibold'>{product.supplier_name}</p>
+          <PopperMenu list={['Edit', 'Delete']} actions={[() => { alert('test!') }]}
+            className=""
+            containerStyle={{ background: theme.background, borderRadius: '0.375rem', border: '1px solid', borderColor: theme.border }}
+            renderButton={() => {
+              return (
+                <span className={`flex h-fit cursor-pointer rounded-full px-1`}>
+                  <TbDots size={18} />
+                </span>
+              )
+            }}>
+          </PopperMenu>
+        </span>
         <span className='inline-block mr-8'>
           <p className='text-gray-400'>Stock</p>
-          <p className='text-xl font-semibold inline' /* style={{color:theme.danger}} */>{product.stock}</p>
-          {/* <p className="inline ml-1 text-xs" style={{color:theme.danger}}>low</p> */}
+          <p className='text-xl font-semibold inline' style={{ color: product.low_on_stock ? theme.danger : theme.text }}>{product.stock}</p>
+          {product.low_on_stock
+            ? <p className="inline ml-1 text-xs">low</p>
+            : null
+          }
         </span>
         <span className='inline-block'>
           <p className='text-gray-400'>Buying Price</p>
