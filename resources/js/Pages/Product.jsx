@@ -203,8 +203,8 @@ export default function Product({ auth }) {
         </div> */}
 
         <Modal show={openAddProductModal} onClose={() => setOpenAddProductModal(false)} maxWidth={'2xl'}>
-          <div className='p-4'>
-            <p className='font-semibold text-xl mt-2 mb-4' style={{ color: theme.text }}>Add Product</p>
+          <div className='p-4' style={{ color: theme.text }}>
+            <p className='font-semibold text-xl mt-2 mb-4'>Add Product</p>
             <form onSubmit={handleAddProductSubmit}>
               <div className='flex gap-2 mb-4'>
                 <div className='w-52 aspect-square border-card overflow-hidden'
@@ -215,36 +215,39 @@ export default function Product({ auth }) {
                   }
                 </div>
                 <div className='flex flex-col flex-1 gap-2'>
-                  <select className='border-card' name="category_id" id="category_id" onChange={handleAddProductInputChange}>
-                    <option value={null}>Select Category</option>
+                  <select className='border-card bg-transparent' style={{ borderColor: theme.border }} name="category_id" id="category_id" onChange={handleAddProductInputChange}>
+                    <option value={null} style={{ background: theme.background }}>Select Category</option>
                     {categories.map((category, index) => {
                       return (
-                        <option key={index} value={category.id}>{category.name}</option>
+                        <option style={{ background: theme.background }} key={index} value={category.id}>{category.name}</option>
                       )
                     })}
                   </select>
-                  <select className='border-card' name="supplier_id" id="supplier_id" onChange={handleAddProductInputChange}>
-                    <option value={null}>Select Supplier</option>
+                  <select className='border-card bg-transparent' style={{ borderColor: theme.border }} name="supplier_id" id="supplier_id" onChange={handleAddProductInputChange}>
+                    <option value={null} style={{ background: theme.background }}>Select Supplier</option>
                     {suppliers.map((supplier, index) => {
                       return (
-                        <option key={index} value={supplier.id}>{supplier.name}</option>
+                        <option style={{ background: theme.background }} key={index} value={supplier.id}>{supplier.name}</option>
                       )
                     })}
                   </select>
                   <div className='flex gap-2'>
                     <input type="number" name="price" id="price" placeholder="Price"
-                      className='border-card'
+                      className='border-card bg-transparent'
+                      style={{ borderColor: theme.border }}
                       value={addProductFormData.price}
                       onChange={handleAddProductInputChange}
                     />
                     <input type="number" name="restock_point" id="restock_point" placeholder="Restock Point"
-                      className='border-card'
+                      className='border-card bg-transparent'
+                      style={{ borderColor: theme.border }}
                       value={addProductFormData.restock_point}
                       onChange={handleAddProductInputChange}
                     />
                   </div>
                   <input type="text" name="image_url" id="image_url" placeholder="Image URL"
-                    className='border-card'
+                    className='border-card bg-transparent'
+                    style={{ borderColor: theme.border }}
                     value={addProductFormData.image_url}
                     onChange={handleAddProductInputChange}
                   />
@@ -253,24 +256,28 @@ export default function Product({ auth }) {
               <div className='flex flex-col gap-2'>
                 <div className='flex gap-2'>
                   <input type="text" name="name" id="name" placeholder="Name"
-                    className='border-card w-2/3'
+                    className='border-card w-2/3 bg-transparent'
+                    style={{ borderColor: theme.border }}
                     value={addProductFormData.name}
                     onChange={handleAddProductInputChange}
                   />
                   <input type="text" name="model" id="model" placeholder="Model"
-                    className='border-card w-1/3'
+                    className='border-card w-1/3 bg-transparent'
+                    style={{ borderColor: theme.border }}
                     value={addProductFormData.model}
                     onChange={handleAddProductInputChange}
                   />
                 </div>
                 <input type="text" name="brand" id="brand" placeholder="Brand"
-                  className='border-card w-full'
+                  className='border-card w-full bg-transparent'
+                  style={{ borderColor: theme.border }}
                   value={addProductFormData.brand}
                   onChange={handleAddProductInputChange}
                 />
                 <textarea type="text" name="description" id="description" placeholder="Description"
                   rows={6}
-                  className='border-card w-full resize-none'
+                  className='border-card w-full resize-none bg-transparent'
+                  style={{ borderColor: theme.border }}
                   value={addProductFormData.description}
                   onChange={handleAddProductInputChange}
                 />

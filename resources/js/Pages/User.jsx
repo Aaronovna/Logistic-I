@@ -343,7 +343,7 @@ export default function User({ auth }) {
             </div>
 
             {/* MODAL FOR ADD POSITION */}
-            <div className={`z-10 absolute h-full w-full top-0 left-0 p-1 backdrop-blur-sm duration-300 rounded-md ${openAddPositionModal ? 'visible opacity-100' : 'invisible opacity-0'}`}>
+            <div className={`z-10 absolute h-full w-full top-0 left-0 p-1 backdrop-blur-sm duration-300 rounded-md ${openAddPositionModal ? 'visible opacity-100' : 'invisible opacity-0'} ${themePreference === 'light' ? 'l-t-grad' : 'd-t-grad'}`}>
               <span className='h-14 flex justify-end items-center rounded-md'>
                 <button className='font-semibold m-2 mr-0 p-2 rounded-md flex' style={{ color: theme.background, background: theme.danger }}
                   onClick={() => setOpenAddPositionModal(false)}
@@ -366,7 +366,7 @@ export default function User({ auth }) {
             </div>
 
             {/* MODAL FOR EDITING AND DELETING POSITION */}
-            <div className={`z-10 absolute h-full w-full top-0 left-0 p-1 backdrop-blur-sm duration-300 ${openEditPositionModal ? 'visible opacity-100' : 'invisible opacity-0'}`}>
+            <div className={`z-10 absolute h-full w-full top-0 left-0 p-1 backdrop-blur-sm duration-300 ${openEditPositionModal ? 'visible opacity-100' : 'invisible opacity-0'} ${themePreference === 'light' ? 'l-t-grad' : 'd-t-grad'}`}>
               <span className='h-14 flex justify-end items-center rounded-md'>
                 <button className='font-semibold m-2 mr-0 p-2 rounded-md flex' style={{ color: theme.background, background: theme.danger }}
                   onClick={() => setOpenEditPositionModal(false)}
@@ -412,7 +412,7 @@ export default function User({ auth }) {
                 <p className='inline-block text-lg font-medium' style={{ color: theme.text }}>Template: </p>
                 <select
                   style={{ color: theme.text, background: theme.background }}
-                  className="inline-block" name="position_list" id="position_list"
+                  className="inline-block border-none" name="position_list" id="position_list"
                   disabled={userSelectedData && userSelectedData.email_verified_at ? false : true}>
 
                   <option value="none">None</option>
@@ -464,38 +464,39 @@ export default function User({ auth }) {
       </div>
 
       <Modal show={openAddUserModal} onClose={() => setOpenAddUserModal(false)} maxWidth={'2xl'}>
-        <div className='p-4'>
-          <p className='font-semibold text-xl mt-2 mb-4' style={{ color: theme.text }}>Create User</p>
+        <div className='p-4' style={{color: theme.text}}>
+          <p className='font-semibold text-xl mt-2 mb-4'>Create User</p>
           <form onSubmit={handleAddUserSubmit} className='flex flex-col gap-2'>
             <div className='relative w-full'>
               <input
                 type="text"
                 placeholder="Search an employee..."
-                className='border-card w-full mb-2'
+                className='border-card w-full mb-2 bg-transparent'
                 value={searchedEmployee}
                 onChange={handleSearchEmployee}
                 onClick={() => setOpenEmployeeDropdown(!openEmployeeDropdown)}
+                style={{borderColor: theme.border}}
               />
               {openEmployeeDropdown &&
                 <div
                   ref={employeeDropdownRef}
-                  className="absolute w-full rounded-md max-h-36 overflow-y-auto z-50 bg-white border-card"
+                  className="absolute w-full rounded-md max-h-36 overflow-y-auto z-50 backdrop-blur border-card"
                 >
                   {searchedEmployee.trim() === ""
-                    ? <p className="bg-white p-2">Search Employee</p>
+                    ? <p className="p-2">Search Employee</p>
                     : filteredEmployees.length > 0
                       ? filteredEmployees.map((employee, index) =>
-                        <button key={index} className="block p-2 hover:bg-[#EEF9FF] w-full text-left" onClick={() => { handleSelectEmployee(employee.fname); handleAddUserInput(employee); }}>
+                        <button key={index} className="block p-2 hover:bg-gray-300/50 w-full text-left" onClick={() => { handleSelectEmployee(employee.fname); handleAddUserInput(employee); }}>
                           {`${employee.fname} ${employee.sname}`}
                         </button>)
-                      : <p className="p-2 text-[#F2A5A5]">No Employee Found</p>
+                      : <p className="p-2 text-[#FF9E8D]">No Employee Found</p>
                   }
                 </div>}
             </div>
             <div className='w-full mt-10'>
-              <input readOnly={true} value={addUserFormData.name} className='border-card w-3/5 mb-2' type="text" name="name" id="name" placeholder='Name' />
-              <input readOnly={true} value={addUserFormData.email} className='border-card w-3/5 mb-2' type="email" name='email' id='email' placeholder='email' />
-              <input readOnly={true} value={addUserFormData.password} className='border-card w-3/5 mb-2' type="text" name='password' id='password' placeholder='password' />
+              <input readOnly={true} value={addUserFormData.name} className='border-card w-3/5 mb-2 bg-transparent' style={{borderColor: theme.border}} type="text" name="name" id="name" placeholder='Name' />
+              <input readOnly={true} value={addUserFormData.email} className='border-card w-3/5 mb-2 bg-transparent' style={{borderColor: theme.border}} type="email" name='email' id='email' placeholder='Email' />
+              <input readOnly={true} value={addUserFormData.password} className='border-card w-3/5 mb-2 bg-transparent' style={{borderColor: theme.border}} type="text" name='password' id='password' placeholder='Password' />
               <button type="submit" className="block ml-auto text-white font-medium p-2 rounded-md" style={{ background: theme.primary }}>Submit</button>
             </div>
           </form>

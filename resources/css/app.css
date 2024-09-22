@@ -87,11 +87,18 @@ select:focus {
     background-color: #003151;
 }
 
-.w-t-grad {
+.l-t-grad {
     background: rgb(255, 255, 255);
     background: -moz-linear-gradient(0deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 75%);
     background: -webkit-linear-gradient(0deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 75%);
     background: linear-gradient(0deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 75%);
+}
+
+.d-t-grad {
+    background: rgb(255,255,255);
+    background: -moz-linear-gradient(0deg, rgba(255,255,255,0) 0%, rgba(31,41,54,1) 75%);
+    background: -webkit-linear-gradient(0deg, rgba(255,255,255,0) 0%, rgba(31,41,54,1) 75%);
+    background: linear-gradient(0deg, rgba(255,255,255,0) 0%, rgba(31,41,54,1) 75%);
 }
 
 ::selection {
@@ -115,8 +122,8 @@ select:focus {
     @apply duration-100;
 }
 
-.asd {
+/* .asd {
     background-color: #e5e5f7;
     opacity: 0.8;
     background-image: repeating-radial-gradient(circle at 0 0, transparent 0, #e5e5f7 40px), repeating-linear-gradient(#444cf755, #444cf7);
-}
+} */
