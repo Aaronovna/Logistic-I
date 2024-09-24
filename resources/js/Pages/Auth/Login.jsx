@@ -24,20 +24,18 @@ export default function Login({ status, canResetPassword }) {
   };
 
   return (
-    <div className='h-screen flex md:flex-row flex-col bus-bg' style={{ background: theme.background, color: theme.accent }}>
+    <div className='h-screen flex md:flex-row flex-col' style={{ background: theme.background, color: theme.accent }}>
       <Head title="Log in" />
-      <div className='w-3/5 h-screen py-1p md:block hidden'>
+      <div className='lg:w-3/5 h-screen py-1p lg:block hidden'>
         <div className='bus-bg bg-cover w-full h-full rounded-r-3xl'></div>
       </div>
-      <div className='flex flex-col py-4 md:w-2/5 w-full items-center'>
+      <div className='flex flex-col py-4 md:1/2 lg:w-2/5 w-full items-center'>
 
-        <div>
-          <p className='font-bold md:text-5xl text-3xl w-full text-center'>Bus Transportation Management System</p>
-        </div>
+        <p className='font-bold md:text-4xl lg:text-3xl text-2xl w-full text-center'>Bus Transportation Management System</p>
         <p className='font-semibold text-3xl text-center mt-10'>Logistic I</p>
 
         <form onSubmit={submit}
-          className='md:w-4/6 w-4/5 py-4 rounded-3xl shadow-lg shad mt-10 flex flex-col items-center border'
+          className='w-4/5 py-4 rounded-3xl shadow-lg shad mt-10 flex flex-col items-center border'
           style={{ background: theme.background, color: theme.accent, borderColor: theme.border }}
         >
           <p className='text-center mb-4 text-xl'>Sign In</p>
@@ -74,7 +72,7 @@ export default function Login({ status, canResetPassword }) {
             <InputError message={errors.password} className="mt-2" />
           </div>
 
-          <div className="w-4/5 flex justify-between mt-4 md:mb-24 mb-12">
+          <div className="w-4/5 flex justify-between mt-4 lg:mb-12 mb-12">
             <label className="flex items-center">
               <Checkbox
                 name="remember"
