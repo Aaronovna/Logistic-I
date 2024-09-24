@@ -152,7 +152,7 @@ export default function Product({ auth }) {
     >
       <Head title="Product" />
 
-      <div className="content">
+      <div className="content mt-24 md:mt-0">
         <div className='flex items-end mb-4 gap-4'>
           <Card2 data={totalProductValue} name="Total Asset Value" Icon={TbCurrencyPeso} />
           <Card2 data={products && products.length} name="Total Products" Icon={TbBox} />

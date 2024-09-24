@@ -22,6 +22,12 @@ const analyticsRoutes = ['dashboard', 'report'];
 const inventoryRoutes = ['product'];
 const managementRoutes = ['category', 'user'];
 
+const pages = [
+  'dashboard', 'report',
+  'product',
+  'category', 'user',
+]
+
 export default function Authenticated({ user, header, children }) {
   const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
   const { setUserPermissions, theme, setThemePreference } = useStateContext(convertPermissions(user.permissions));
@@ -31,7 +37,7 @@ export default function Authenticated({ user, header, children }) {
   }, [])
 
   return (
-    <div className="flex h-screen" style={{background: theme.background}}>
+    <div className="flex h-screen" style={{ background: theme.background }}>
       <Toaster
         position="top-right"
         reverseOrder={false}
@@ -46,8 +52,8 @@ export default function Authenticated({ user, header, children }) {
         }}
       />
 
-      <div className='w-full h-4 absolute z-30 -left-2' style={{background:theme.background}}></div>
-      <div className='w-full h-4 absolute z-30 bottom-0 -left-2' style={{background:theme.background}}></div>
+      <div className='w-full h-4 absolute z-30 -left-2' style={{ background: theme.background }}></div>
+      <div className='w-full h-4 absolute z-30 bottom-0 -left-2' style={{ background: theme.background }}></div>
 
       <aside
         className='w-80 hidden md:flex md:flex-col border m-4 mr-0 rounded-lg overflow-hidden'
@@ -57,7 +63,6 @@ export default function Authenticated({ user, header, children }) {
         <p className='m-4 mb-12 font-bold text-2xl text-center' style={{ color: theme.accent }}>NextFleet Dynamics</p>
 
         <div className="flex flex-col mr-4">
-
           <NavLinkCategory routes={analyticsRoutes} Icon={TbChartHistogram} href='dashboard' label='Analytics' className='mr-4' />
           <NavLink href={route('dashboard')} active={route().current('dashboard')}>
             <span className='flex items-center gap-1 px-1'>
@@ -97,7 +102,7 @@ export default function Authenticated({ user, header, children }) {
 
         <button
           className='p-2 border-card mt-auto'
-          style={{color: theme.text}}
+          style={{ color: theme.text }}
           onClick={() => { setThemePreference(theme._name === 'light' ? 'dark' : 'light'); }}
         >
           {theme._name === 'light' ? 'Dark Mode' : 'Light Mode'}
@@ -105,13 +110,15 @@ export default function Authenticated({ user, header, children }) {
 
       </aside>
 
-      <div className='flex flex-col w-full h-screen overflow-y-scroll'>
-        <nav className='md:sticky block md:w-auto top-4 z-10 backdrop-blur-sm border-card m-4 bg-white' style={{backgroundColor:theme.blur}}>
+      <div className='relative flex flex-col w-full h-screen overflow-y-scroll overflow-hidden'>
+        <nav className='sticky w-auto top-4 z-20 backdrop-blur-sm border-card m-4 h-fit'
+          style={{ backgroundColor: theme.blur }}>
           <div className="flex w-full">
-            <div className="-me-2 flex items-center sm:hidden">
+            <div className="flex items-center md:hidden">
               <button
                 onClick={() => setShowingNavigationDropdown((previousState) => !previousState)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out"
+                className="inline-flex items-center justify-center p-2 rounded-md transition duration-150 ease-in-out"
+                style={{ color: theme.accent }}
               >
                 <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                   <path
@@ -140,7 +147,7 @@ export default function Authenticated({ user, header, children }) {
                   <span className="m-4 md:inline-flex hidden">
                     <button
                       type="button"
-                      style={{color:theme.text}}
+                      style={{ color: theme.text }}
                       className="inline-flex items-center px-3 py-2 font-medium transition ease-in-out duration-150"
                     >
                       {user.name}
@@ -170,35 +177,57 @@ export default function Authenticated({ user, header, children }) {
               </Dropdown>
             </div>
           </div>
+        </nav>
 
-          <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden'}>
-            <div className="pt-2 pb-3 space-y-1">
-              <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>
-                Dashboard
-              </ResponsiveNavLink>
-              <ResponsiveNavLink href={route('category')} active={route().current('category')}>
-                Category
-              </ResponsiveNavLink>
-              <ResponsiveNavLink href={route('user')} active={route().current('user')}>
-                User
-              </ResponsiveNavLink>
+        <div
+          className={(showingNavigationDropdown ? 'block' : 'hidden') + ' p-4 w-full fixed flex flex-col h-screen z-40 backdrop-blur-lg'}
+          style={{ backgroundColor: theme.blur }}
+        >
+          <button
+            onClick={() => setShowingNavigationDropdown((previousState) => !previousState)}
+            className="inline-flex items-center justify-center p-2 rounded-md transition duration-150 ease-in-out w-fit my-2"
+            style={{ color: theme.accent }}
+          >
+            <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+              <path
+                className={!showingNavigationDropdown ? 'inline-flex' : 'hidden'}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+              <path
+                className={showingNavigationDropdown ? 'inline-flex' : 'hidden'}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+          <div className="">
+            {pages && pages.map((page, index) => {
+              return (
+                <ResponsiveNavLink key={index} href={route(page)} active={route().current(page)} className='capitalize'>
+                  {page}
+                </ResponsiveNavLink>
+              )
+            })}
+          </div>
+          <div className="mt-auto border-t border-gray-300">
+            <div className="px-4">
+              <div className="font-medium text-base text-gray-800">{user.name}</div>
+              <div className="font-medium text-sm text-gray-500">{user.email}</div>
             </div>
 
-            <div className="pt-4 pb-1 border-t border-gray-200">
-              <div className="px-4">
-                <div className="font-medium text-base text-gray-800">{user.name}</div>
-                <div className="font-medium text-sm text-gray-500">{user.email}</div>
-              </div>
-
-              <div className="mt-3 space-y-1">
-                <ResponsiveNavLink href={route('profile.edit')}>Profile</ResponsiveNavLink>
-                <ResponsiveNavLink method="post" href={route('logout')} as="button">
-                  Log Out
-                </ResponsiveNavLink>
-              </div>
+            <div className="" >
+              <ResponsiveNavLink href={route('profile.edit')}>Profile</ResponsiveNavLink>
+              <ResponsiveNavLink method="post" href={route('logout')} as="button">
+                Log Out
+              </ResponsiveNavLink>
             </div>
           </div>
-        </nav>
+        </div>
 
         {children}
 

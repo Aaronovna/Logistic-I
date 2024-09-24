@@ -148,7 +148,7 @@ export default function Category({ auth }) {
   return (
     <AuthenticatedLayout
       user={auth.user}
-      header={<h2 className="font-medium text-3xl" style={{ color: theme.text }}>Manage Categories</h2>}
+      header={<h2 className="font-medium md:text-3xl text-xl" style={{ color: theme.text }}>Manage Categories</h2>}
     >
       <Head title="Category" />
 
