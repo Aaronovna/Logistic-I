@@ -563,7 +563,7 @@ export default function User({ auth }) {
 
       <Modal show={openEditPositionPermissionsModal} onClose={() => setOpenEditPositionPermissionsModal(false)} maxWidth={'2xl'}>
         <div className='p-4' style={{ color: theme.text }}>
-          <p className='font-semibold text-xl mt-2 mb-4'>Edit Position's Permissions</p>
+          <p className='font-semibold text-xl mt-2 mb-4'>Edit <span className='font-semibold text-xl mt-2 mb-4' style={{ color: theme.accent }}>{positionSelectedData && `${positionSelectedData.name}'s`}</span> Permissions</p>
           <form onSubmit={handleEditPositionPermissionsSubmit} className='flex flex-col gap-2'>
             <div className='my-2 relative border-card p-1 grid grid-cols-3 grid-rows-3 grid-flow-col' style={{ color: theme.text, borderColor: theme.border }}>
               {permissions.map((role, index) => {
