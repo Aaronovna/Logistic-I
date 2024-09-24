@@ -68,4 +68,35 @@ class PositionController extends Controller
         $position = Position::findOrFail($id);
         $position->delete();
     }
+
+    public function update_permission(Request $request, string $id)
+    {
+        $request->validate([
+            'permissions' => 'required|array', // Ensure 'permissions' is an array
+            'permissions.*' => 'array', // Each item in the 'permissions' array should be an array
+            'permissions.*.*' => 'boolean' // Each value in the array should be a boolean
+        ]);
+
+        $position = Position::findOrFail($id); // Throws 404 if the position is not found
+
+        // Retrieve the permissions from the request
+        $newPermissions = $request->input('permissions');
+
+        // Process the permissions data
+        $processedPermissions = [];
+        foreach ($newPermissions as $permission) {
+            foreach ($permission as $key => $value) {
+                $processedPermissions[$key] = $value;
+            }
+        }
+
+        $position->permissions = $processedPermissions;
+
+        $position->save();
+
+        return response()->json([
+            'message' => 'Position permissions updated successfully!',
+            'permissions' => $position->permissions
+        ], 200);
+    }
 }

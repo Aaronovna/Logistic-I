@@ -74,7 +74,6 @@ export default function User({ auth }) {
     const newPermissions = [...selectUserPermissionsForm];
     newPermissions[index] = { ...newPermissions[index], [role.code]: e.target.checked };
     setSelectUserPermissionsForm(newPermissions);
-    console.log(selectUserPermissionsForm);
   };
 
   const handleEditUserPermissionsSubmit = async (e) => {
@@ -89,6 +88,41 @@ export default function User({ auth }) {
     }
   }
 
+  const [openEditPositionPermissionsModal, setOpenEditPositionPermissionsModal] = useState(false);
+
+  const [selectPositionPermissionsForm, setSelectPositionPermissionsForm] = useState(
+    permissions.map((permission) => ({
+      [permission.code]: false,
+    }))
+  );
+
+  const resetPositionPermissionsForm = () => {
+    const resetPermissions = selectPositionPermissionsForm.map((permission) => {
+      const roleCode = Object.keys(permission)[0];
+      return { [roleCode]: false };
+    });
+
+    setSelectPositionPermissionsForm(resetPermissions);
+  };
+
+  const handlePositionPermissionsCheckBoxesChange = (e, index, role) => {
+    const newPermissions = [...selectPositionPermissionsForm];
+    newPermissions[index] = { ...newPermissions[index], [role.code]: e.target.checked };
+    setSelectPositionPermissionsForm(newPermissions);
+  };
+
+  const handleEditPositionPermissionsSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.patch(`/position/update/permission/${positionSelectedData.id}`, { permissions: selectPositionPermissionsForm });
+
+      toast.success('Position permissions updated successfully');
+      fetchUsers();
+    } catch (error) {
+      toast.error('Failed to update user position' + error);
+    }
+  }
+
   const [openAddUserModal, setOpenAddUserModal] = useState(false);
 
   const onGridReady = useCallback((params) => {
@@ -96,6 +130,7 @@ export default function User({ auth }) {
   }, []);
 
   const [userSelectedData, setUserSelectedData] = useState(null)
+
 
   const onUserSelectionChanged = (event) => {
     const selectedRows = event.api.getSelectedRows();
@@ -108,7 +143,7 @@ export default function User({ auth }) {
       const permissions = convertPermissions(selectedUser.permissions);
       setSelectUserPermissionsForm(permissions);
     } else {
-      resetUserPermissionsForm(); // Ensure permissions form is reset if no user or permissions
+      resetUserPermissionsForm();
     }
   };
 
@@ -116,7 +151,17 @@ export default function User({ auth }) {
 
   const onPositionSelectionChanged = (event) => {
     const selectedRows = event.api.getSelectedRows();
-    setPositionSelectedData(selectedRows[0] || null);
+    const selectedPosition = selectedRows[0] || null;
+
+    setPositionSelectedData(selectedPosition);
+    resetPositionPermissionsForm();
+
+    if (selectedPosition && selectedPosition.permissions) {
+      const permissions = convertPermissions(selectedPosition.permissions);
+      setSelectPositionPermissionsForm(permissions);
+    } else {
+      resetPositionPermissionsForm();
+    }
   };
 
   const [addPositionName, setAddPositionName] = useState("");
@@ -281,6 +326,15 @@ export default function User({ auth }) {
     fetchPositions();
   }, []);
 
+  const handleTemplateChange = (e) => {
+    const { value } = e.target;
+    const selectedPosition = positions.find((position) => position.id === parseInt(value));
+    if (selectedPosition.permissions) {
+      const permissions = convertPermissions(selectedPosition.permissions);
+      setSelectUserPermissionsForm(permissions);
+    } else resetUserPermissionsForm();
+  };
+
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -396,7 +450,9 @@ export default function User({ auth }) {
                     Update
                   </button>
                 </span>
-                <button type='button' className='p-2 mt-2 font-medium border-card' style={{ background: theme.secondary, color: theme.text, borderColor: theme.border }}>Edit Permissions</button>
+                <button type='button' onClick={() => setOpenEditPositionPermissionsModal(true)}
+                  className='p-2 mt-2 font-medium border-card'
+                  style={{ background: theme.secondary, color: theme.text, borderColor: theme.border }}>Edit Permissions</button>
               </form>
             </div>
           </div>
@@ -413,7 +469,9 @@ export default function User({ auth }) {
                 <select
                   style={{ color: theme.text, background: theme.background }}
                   className="inline-block border-none" name="position_list" id="position_list"
-                  disabled={userSelectedData && userSelectedData.email_verified_at ? false : true}>
+                  onChange={(e)=>handleTemplateChange(e)}
+                  disabled={userSelectedData && userSelectedData.email_verified_at ? false : true}
+                >
 
                   <option value="none">None</option>
                   {positions && positions.map((position, index) => {
@@ -430,12 +488,12 @@ export default function User({ auth }) {
               </div>
               {permissions.map((role, index) => {
                 return (
-                  <label htmlFor={role.code} className='flex m-1 w-fit h-fit gap-2 items-center select-none cursor-pointer' key={index}>
+                  <label htmlFor={`user-${role.code}`} className='flex m-1 w-fit h-fit gap-2 items-center select-none cursor-pointer' key={`user-${index}`}>
                     <input
                       type="checkbox"
                       className={`h-0 w-0 absolute block invisible overflow-hidden ${themePreference === 'light' ? 'l' : 'd'}`}
                       name={role.alias}
-                      id={role.code}
+                      id={`user-${role.code}`}
                       checked={selectUserPermissionsForm[index][role.code]}
                       onChange={(e) => handleUserPermissionsCheckBoxesChange(e, index, role)}
                       disabled={userSelectedData && userSelectedData.email_verified_at ? false : true}
@@ -464,7 +522,7 @@ export default function User({ auth }) {
       </div>
 
       <Modal show={openAddUserModal} onClose={() => setOpenAddUserModal(false)} maxWidth={'2xl'}>
-        <div className='p-4' style={{color: theme.text}}>
+        <div className='p-4' style={{ color: theme.text }}>
           <p className='font-semibold text-xl mt-2 mb-4'>Create User</p>
           <form onSubmit={handleAddUserSubmit} className='flex flex-col gap-2'>
             <div className='relative w-full'>
@@ -475,7 +533,7 @@ export default function User({ auth }) {
                 value={searchedEmployee}
                 onChange={handleSearchEmployee}
                 onClick={() => setOpenEmployeeDropdown(!openEmployeeDropdown)}
-                style={{borderColor: theme.border}}
+                style={{ borderColor: theme.border }}
               />
               {openEmployeeDropdown &&
                 <div
@@ -494,11 +552,38 @@ export default function User({ auth }) {
                 </div>}
             </div>
             <div className='w-full mt-10'>
-              <input readOnly={true} value={addUserFormData.name} className='border-card w-3/5 mb-2 bg-transparent' style={{borderColor: theme.border}} type="text" name="name" id="name" placeholder='Name' />
-              <input readOnly={true} value={addUserFormData.email} className='border-card w-3/5 mb-2 bg-transparent' style={{borderColor: theme.border}} type="email" name='email' id='email' placeholder='Email' />
-              <input readOnly={true} value={addUserFormData.password} className='border-card w-3/5 mb-2 bg-transparent' style={{borderColor: theme.border}} type="text" name='password' id='password' placeholder='Password' />
+              <input readOnly={true} value={addUserFormData.name} className='border-card w-3/5 mb-2 bg-transparent' style={{ borderColor: theme.border }} type="text" name="name" id="name" placeholder='Name' />
+              <input readOnly={true} value={addUserFormData.email} className='border-card w-3/5 mb-2 bg-transparent' style={{ borderColor: theme.border }} type="email" name='email' id='email' placeholder='Email' />
+              <input readOnly={true} value={addUserFormData.password} className='border-card w-3/5 mb-2 bg-transparent' style={{ borderColor: theme.border }} type="text" name='password' id='password' placeholder='Password' />
               <button type="submit" className="block ml-auto text-white font-medium p-2 rounded-md" style={{ background: theme.primary }}>Submit</button>
             </div>
+          </form>
+        </div>
+      </Modal>
+
+      <Modal show={openEditPositionPermissionsModal} onClose={() => setOpenEditPositionPermissionsModal(false)} maxWidth={'2xl'}>
+        <div className='p-4' style={{ color: theme.text }}>
+          <p className='font-semibold text-xl mt-2 mb-4'>Edit Position's Permissions</p>
+          <form onSubmit={handleEditPositionPermissionsSubmit} className='flex flex-col gap-2'>
+            <div className='my-2 relative border-card p-1 grid grid-cols-3 grid-rows-3 grid-flow-col' style={{ color: theme.text, borderColor: theme.border }}>
+              {permissions.map((role, index) => {
+                return (
+                  <label htmlFor={`position-${role.code}`} className='flex m-1 w-fit h-fit gap-2 items-center select-none cursor-pointer' key={`position-${index}`}>
+                    <input
+                      type="checkbox"
+                      className={`h-0 w-0 absolute block invisible overflow-hidden ${themePreference === 'light' ? 'l' : 'd'}`}
+                      name={role.alias}
+                      id={`position-${role.code}`}
+                      checked={selectPositionPermissionsForm[index][role.code]}
+                      onChange={(e) => handlePositionPermissionsCheckBoxesChange(e, index, role)}
+                    />
+                    <span className='check w-5 h-5 inline-block rounded border' style={{ borderColor: theme.border }}></span>
+                    <p>{role.alias}</p>
+                  </label>
+                )
+              })}
+            </div>
+            <button type="submit" className="block ml-auto text-white font-medium p-2 rounded-md" style={{ background: theme.primary }}>Submit</button>
           </form>
         </div>
       </Modal>

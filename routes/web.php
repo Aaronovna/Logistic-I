@@ -37,6 +37,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post('/position/create', [PositionController::class, 'store'])->name('position.store');
     Route::delete('/position/delete/{id}', [PositionController::class, 'destroy'])->name('position.destroy');
     Route::patch('/position/update/{id}', [PositionController::class, 'update'])->name('position.update');
+    Route::patch('/position/update/permission/{id}', [PositionController::class, 'update_permission'])->name('position.update_permission');
 
     Route::get('/user/get', [UserController::class, 'index'])->name('user.index');
     Route::post('/user/create', [UserController::class, 'store'])->name('user.store');

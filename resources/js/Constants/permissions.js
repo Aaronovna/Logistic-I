@@ -23,4 +23,12 @@ export const permissions = [
         code: 201,
         alias: 'edit_category',
     },
+    {
+        code: 250,
+        alias: 'view_product',
+    },
+    {
+        code: 251,
+        alias: 'edit_product',
+    },
 ]
