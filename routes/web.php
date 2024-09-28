@@ -13,13 +13,20 @@ use App\Http\Controllers\SupplierController;
 
 Route::redirect('/', 'login');
 
+
+// PAGES ROUTES
 Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/dashboard', fn () => Inertia::render('Dashboard'))->name('dashboard');
     Route::get('/category', fn () => Inertia::render('Category'))->name('category');
     Route::get('/user', fn () => Inertia::render('User'))->name('user');
     Route::get('/report', fn () => Inertia::render('Report'))->name('report');
     Route::get('/product', fn () => Inertia::render('Product'))->name('product');
-    
+    Route::get('/receipt', fn () => Inertia::render('Receipt'))->name('receipt');
+    Route::get('/dispatch', fn () => Inertia::render('Dispatch'))->name('dispatch');
+});
+
+// REQUEST ROUTES
+Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/product/get', [ProductController::class, 'index'])->name('product.index');
     Route::post('/product/store', [ProductController::class, 'store'])->name('product.store');
     Route::patch('/product/update/{id}', [ProductController::class, 'update'])->name('product.update');
