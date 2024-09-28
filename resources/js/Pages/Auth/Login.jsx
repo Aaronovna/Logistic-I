@@ -1,8 +1,5 @@
 import Checkbox from '@/Components/Checkbox';
 import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 import { useStateContext } from '@/context/contextProvider';
@@ -31,11 +28,11 @@ export default function Login({ status, canResetPassword }) {
       </div>
       <div className='flex flex-col py-4 md:1/2 lg:w-2/5 w-full items-center'>
 
-        <p className='font-bold md:text-4xl lg:text-3xl text-2xl w-full text-center'>Bus Transportation Management System</p>
-        <p className='font-semibold text-3xl text-center mt-10'>Logistic I</p>
+        <p className='font-bold lg:text-4xl text-2xl w-full text-center'>Bus Transportation Management System</p>
+        <p className='font-semibold lg:text-3xl text-xl text-center mt-10'>Logistic I</p>
 
         <form onSubmit={submit}
-          className='w-4/5 py-4 rounded-3xl shadow-lg shad mt-10 flex flex-col items-center border'
+          className='xl:w-4/6 lg:w-5/6 sm:w-2/3 py-4 rounded-3xl shadow-lg shad mt-10 flex flex-col items-center border'
           style={{ background: theme.background, color: theme.accent, borderColor: theme.border }}
         >
           <p className='text-center mb-4 text-xl'>Sign In</p>
