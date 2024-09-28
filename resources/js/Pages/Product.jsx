@@ -16,9 +16,10 @@ import { Card2 } from '@/Components/Cards';
 import { ProductCard } from '@/Components/cards/ProductCard';
 
 import Modal from '@/Components/Modal';
+import Pagination from '@/Components/Pagination';
 
 export default function Product({ auth }) {
-  const [products, setProducts] = useState(null);
+  const [products, setProducts] = useState([]);
   const [totalProductValue, setTotalProductValue] = useState(0);
   const [openAddProductModal, setOpenAddProductModal] = useState(false);
 
@@ -39,7 +40,7 @@ export default function Product({ auth }) {
     fetchProducts();
   };
 
-  const [filteredProducts, setFilteredProducts] = useState(null);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchedProduct, setSearchedProduct] = useState("");
 
   const handleSearchProducts = (e) => {
@@ -47,7 +48,7 @@ export default function Product({ auth }) {
     setSearchedProduct(searchQuery);
 
     if (searchQuery.trim() === "") {
-      setFilteredProducts(null);
+      setFilteredProducts([]);
       return;
     }
 
@@ -143,6 +144,17 @@ export default function Product({ auth }) {
     }
   }, [products]);
 
+  const renderProductItem = (product, index) => (
+    <ProductCard
+      product={product}
+      key={index}
+      list={['Edit', 'Delete']}
+      categories={categories}
+      suppliers={suppliers}
+      update={updateData}
+    />
+  );
+
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -177,20 +189,19 @@ export default function Product({ auth }) {
           </button>
         </div>
 
-        <p style={{ color: theme.danger }}
-          className={`w-full text-center p-2 font-medium text-2xl 
-            ${filteredProducts === null || filteredProducts.length !== 0 ? 'invisible hidden' : 'visible'}`
-          }>
+        <p
+          style={{ color: theme.danger }}
+          className={`w-full text-center p-2 font-medium text-2xl ${filteredProducts.length === 0 && searchedProduct ? '' : 'hidden'}`}>
           No Product Found
         </p>
 
         <Pagination
-          products={products}
-          filteredProducts={filteredProducts}
-          searchedProduct={searchedProduct}
-          categories={categories}
-          suppliers={suppliers}
-          update={updateData}
+          data={products}
+          filteredData={filteredProducts}
+          itemsPerPage={5}
+          renderItem={renderProductItem}
+          theme={theme}
+          hidePage={!filteredProducts.length === 0}
         />
 
         {/* ALTERNATIVE LOGIC */}
@@ -293,133 +304,3 @@ export default function Product({ auth }) {
     </AuthenticatedLayout>
   );
 }
-
-const Pagination = ({ products, filteredProducts, searchedProduct, categories, suppliers, update }) => {
-  const { theme } = useStateContext();
-  const [currentPage, setCurrentPage] = useState(1);
-
-  // Configurable number of items per page
-  const itemsPerPage = 20;
-
-  let totalPages;
-  let currentData;
-
-  // Handle page change
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  // Calculate total number of pages
-  totalPages = Math.ceil(products && products.length / itemsPerPage);
-
-  // Get current items based on the currentPage
-  if (products) {
-    currentData = products.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage
-    );
-  }
-
-  useEffect(() => {
-
-  }, []);
-
-  return (
-    <div className="pagination relative">
-
-      <div className=''>
-        {filteredProducts && filteredProducts.length > 0 ? (
-          filteredProducts.map((product, index) => (
-            <ProductCard
-              product={product}
-              key={index}
-              list={['Edit', 'Delete']}
-              categories={categories}
-              suppliers={suppliers}
-              update={update}
-            />
-          ))
-        ) : (
-          currentData && currentData.map((product, index) => (
-            <ProductCard
-              product={product}
-              key={index}
-              list={['Edit', 'Delete']}
-              categories={categories}
-              suppliers={suppliers}
-              update={update}
-              className={`${searchedProduct !== '' ? 'hidden' : 'block'}`}
-            />
-          ))
-        )}
-      </div>
-      <div
-        style={{ outlineColor: theme.border }}
-        className={`w-full flex outline-card bottom-4 sticky ml-auto backdrop-blur-sm ${searchedProduct === '' ? 'visible' : 'invisible'}`}
-      >
-        <button
-          style={{ background: theme.accent, color: theme.background }}
-          className='p-2 rounded-l-md'
-          disabled={currentPage === 1}
-          onClick={() => handlePageChange(currentPage - 1)}
-        >
-          {'<'}
-        </button>
-        <button
-          style={{ background: theme.accent, color: theme.background }}
-          className='p-2'
-          onClick={() => handlePageChange(1)}
-        >
-          {'<<'}
-        </button>
-
-        {[...Array(20)].map((_, index) => {
-          // Calculate the start and end range for buttons
-          let startPage = Math.max(1, currentPage - 9); // Start from 1 or currentPage - 5
-          let endPage = startPage + 19; // Show 10 pages
-
-          // Adjust the startPage if you are near the last pages
-          if (endPage > totalPages) {
-            endPage = totalPages; // Ensure endPage doesn't exceed totalPages
-            startPage = Math.max(1, totalPages - 19); // Adjust startPage accordingly
-          }
-
-          const pageNumber = startPage + index;
-
-          // Don't render a button if it exceeds the totalPages
-          if (pageNumber > totalPages) return null;
-
-          return (
-            <button
-              key={index}
-              onClick={() => handlePageChange(pageNumber)}
-              className={`flex-1`}
-              style={{
-                background: currentPage === pageNumber ? theme.secondary : theme.blur,
-                color: theme.text,
-              }}
-            >
-              {pageNumber}
-            </button>
-          );
-        })}
-
-        <button
-          style={{ background: theme.accent, color: theme.background }}
-          className='p-2'
-          onClick={() => handlePageChange(totalPages)}
-        >
-          {'>>'}
-        </button>
-        <button
-          style={{ background: theme.accent, color: theme.background }}
-          className='p-2 rounded-r-md'
-          disabled={currentPage === totalPages}
-          onClick={() => handlePageChange(currentPage + 1)}
-        >
-          {'>'}
-        </button>
-      </div>
-    </div>
-  );
-};
