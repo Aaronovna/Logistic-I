@@ -338,11 +338,11 @@ export default function User({ auth }) {
   return (
     <AuthenticatedLayout
       user={auth.user}
-      header={<h2 className="font-medium md:text-3xl text-xl" style={{ color: theme.text }}>Manage Users</h2>}
+      header={<h2 className="header" style={{ color: theme.text }}>Manage Users</h2>}
     >
       <Head title="Users" />
 
-      <div className='flex mx-4 flex-col'>
+      <div className='content flex flex-col'>
 
         <div className='flex items-center gap-6'>
           <Card data={users ? users.length : "-"} name="Users" Icon={TbUser} />
@@ -469,7 +469,7 @@ export default function User({ auth }) {
                 <select
                   style={{ color: theme.text, background: theme.background }}
                   className="inline-block border-none" name="position_list" id="position_list"
-                  onChange={(e)=>handleTemplateChange(e)}
+                  onChange={(e) => handleTemplateChange(e)}
                   disabled={userSelectedData && userSelectedData.email_verified_at ? false : true}
                 >
 

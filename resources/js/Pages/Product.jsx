@@ -9,8 +9,6 @@ import { TbPlus } from "react-icons/tb";
 import { TbBox } from "react-icons/tb";
 import { TbCurrencyPeso } from "react-icons/tb";
 import { TbSearch } from "react-icons/tb";
-import { TbDownload } from "react-icons/tb";
-import { TbUpload } from "react-icons/tb";
 
 import { useStateContext } from '@/context/contextProvider';
 
@@ -148,11 +146,11 @@ export default function Product({ auth }) {
   return (
     <AuthenticatedLayout
       user={auth.user}
-      header={<h2 className="font-medium md:text-3xl text-xl" style={{ color: theme.text }}>Product</h2>}
+      header={<h2 className="header" style={{ color: theme.text }}>Product</h2>}
     >
       <Head title="Product" />
 
-      <div className="content mt-24 md:mt-0">
+      <div className="content">
         <div className='flex items-end mb-4 gap-4'>
           <Card2 data={totalProductValue} name="Total Asset Value" Icon={TbCurrencyPeso} />
           <Card2 data={products && products.length} name="Total Products" Icon={TbBox} />

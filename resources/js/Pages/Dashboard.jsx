@@ -1,20 +1,20 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
 
+import { useStateContext } from '@/context/contextProvider';
+
 export default function Dashboard({ auth }) {
-    return (
-        <AuthenticatedLayout
-            user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>}
-        >
-            <Head title="Dashboard" />
+  const { theme } = useStateContext();
+  return (
+    <AuthenticatedLayout
+      user={auth.user}
+      header={<h2 className="header" style={{ color: theme.text }}>Dashboard</h2>}
+    >
+      <Head title="Dashboard" />
 
-            <div className="w-full">
-                        <div className="bg-white">
-                            <div className="p-6 text-gray-900">You're logged in!</div>
-                        </div>
+      <div className="content">
 
-                    </div>
-        </AuthenticatedLayout>
-    );
+      </div>
+    </AuthenticatedLayout>
+  );
 }

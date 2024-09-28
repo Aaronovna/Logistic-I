@@ -116,11 +116,15 @@ select:focus {
 }
 
 .content {
-    @apply mx-4 mb-4;
+    @apply mx-4 mb-4 mt-24 md:mt-0;
 }
 
 * {
     @apply duration-100;
+}
+
+.header {
+    @apply font-medium md:text-3xl text-xl;
 }
 
 /* .asd {
@@ -163,4 +167,26 @@ select:focus {
 
     mask: linear-gradient(to bottom, transparent, black 35%);
     @apply backdrop-blur;
+}
+
+.log{
+    background-image: url('../../public/assets/svgs/Logistics-rafiki.svg');
+}
+
+.hover-r-grd-blr:hover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(255, 255, 255, 0.5);
+
+    mask: linear-gradient(to right, transparent, black 75%);
+    @apply backdrop-blur-sm;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:focus {
+    transition: background-color 600000s 0s, color 600000s 0s;
+}
+input[data-autocompleted] {
+    background-color: transparent !important;
 }
