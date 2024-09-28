@@ -4,23 +4,19 @@ import NavLink from '@/Components/NavLink';
 import NavLinkCategory from '@/Components/NavLinkCategory';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 
-import { TbLayoutDashboard } from "react-icons/tb";
 import { TbChartHistogram } from "react-icons/tb";
-import { TbBuildingWarehouse } from "react-icons/tb";
-import { TbClipboardList } from "react-icons/tb";
+import { TbPackages } from "react-icons/tb";
+import { TbClipboardCheck } from "react-icons/tb";
+import { TbBuildingCommunity } from "react-icons/tb";
 import { TbSettingsCog } from "react-icons/tb";
-import { TbCategory } from "react-icons/tb";
-import { TbUserCog } from "react-icons/tb";
-import { TbBox } from "react-icons/tb";
+
 
 import { Toaster } from 'react-hot-toast';
 
 import { useStateContext } from '@/context/contextProvider';
 import { convertPermissions } from '@/functions/permissionsConverter';
 
-const analyticsRoutes = ['dashboard', 'report'];
-const inventoryRoutes = ['product'];
-const managementRoutes = ['category', 'user'];
+import { analyticsLinks, inventoryLinks, managementLinks } from '@/Constants/navlinks';
 
 const pages = [
   'dashboard', 'report',
@@ -63,49 +59,53 @@ export default function Authenticated({ user, header, children }) {
         <p className='m-4 mb-12 font-bold text-2xl text-center' style={{ color: theme.accent }}>NextFleet Dynamics</p>
 
         <div className="flex flex-col mr-4">
-          <NavLinkCategory routes={analyticsRoutes} Icon={TbChartHistogram} href='dashboard' label='Analytics' className='mr-4' />
-          <NavLink href={route('dashboard')} active={route().current('dashboard')}>
-            <span className='flex items-center gap-1 px-1'>
-              <TbLayoutDashboard className='mr-1' />
-              <p>Dashboard</p>
-            </span>
-          </NavLink>
-          <NavLink href={route('report')} active={route().current('report')}>
-            <span className='flex items-center gap-1 px-1'>
-              <TbClipboardList className='mr-1' />
-              <p>Report</p>
-            </span>
-          </NavLink>
+          <NavLinkCategory routes={analyticsLinks.map(link => link.name)} Icon={TbChartHistogram} href='dashboard' label='Analytics' className='mr-4' />
+          {analyticsLinks.map((link, index) => {
+            return (
+              <NavLink key={index} href={route(link.name)} active={route().current(link.name)}>
+                <span className='flex items-center gap-1 px-1'>
+                  <link.Icon className='mr-1' />
+                  <p>{link.name}</p>
+                </span>
+              </NavLink>
+            )
+          })}
 
-          <NavLinkCategory routes={inventoryRoutes} Icon={TbBuildingWarehouse} href='product' label='Inventory' className='mr-4' />
-          <NavLink href={route('product')} active={route().current('product')}>
-            <span className='flex items-center gap-1 px-1'>
-              <TbBox className='mr-1' />
-              <p>Product</p>
-            </span>
-          </NavLink>
+          <NavLinkCategory routes={inventoryLinks.map(link => link.name)} Icon={TbPackages} href='product' label='Inventory' className='mr-4' />
+          {inventoryLinks.map((link, index) => {
+            return (
+              <NavLink key={index} href={route(link.name)} active={route().current(link.name)}>
+                <span className='flex items-center gap-1 px-1'>
+                  <link.Icon className='mr-1' />
+                  <p>{link.name}</p>
+                </span>
+              </NavLink>
+            )
+          })}
 
-          <NavLinkCategory routes={managementRoutes} Icon={TbSettingsCog} href='category' label='Management' className='mr-4' />
-          <NavLink href={route('category')} active={route().current('category')}>
-            <span className='flex items-center gap-1 px-1'>
-              <TbCategory className='mr-1' />
-              <p>Category</p>
-            </span>
-          </NavLink>
-          <NavLink href={route('user')} active={route().current('user')}>
-            <span className='flex items-center gap-1 px-1'>
-              <TbUserCog className='mr-1' />
-              <p>User</p>
-            </span>
-          </NavLink>
+          {/* <NavLinkCategory routes={auditRoutes} Icon={TbClipboardCheck} href='product' label='Audit' className='mr-4' /> */}
+
+          {/* <NavLinkCategory routes={auditRoutes} Icon={TbBuildingCommunity} href='product' label='Infrastructure' className='mr-4' /> */}
+
+          <NavLinkCategory routes={managementLinks.map(link => link.name)} Icon={TbSettingsCog} href='category' label='Management' className='mr-4' />
+          {managementLinks.map((link, index) => {
+            return (
+              <NavLink key={index} href={route(link.name)} active={route().current(link.name)}>
+                <span className='flex items-center gap-1 px-1'>
+                  <link.Icon className='mr-1' />
+                  <p>{link.name}</p>
+                </span>
+              </NavLink>
+            )
+          })}
         </div>
 
         <button
           className='p-2 border-card mt-auto'
           style={{ color: theme.text }}
-          onClick={() => { setThemePreference(theme._name === 'light' ? 'dark' : 'light'); }}
+          onClick={() => { setThemePreference(theme._type === 'light' ? 'dark' : 'light'); }}
         >
-          {theme._name === 'light' ? 'Dark Mode' : 'Light Mode'}
+          {theme._type === 'light' ? 'Dark Mode' : 'Light Mode'}
         </button>
 
       </aside>
@@ -180,7 +180,7 @@ export default function Authenticated({ user, header, children }) {
         </nav>
 
         <div
-          className={(showingNavigationDropdown ? 'block' : 'hidden') + ' p-4 w-full fixed flex flex-col h-screen z-40 backdrop-blur-lg'}
+          className={(showingNavigationDropdown ? 'flex' : 'hidden') + ' p-4 w-full fixed flex-col h-screen z-40 backdrop-blur-lg'}
           style={{ backgroundColor: theme.blur }}
         >
           <button
@@ -214,13 +214,13 @@ export default function Authenticated({ user, header, children }) {
               )
             })}
           </div>
-          <div className="mt-auto border-t border-gray-300">
-            <div className="px-4">
-              <div className="font-medium text-base text-gray-800">{user.name}</div>
-              <div className="font-medium text-sm text-gray-500">{user.email}</div>
+          <div className="mt-auto border-t" style={{ borderColor: theme.border }}>
+            <div className="px-2">
+              <div className="font-medium" style={{ color: theme.accent }}>{user.name}</div>
+              <div className="font-medium text-sm" style={{ color: theme.secondary }}>{user.email}</div>
             </div>
 
-            <div className="" >
+            <div className="">
               <ResponsiveNavLink href={route('profile.edit')}>Profile</ResponsiveNavLink>
               <ResponsiveNavLink method="post" href={route('logout')} as="button">
                 Log Out
