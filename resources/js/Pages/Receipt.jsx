@@ -39,8 +39,8 @@ export default function Receipt({ auth }) {
           </button>
         </div>
 
-        <div className='mt-4 relative'>
-          <div className='absolute w-96 h-10 bottom-2 left-2 z-10 flex items-center border-b' style={{ borderColor: theme.text }}>
+        <div className='mt-4'>
+          <div className='w-full h-10 z-10 flex items-center mb-4' style={{ borderColor: theme.text }}>
             <span className='absolute'>
               <TbSearch size={24} color={theme.text} />
             </span>
