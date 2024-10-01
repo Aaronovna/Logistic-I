@@ -17,6 +17,7 @@ import { ProductCard } from '@/Components/cards/ProductCard';
 
 import Modal from '@/Components/Modal';
 import Pagination from '@/Components/Pagination';
+import { productToastMessages } from '@/Constants/toastMessages';
 
 export default function Product({ auth }) {
   const [products, setProducts] = useState([]);
@@ -32,7 +33,7 @@ export default function Product({ auth }) {
       const response = await axios.get('/product/get');
       setProducts(response.data);
     } catch (error) {
-      toast.error('Error fetching products:', error);
+      toast.error(productToastMessages.show.error, error);
     }
   };
 
@@ -108,11 +109,11 @@ export default function Product({ auth }) {
     try {
       const response = await axios.post('/product/store', addProductFormData);
 
-      toast.success('Product added successfully');
+      toast.success(productToastMessages.store.success);
       fetchProducts();
       setOpenAddProductModal(false);
     } catch (error) {
-      toast.error('Failed to add product' + error);
+      toast.error(productToastMessages.store.error, error);
     }
   };
 

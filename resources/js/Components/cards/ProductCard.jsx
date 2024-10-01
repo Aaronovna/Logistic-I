@@ -5,6 +5,7 @@ import { TbDots } from "react-icons/tb";
 import PopperMenu from "../PopperMenu";
 import { useStateContext } from "@/context/contextProvider";
 import toast from "react-hot-toast";
+import { productToastMessages } from "@/Constants/toastMessages";
 
 const product_image_placeholder = 'https://psediting.websites.co.in/obaju-turquoise/img/product-placeholder.png';
 
@@ -25,11 +26,11 @@ export const ProductCard = ({ product, isFlip = false, className = '', categorie
 
     try {
       const response = await axios.patch(`/product/update/${product.id}`, editProductFormData);
-      toast.success('Product updated successfully');
+      toast.success(productToastMessages.update.success);
       update();
       setOpenEditProductModal(false);
     } catch (error) {
-      toast.error('Failed to update product' + error);
+      toast.error(productToastMessages.update.error, error);
     }
   };
 
@@ -37,9 +38,9 @@ export const ProductCard = ({ product, isFlip = false, className = '', categorie
     try {
       await axios.delete(`/product/delete/${id}}`);
       update();
-      toast.success('Product deleted successfully');
+      toast.success(productToastMessages.destroy.success);
     } catch (error) {
-      toast.error('Error deleting product:', error);
+      toast.error(productToastMessages.destroy.error, error);
     }
   };
 

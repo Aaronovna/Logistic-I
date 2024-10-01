@@ -12,6 +12,7 @@ import { useStateContext } from '@/context/contextProvider';
 import Modal from '@/Components/Modal';
 import { Card } from '@/Components/Cards';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { categoryToastMessages } from '@/Constants/toastMessages';
 
 import { TbCategory } from "react-icons/tb";
 import { TbPlus } from "react-icons/tb";
@@ -47,9 +48,9 @@ export default function Category({ auth }) {
   });
 
   const colDefs = [
-    { field: "id", filter: true, flex: 1, minWidth: 70, maxWidth: 90,},
+    { field: "id", filter: true, flex: 1, minWidth: 70, maxWidth: 90, },
     { field: "name", filter: true, flex: 1 },
-    { field: "products_count", headerName: 'Products Count', minWidth: 120,maxWidth: 150, },
+    { field: "products_count", headerName: 'Products Count', minWidth: 120, maxWidth: 150, },
     { field: "description", flex: 2, sortable: false, },
     {
       field: "action",
@@ -100,11 +101,11 @@ export default function Category({ auth }) {
       const response = await axios.post('/category/create', addFormData);
 
       setAddFormData({ name: '', description: '' });
-      toast.success('Category added successfully');
+      toast.success(categoryToastMessages.store.success);
       fetchCategories();
       setOpenAddModal(false);
     } catch (error) {
-      toast.error('Failed to add category' + error);
+      toast.error(categoryToastMessages.store.error, error);
     }
   };
 
@@ -114,11 +115,11 @@ export default function Category({ auth }) {
     try {
       const response = await axios.patch(`/category/update/${editFormData.id}`, editFormData);
 
-      toast.success('Category updated successfully');
+      toast.success(categoryToastMessages.update.success);
       fetchCategories();
       setOpenEditModal(false);
     } catch (error) {
-      toast.error('Failed to add category' + error);
+      toast.error(categoryToastMessages.update.error, error);
     }
   };
 
@@ -126,9 +127,9 @@ export default function Category({ auth }) {
     try {
       await axios.delete(`/category/delete/${id}`);
       fetchCategories();
-      toast.success('Category deleted successfully');
+      toast.success(categoryToastMessages.destroy.success);
     } catch (error) {
-      toast.error('Error deleting category:', error);
+      toast.error(categoryToastMessages.destroy.error, error);
     }
   };
 
@@ -137,7 +138,7 @@ export default function Category({ auth }) {
       const response = await axios.get('/category/get/count');
       setCategories(response.data);
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error(categoryToastMessages.show.error, error);
     }
   };
 
@@ -180,7 +181,7 @@ export default function Category({ auth }) {
           </div>
 
           {selectedData ?
-            <div className='border-card p-4' style={{color: theme.text}}>
+            <div className='border-card p-4' style={{ color: theme.text }}>
               <span className='flex mb-2'>
                 <p className='text-gray-300/50 mr-2'>{selectedData.id}</p>
                 <p className='font-semibold'>{selectedData.name}</p>
@@ -194,7 +195,7 @@ export default function Category({ auth }) {
 
       {/* MODAL FOR CREATING NEW CATEGORY */}
       <Modal show={openAddModal} onClose={() => setOpenAddModal(false)} maxWidth='lg'>
-        <form onSubmit={handleAddSubmit} className="p-4" style={{color: theme.text}}>
+        <form onSubmit={handleAddSubmit} className="p-4" style={{ color: theme.text }}>
           <p className='font-semibold text-xl mt-2 mb-4'>Add New Category</p>
           <input
             type="text"
@@ -204,7 +205,7 @@ export default function Category({ auth }) {
             onChange={handleAddInputChange}
             placeholder="Category Name"
             className="mb-2 p-2 border rounded w-full bg-transparent"
-            style={{borderColor: theme.border}}
+            style={{ borderColor: theme.border }}
           />
           <textarea
             type="text"
@@ -215,15 +216,15 @@ export default function Category({ auth }) {
             onChange={handleAddInputChange}
             placeholder="Category Description"
             className="mb-2 p-2 border rounded w-full resize-none bg-transparent"
-            style={{borderColor: theme.border}}
+            style={{ borderColor: theme.border }}
           />
-          <button type="submit" className="p-2 border-card font-medium text-white block ml-auto" style={{background: theme.primary, borderColor: theme.border}}>Submit</button>
+          <button type="submit" className="p-2 border-card font-medium text-white block ml-auto" style={{ background: theme.primary, borderColor: theme.border }}>Submit</button>
         </form>
       </Modal>
 
       {/* MODAL FOR EDITING EXISTING CATEGORY */}
       <Modal show={openEditModal} onClose={() => setOpenEditModal(false)}>
-        <form onSubmit={handleEditSubmit} className="p-4" style={{color: theme.text}}>
+        <form onSubmit={handleEditSubmit} className="p-4" style={{ color: theme.text }}>
           <p className='font-semibold text-xl mt-2 mb-4'>Edit Category</p>
           <input
             type="text"
@@ -233,7 +234,7 @@ export default function Category({ auth }) {
             onChange={handleEditInputChange}
             placeholder="Category Name"
             className="mb-2 p-2 border rounded w-full bg-transparent"
-            style={{borderColor: theme.border}}
+            style={{ borderColor: theme.border }}
           />
           <textarea
             type="text"
@@ -244,9 +245,9 @@ export default function Category({ auth }) {
             onChange={handleEditInputChange}
             placeholder="Category Description"
             className="mb-2 p-2 border rounded w-full bg-transparent resize-none"
-            style={{borderColor: theme.border}}
+            style={{ borderColor: theme.border }}
           />
-          <button type="submit" className="p-2 border-card font-medium text-white block ml-auto" style={{background: theme.primary, borderColor: theme.border}}>Update</button>
+          <button type="submit" className="p-2 border-card font-medium text-white block ml-auto" style={{ background: theme.primary, borderColor: theme.border }}>Update</button>
         </form>
       </Modal>
     </AuthenticatedLayout>

@@ -24,6 +24,8 @@ import { useStateContext } from '@/context/contextProvider';
 import { generatePassword } from '@/functions/passwordGenerator';
 import { convertPermissions } from '@/functions/permissionsConverter';
 
+import { userToastMessages, positionToastMessages } from '@/Constants/toastMessages';
+
 const dummyEmployeesData = [
   {
     fname: 'Saika',
@@ -81,10 +83,10 @@ export default function User({ auth }) {
     try {
       const response = await axios.patch(`/user/update/permission/${userSelectedData.id}`, { permissions: selectUserPermissionsForm });
 
-      toast.success('User permissions updated successfully');
+      toast.success(userToastMessages.update_UserPermission.success);
       fetchUsers();
     } catch (error) {
-      toast.error('Failed to update user permissions' + error);
+      toast.error(userToastMessages.update_UserPermission.error, error);
     }
   }
 
@@ -116,10 +118,10 @@ export default function User({ auth }) {
     try {
       const response = await axios.patch(`/position/update/permission/${positionSelectedData.id}`, { permissions: selectPositionPermissionsForm });
 
-      toast.success('Position permissions updated successfully');
+      toast.success(positionToastMessages.update_PositionPermission.success);
       fetchUsers();
     } catch (error) {
-      toast.error('Failed to update user position' + error);
+      toast.error(positionToastMessages.update_PositionPermission.error, error);
     }
   }
 
@@ -193,11 +195,11 @@ export default function User({ auth }) {
       const response = await axios.post('/position/create', { name: addPositionName });
 
       setAddPositionName("");
-      toast.success('Position added successfully');
+      toast.success(positionToastMessages.store.success);
       fetchPositions();
       setOpenAddPositionModal(false);
     } catch (error) {
-      toast.error('Failed to add position' + error);
+      toast.error(positionToastMessages.store.error, error);
     }
   };
 
@@ -206,12 +208,12 @@ export default function User({ auth }) {
     try {
       const response = await axios.patch(`/position/update/${positionSelectedData.id}`, { name: editPositionName });
 
-      toast.success('Position updated successfully');
+      toast.success(positionToastMessages.update.success);
       setEditPositionName("");
       fetchPositions();
       setOpenEditPositionModal(false);
     } catch (error) {
-      toast.error('Failed to update position' + error);
+      toast.error(positionToastMessages.update.error, error);
     }
   };
 
@@ -220,9 +222,9 @@ export default function User({ auth }) {
       await axios.delete(`/position/delete/${id}}`);
       fetchPositions();
       setOpenEditPositionModal(false);
-      toast.success('Position deleted successfully');
+      toast.success(positionToastMessages.destroy.success);
     } catch (error) {
-      toast.error('Error deleting position:', error);
+      toast.error(positionToastMessages.destroy.error, error);
     }
   };
 
@@ -231,11 +233,11 @@ export default function User({ auth }) {
     try {
       const response = await axios.post('/user/create', addUserFormData);
 
-      toast.success('User added successfully');
+      toast.success(userToastMessages.store.success);
       fetchUsers();
       setOpenAddUserModal(false);
     } catch (error) {
-      toast.error('Failed to add user' + error);
+      toast.error(userToastMessages.store.error, error);
     }
   };
 
@@ -243,9 +245,9 @@ export default function User({ auth }) {
     try {
       await axios.delete(`/user/delete/${id}}`);
       fetchUsers();
-      toast.success('User deleted successfully');
+      toast.success(userToastMessages.destroy.success);
     } catch (error) {
-      toast.error('Error deleting user:', error);
+      toast.error(userToastMessages.destroy.error, error);
     }
   };
 
@@ -275,7 +277,7 @@ export default function User({ auth }) {
       const response = await axios.get('/user/get');
       setUsers(response.data);
     } catch (error) {
-      toast.error('Error fetching users:', error);
+      toast.error(userToastMessages.show.error, error);
     }
   };
 
@@ -284,7 +286,7 @@ export default function User({ auth }) {
       const response = await axios.get('/position');
       setPositions(response.data);
     } catch (error) {
-      toast.error('Error fetching positions:', error);
+      toast.error(positionToastMessages.show.error, error);
     }
   };
 
