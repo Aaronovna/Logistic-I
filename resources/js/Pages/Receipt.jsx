@@ -48,7 +48,7 @@ export default function Receipt({ auth }) {
               className='pl-8 bg-transparent border-none tracking-wide w-full' style={{ color: theme.text }}
             />
           </div>
-          <div className='grid grid-cols-2 gap-4 overflow-y-scroll pb-14' style={{ height: '528px' }}>
+          <div className='grid grid-cols-2 gap-4 overflow-y-scroll pr-2' style={{ height: '528px' }}>
             {received.map((item, index) => {
               return (
                 <div key={index}

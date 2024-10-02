@@ -16,7 +16,7 @@ import { Toaster } from 'react-hot-toast';
 import { useStateContext } from '@/context/contextProvider';
 import { convertPermissions } from '@/functions/permissionsConverter';
 
-import { analyticsLinks, inventoryLinks, managementLinks } from '@/Constants/navlinks';
+import { analyticsLinks, inventoryLinks, managementLinks, infrastructureLinks, auditLinks } from '@/Constants/navlinks';
 
 const pages = [
   'dashboard', 'report',
@@ -32,11 +32,15 @@ export default function Authenticated({ user, header, children }) {
     setUserPermissions(convertPermissions(user.permissions));
   }, [])
 
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false);
+  const handleSidebarMouseEnter = () => setIsSidebarHovered(true);
+  const handleSidebarMouseLeave = () => setIsSidebarHovered(false);
+
   return (
     <div className="flex h-screen" style={{ background: theme.background }}>
       <Toaster
         position="top-right"
-        reverseOrder={false}
+        reverseOrder={false}Sidebar
         toastOptions={{
           style: {
             padding: '18px',
@@ -58,14 +62,17 @@ export default function Authenticated({ user, header, children }) {
 
         <p className='m-4 mb-12 font-bold text-2xl text-center' style={{ color: theme.accent }}>NextFleet Dynamics</p>
 
-        <div className="flex flex-col mr-4">
+        <div className={`flex flex-col h-auto overflow-hidden overflow-y-auto pr-4 gutter-stable duration-300 ${isSidebarHovered ? 'scroll' : 'scroll-hide'}`} 
+          onMouseEnter={handleSidebarMouseEnter}
+          onMouseLeave={handleSidebarMouseLeave}
+        >
           <NavLinkCategory routes={analyticsLinks.map(link => link.name)} Icon={TbChartHistogram} href='dashboard' label='Analytics' className='mr-4' />
           {analyticsLinks.map((link, index) => {
             return (
               <NavLink key={index} href={route(link.name)} active={route().current(link.name)}>
                 <span className='flex items-center gap-1 px-1'>
                   <link.Icon className='mr-1' />
-                  <p>{link.name}</p>
+                  <p className=' capitalize'>{link.name}</p>
                 </span>
               </NavLink>
             )
@@ -77,15 +84,35 @@ export default function Authenticated({ user, header, children }) {
               <NavLink key={index} href={route(link.name)} active={route().current(link.name)}>
                 <span className='flex items-center gap-1 px-1'>
                   <link.Icon className='mr-1' />
-                  <p>{link.name}</p>
+                  <p className=' capitalize'>{link.name}</p>
                 </span>
               </NavLink>
             )
           })}
 
-          {/* <NavLinkCategory routes={auditRoutes} Icon={TbClipboardCheck} href='product' label='Audit' className='mr-4' /> */}
+          <NavLinkCategory routes={infrastructureLinks.map(link => link.name)} Icon={TbBuildingCommunity} href='depot' label='Infrastructure' className='mr-4' />
+          {infrastructureLinks.map((link, index) => {
+            return (
+              <NavLink key={index} href={route(link.name)} active={route().current(link.name)}>
+                <span className='flex items-center gap-1 px-1'>
+                  <link.Icon className='mr-1' />
+                  <p className=' capitalize'>{link.name}</p>
+                </span>
+              </NavLink>
+            )
+          })}
 
-          {/* <NavLinkCategory routes={auditRoutes} Icon={TbBuildingCommunity} href='product' label='Infrastructure' className='mr-4' /> */}
+          <NavLinkCategory routes={auditLinks.map(link => link.name)} Icon={TbClipboardCheck} href='product' label='Audit' className='mr-4' />
+          {auditLinks.map((link, index) => {
+            return (
+              <NavLink key={index} href={route(link.name)} active={route().current(link.name)}>
+                <span className='flex items-center gap-1 px-1'>
+                  <link.Icon className='mr-1' />
+                  <p className=' capitalize'>{link.name}</p>
+                </span>
+              </NavLink>
+            )
+          })}
 
           <NavLinkCategory routes={managementLinks.map(link => link.name)} Icon={TbSettingsCog} href='category' label='Management' className='mr-4' />
           {managementLinks.map((link, index) => {
@@ -93,7 +120,7 @@ export default function Authenticated({ user, header, children }) {
               <NavLink key={index} href={route(link.name)} active={route().current(link.name)}>
                 <span className='flex items-center gap-1 px-1'>
                   <link.Icon className='mr-1' />
-                  <p>{link.name}</p>
+                  <p className=' capitalize'>{link.name}</p>
                 </span>
               </NavLink>
             )
@@ -101,8 +128,8 @@ export default function Authenticated({ user, header, children }) {
         </div>
 
         <button
-          className='p-2 border-card mt-auto'
-          style={{ color: theme.text }}
+          className='p-2 border-t mt-auto'
+          style={{ color: theme.text, borderColor: theme.border }}
           onClick={() => { setThemePreference(theme._type === 'light' ? 'dark' : 'light'); }}
         >
           {theme._type === 'light' ? 'Dark Mode' : 'Light Mode'}

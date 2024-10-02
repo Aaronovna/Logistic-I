@@ -33,10 +33,10 @@ export const inventoryLinks = [
         name: 'dispatch',
         Icon: TbArrowBarToDown
     },
-    /* {
+    {
         name: 'warehouse',
         Icon: TbBuildingWarehouse
-    }, */
+    },
     {
         name: 'product',
         Icon: TbPackage
@@ -50,16 +50,22 @@ export const inventoryLinks = [
 ////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////
 
-const auditRoutes = ['task'];
+import { TbDesk } from "react-icons/tb";
+
+export const auditLinks = [
+    {
+        name: 'depot',
+        Icon: TbDesk
+    },
+];
 
 ////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////
 
 import { TbHomeCog } from "react-icons/tb";
 import { TbBus } from "react-icons/tb";
-import { TbDesk } from "react-icons/tb";
 
-export const infrastructureLink = [
+export const infrastructureLinks = [
     {
         name: 'depot',
         Icon: TbHomeCog
@@ -67,11 +73,7 @@ export const infrastructureLink = [
     {
         name: 'terminal',
         Icon: TbBus
-    },
-    {
-        name: 'office',
-        Icon: TbDesk
-    },
+    }
 ];
 
 ////////////////////////////////////////////////////////

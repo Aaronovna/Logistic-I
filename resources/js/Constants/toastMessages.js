@@ -59,7 +59,7 @@ export const positionToastMessages = {
     },
     update_PositionPermission: {
         success:'Position permissions updated successfully',
-        error:'Failed to update user position',
+        error:'Failed to update Position position',
     },
 }
 

@@ -4,7 +4,7 @@ import { light, dark } from "@/Constants/themes";
 const StateContext = createContext();
 
 export const ContextProvider = ({ children }) => {
-    const [themePreference, setThemePreference] = useState('dark');
+    const [themePreference, setThemePreference] = useState('light');
     const [theme, setTheme] = useState({});
     const [userPermissions, setUserPermissions] = useState();
 

@@ -196,14 +196,16 @@ export default function Product({ auth }) {
           No Product Found
         </p>
 
-        <Pagination
-          data={products}
-          filteredData={filteredProducts}
-          itemsPerPage={5}
-          renderItem={renderProductItem}
-          theme={theme}
-          hidePage={!filteredProducts.length === 0}
-        />
+        <div className='w-full'>
+          <Pagination
+            data={products}
+            filteredData={filteredProducts}
+            itemsPerPage={5}
+            renderItem={renderProductItem}
+            theme={theme}
+            hidePage={!filteredProducts.length === 0}
+          />
+        </div>
 
         {/* ALTERNATIVE LOGIC */}
         {/* <div className=''>

@@ -20,7 +20,7 @@ const usePagination = ({ totalItems, itemsPerPage }) => {
   };
 };
 
-export default function Pagination({ data = [], filteredData = [], itemsPerPage = 20, renderItem, visible = true, hidePage = false }) {
+export default function Pagination({ data = [], filteredData = [], itemsPerPage = 20, renderItem, visible = true, hidePage = false, className = '' }) {
   const {theme} = useStateContext();
   
   const effectiveData = filteredData.length > 0 ? filteredData : data;
@@ -32,14 +32,14 @@ export default function Pagination({ data = [], filteredData = [], itemsPerPage 
   const currentData = effectiveData.slice(startIndex, endIndex);
 
   return (
-    <div className={`pagination relative`}>
+    <div className={'pagination relative w-full h-full ' + className}>
       <div className={`items-container ${visible ? '' : 'hidden'}`}>
         {currentData.map((item, index) => renderItem(item, index))}
       </div>
 
       <div
         style={{ outlineColor: theme?.border }}
-        className={`w-full flex outline-card bottom-4 sticky ml-auto backdrop-blur-sm ${hidePage ? 'hidden' : ''}`}
+        className={`w-full flex outline-card bottom-4 sticky backdrop-blur-sm ${hidePage ? 'hidden' : ''}`}
       >
         <button
           style={{ background: theme?.accent, color: theme?.background }}
