@@ -20,7 +20,7 @@ export default function Receipt({ auth }) {
       <div className="content">
         <div className='relative rounded-xl p-4 flex h-44 overflow-hidden shadow-xl cursor-pointer hover:shadow-2xl duration-200' style={{ background: gradients.evening_night }}>
           <div className='absolute log w-44 scale-150 top-1 right-10 h-full bg-no-repeat'></div>
-          <div className='absolute w-full h-full top-0 left-0 hover-r-grd-blr duration-150 hover:opacity-100 opacity-0 flex'>
+          <div className='absolute w-full h-full top-0 left-0 hover-r-grd duration-150 hover:opacity-100 opacity-0 flex'>
             <p className='font-medium text-2xl text-white tracking-wide z-10 ml-auto mt-auto p-2 bg-black/50 rounded-tl-lg'>View Details</p>
           </div>
           <div className='flex flex-col'>

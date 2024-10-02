@@ -155,14 +155,13 @@ select:focus {
     background-image: url('../../public/assets/svgs/Logistics-rafiki.svg');
 }
 
-.hover-r-grd-blr:hover::after {
+.hover-r-grd:hover::after {
     content: "";
     position: absolute;
     inset: 0;
     background-color: rgba(255, 255, 255, 0.5);
 
     mask: linear-gradient(to right, transparent, black 75%);
-    @apply backdrop-blur-sm;
 }
 
 input:-webkit-autofill,
