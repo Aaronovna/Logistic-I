@@ -50,12 +50,17 @@ export const inventoryLinks = [
 ////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////
 
-import { TbDesk } from "react-icons/tb";
+import { TbUserSearch } from "react-icons/tb";
+import { TbListSearch } from "react-icons/tb";
 
 export const auditLinks = [
     {
-        name: 'depot',
-        Icon: TbDesk
+        name: 'audits',
+        Icon: TbListSearch
+    },
+    {
+        name: 'auditors',
+        Icon: TbUserSearch
     },
 ];
 

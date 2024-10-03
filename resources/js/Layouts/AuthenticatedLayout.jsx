@@ -62,7 +62,7 @@ export default function Authenticated({ user, header, children }) {
 
         <p className='m-4 mb-12 font-bold text-2xl text-center' style={{ color: theme.accent }}>NextFleet Dynamics</p>
 
-        <div className={`flex flex-col h-auto overflow-hidden overflow-y-auto pr-4 gutter-stable duration-300 ${isSidebarHovered ? 'scroll' : 'scroll-hide'}`} 
+        <div className={`flex flex-col h-auto overflow-hidden overflow-y-auto pr-4 gutter-stable duration-300 pb-10 ${isSidebarHovered ? 'scroll' : 'scroll-hide'}`} 
           onMouseEnter={handleSidebarMouseEnter}
           onMouseLeave={handleSidebarMouseLeave}
         >
@@ -102,7 +102,7 @@ export default function Authenticated({ user, header, children }) {
             )
           })}
 
-          <NavLinkCategory routes={auditLinks} Icon={TbClipboardCheck} href='product' label='Audit' className='mr-4' />
+          <NavLinkCategory routes={auditLinks} Icon={TbClipboardCheck} href='product' label='Auditing' className='mr-4' />
           {auditLinks.map((link, index) => {
             return (
               <NavLink key={index} href={route(link.name)} active={route().current(link.name)}>

@@ -27,6 +27,8 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/warehouse', fn () => Inertia::render('Warehouse'))->name('warehouse');
     Route::get('/depot', fn () => Inertia::render('Depot'))->name('depot');
     Route::get('/terminal', fn () => Inertia::render('Terminal'))->name('terminal');
+    Route::get('/audits', fn () => Inertia::render('Audits'))->name('audits');
+    Route::get('/auditors', fn () => Inertia::render('Auditors'))->name('auditors');
 });
 
 // REQUEST ROUTES
