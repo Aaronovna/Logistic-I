@@ -1,6 +1,8 @@
 import { useStateContext } from "@/context/contextProvider";
 import { gradients } from "@/Constants/themes";
 
+import { TbFavicon } from "react-icons/tb";
+
 export const Card = ({ data, Icon, name }) => {
   const { theme, themePreference } = useStateContext();
   return (
@@ -16,10 +18,10 @@ export const Card = ({ data, Icon, name }) => {
   )
 }
 
-export const Card2 = ({ data, Icon, name, className = '' }) => {
+export const Card2 = ({ data, Icon = TbFavicon, name = 'Name', className = '' }) => {
   const { theme } = useStateContext();
   return (
-    <div className={'rounded-xl pl-4 py-4 pr-20 w-fit ' + className}
+    <div className={'rounded-xl pl-4 py-4 pr-20 min-w-60 w-fit' + className}
       style={{ background: gradients.blue_raspberry, borderColor: theme.border }}
     >
       <div className="mb-4 w-fit p-2 rounded-xl" style={{ background: gradients.blue_raspberry }}>
