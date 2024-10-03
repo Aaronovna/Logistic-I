@@ -1,6 +1,8 @@
 <h1 align="center">NexFleet Dynamics</h1>
 <h1 align="center">Bus Transportation Management System</h1>
 
+[![wakatime](https://wakatime.com/badge/user/018c478b-7bf8-48c4-a893-0055b2f83fc6/project/7a795007-17ff-470d-83aa-d617089be109.svg?style=for-the-badge)](https://wakatime.com/badge/user/018c478b-7bf8-48c4-a893-0055b2f83fc6/project/7a795007-17ff-470d-83aa-d617089be109)
+
 # Logistic I
 
 ## Modules
