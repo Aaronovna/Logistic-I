@@ -43,7 +43,7 @@ export default function Login({ status, canResetPassword }) {
               type="email"
               name="email"
               value={data.email}
-              className="mt-1 block w-full bg-transparent rounded-md"
+              className="mt-1 block w-full bg-transparent rounded-md p-2"
               style={{ borderColor: theme.border }}
               autoComplete="username"
               onChange={(e) => setData('email', e.target.value)}
@@ -59,7 +59,7 @@ export default function Login({ status, canResetPassword }) {
               type="password"
               name="password"
               value={data.password}
-              className="mt-1 block w-full bg-transparent rounded-md"
+              className="mt-1 block w-full bg-transparent rounded-md p-2"
               style={{ borderColor: theme.border }}
               autoComplete="current-password"
               onChange={(e) => setData('password', e.target.value)}
