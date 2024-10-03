@@ -26,7 +26,7 @@ import { TbCategory } from "react-icons/tb";
 
 export const inventoryLinks = [
     {
-        name: 'receipt',
+        name: ['receipt', 'receipt-history'],
         Icon: TbArrowBarUp
     },
     {

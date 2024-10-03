@@ -66,7 +66,7 @@ export default function Authenticated({ user, header, children }) {
           onMouseEnter={handleSidebarMouseEnter}
           onMouseLeave={handleSidebarMouseLeave}
         >
-          <NavLinkCategory routes={analyticsLinks.map(link => link.name)} Icon={TbChartHistogram} href='dashboard' label='Analytics' className='mr-4' />
+          <NavLinkCategory routes={analyticsLinks} Icon={TbChartHistogram} href='dashboard' label='Analytics' className='mr-4' />
           {analyticsLinks.map((link, index) => {
             return (
               <NavLink key={index} href={route(link.name)} active={route().current(link.name)}>
@@ -78,19 +78,19 @@ export default function Authenticated({ user, header, children }) {
             )
           })}
 
-          <NavLinkCategory routes={inventoryLinks.map(link => link.name)} Icon={TbPackages} href='product' label='Inventory' className='mr-4' />
+          <NavLinkCategory routes={inventoryLinks} Icon={TbPackages} href='product' label='Inventory' className='mr-4' />
           {inventoryLinks.map((link, index) => {
             return (
-              <NavLink key={index} href={route(link.name)} active={route().current(link.name)}>
+              <NavLink key={index} href={route(Array.isArray(link.name) ? link.name[0] : link.name)} active={Array.isArray(link.name) ? link.name.some(name => route().current(name)) : route().current(link.name)}>
                 <span className='flex items-center gap-1 px-1'>
                   <link.Icon className='mr-1' />
-                  <p className=' capitalize'>{link.name}</p>
+                  <p className=' capitalize'>{Array.isArray(link.name) ? link.name[0] : link.name}</p>
                 </span>
               </NavLink>
             )
           })}
 
-          <NavLinkCategory routes={infrastructureLinks.map(link => link.name)} Icon={TbBuildingCommunity} href='depot' label='Infrastructure' className='mr-4' />
+          <NavLinkCategory routes={infrastructureLinks} Icon={TbBuildingCommunity} href='depot' label='Infrastructure' className='mr-4' />
           {infrastructureLinks.map((link, index) => {
             return (
               <NavLink key={index} href={route(link.name)} active={route().current(link.name)}>
@@ -102,7 +102,7 @@ export default function Authenticated({ user, header, children }) {
             )
           })}
 
-          <NavLinkCategory routes={auditLinks.map(link => link.name)} Icon={TbClipboardCheck} href='product' label='Audit' className='mr-4' />
+          <NavLinkCategory routes={auditLinks} Icon={TbClipboardCheck} href='product' label='Audit' className='mr-4' />
           {auditLinks.map((link, index) => {
             return (
               <NavLink key={index} href={route(link.name)} active={route().current(link.name)}>
@@ -114,7 +114,7 @@ export default function Authenticated({ user, header, children }) {
             )
           })}
 
-          <NavLinkCategory routes={managementLinks.map(link => link.name)} Icon={TbSettingsCog} href='category' label='Management' className='mr-4' />
+          <NavLinkCategory routes={managementLinks} Icon={TbSettingsCog} href='category' label='Management' className='mr-4' />
           {managementLinks.map((link, index) => {
             return (
               <NavLink key={index} href={route(link.name)} active={route().current(link.name)}>

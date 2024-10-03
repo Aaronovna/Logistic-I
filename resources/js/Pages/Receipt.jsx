@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/react';
 
 import { useStateContext } from '@/context/contextProvider';
 import { gradients } from "@/Constants/themes";
+import { Link } from '@inertiajs/react';
 
 import { TbSearch } from "react-icons/tb";
 
@@ -31,12 +32,13 @@ export default function Receipt({ auth }) {
 
         <div className='mt-8 flex'>
           <p className='font-medium text-3xl' style={{ color: theme.text }}>Received Delivery</p>
-          <button
+          <Link
             className='ml-auto p-2 font-medium border-card'
             style={{ background: theme.accent, borderColor: theme.border, color: theme.background }}
+            href={route('receipt-history')}
           >
             View History
-          </button>
+          </Link>
         </div>
 
         <div className='mt-4'>
