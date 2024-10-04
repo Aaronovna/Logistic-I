@@ -36,7 +36,7 @@
 }
 
 .border-card {
-    @apply border rounded-lg;
+    @apply border rounded-lg p-2;
 }
 
 .outline-card {
@@ -48,7 +48,7 @@
 }
 
 input {
-    @apply border p-2;
+    @apply border rounded-lg p-2;
 }
 
 input:focus {
@@ -56,7 +56,7 @@ input:focus {
 }
 
 textarea {
-    @apply border p-2;
+    @apply border rounded-lg p-2;
 }
 
 textarea:focus {
@@ -64,7 +64,7 @@ textarea:focus {
 }
 
 select {
-    @apply border p-2;
+    @apply border rounded-lg p-2;
 }
 
 select:focus {
