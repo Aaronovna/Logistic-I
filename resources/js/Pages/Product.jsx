@@ -21,7 +21,7 @@ import { ProductCard } from '@/Components/cards/ProductCard';
 
 import Modal from '@/Components/Modal';
 import Pagination from '@/Components/Pagination';
-import { feedback } from "@/Constants/themes";
+import { feedbackVibrant } from "@/Constants/themes";
 import { productToastMessages } from '@/Constants/toastMessages';
 
 const cardStyle = 'mb-2 snap-center mx-2 md:min-w-64 inline-block min-w-[100%]';
@@ -143,10 +143,6 @@ export default function Product({ auth }) {
   }, []);
 
   useEffect(() => {
-    console.log(productStats);
-  }, [productStats]);
-
-  useEffect(() => {
     if (products) {
       setTotalProductValue(products.reduce((sum, product) => sum + parseFloat(product.price), 0).toFixed(2));
 
@@ -188,10 +184,10 @@ export default function Product({ auth }) {
 
       <div className="content">
         <div className='md:items-end mb-2 md:mb-0 md:gap-4 overflow-x-auto snap-mandatory snap-x pb-1 whitespace-nowrap'>
-          <Card2 data={productStats?.totalStock} name="Total Stocks" className={cardStyle} Icon={TbPackages} iconColor={feedback.info} />
-          <Card2 data={productStats?.totalProducts} name="Total Products" className={cardStyle} Icon={TbPackage} iconColor={feedback.success} />
-          <Card2 data={productStats?.lowStockProducts} name="Low on Stock" className={cardStyle} Icon={TbCaretDownFilled} iconColor={feedback.warning} />
-          <Card2 data={productStats?.outOfStockProducts || 0} name="Out of Stock" className={cardStyle} Icon={TbPackageOff} iconColor={feedback.danger} />
+          <Card2 data={productStats?.totalStock} name="Total Stocks" className={cardStyle} Icon={TbPackages} iconColor={feedbackVibrant.info} />
+          <Card2 data={productStats?.totalProducts} name="Total Products" className={cardStyle} Icon={TbPackage} iconColor={feedbackVibrant.success} />
+          <Card2 data={productStats?.lowStockProducts} name="Low on Stock" className={cardStyle} Icon={TbCaretDownFilled} iconColor={feedbackVibrant.warning} />
+          <Card2 data={productStats?.outOfStockProducts || 0} name="Out of Stock" className={cardStyle} Icon={TbPackageOff} iconColor={feedbackVibrant.danger} />
         </div>
 
         <div className='flex sm:flex-row flex-col md:flex-row w-full gap-4 mb-4'>
