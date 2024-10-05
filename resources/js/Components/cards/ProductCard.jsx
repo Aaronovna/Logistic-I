@@ -61,12 +61,12 @@ export const ProductCard = ({ product, isFlip = false, className = '', categorie
 
   return (
     <div style={{ color: theme.text, borderColor: theme.border }}
-      className={`p-2 flex mb-2 border rounded-lg overflow-hidden ` + className}
+      className={`relative flex md:flex-row flex-col mb-2 border rounded-lg overflow-hidden md:h-28 ` + className}
     >
-      <div className="flex flex-col w-full">
-        <div className="flex cursor-pointer" onClick={() => setflip(!flip)}>
+      <div className="flex flex-col w-full pr-2 md:border-r">
+        <div className="relative flex cursor-pointer h-28" onClick={() => setflip(!flip)}>
           <div style={{ outlineColor: theme.border, background: `url(${product_image_placeholder})`, backgroundSize: '100%' }}
-            className='w-24 h-24 aspect-square outline outline-1 rounded-md inline-block overflow-hidden'
+            className='w-28 aspect-square outline outline-1 rounded-l-md inline-block overflow-hidden'
           >
             <img
               src={product.image_url || `https://picsum.photos/seed/${product.id}/200/200`}
@@ -75,47 +75,48 @@ export const ProductCard = ({ product, isFlip = false, className = '', categorie
             />
           </div>
           {!flip
-            ? <div className='flex flex-col mx-4 h-fit w-96 select-none'>
-              <p className='text-xl font-semibold'>{`${product.name} ${product.model}`}</p>
-              <p className='font-medium text-gray-400'>{product.brand}</p>
-              <p className='mt-5 text-gray-400'>{product.category_name}</p>
+            ? <div className='flex flex-col mx-4 h-full w-3/5 select-none'>
+              <p className='md:text-xl font-semibold'>{`${product.name} ${product.model}`}</p>
+              <p className='font-medium md:text-base text-sm text-gray-400'>{product.brand}</p>
+              <p className='mt-auto md:text-base text-sm text-gray-400'>{product.category_name}</p>
             </div>
-            : <p className='m-4 mt-0 select-none'>{product.description}</p>
+            : <p className='m-4 mt-0 select-none text-wrap w-3/5 h-full'>{product.description}</p>
           }
-          <p className='font-medium text-gray-300 ml-auto h-fit select-none'>{product.id}</p>
+          <p className='font-medium text-gray-300 h-fit select-none absolute right-0 bottom-0 hidden md:block'>{product.id}</p>
         </div>
       </div>
 
-      <span className='h-auto rounded-sm mx-4' style={{ width: '2px', background: theme.border }}></span>
-
-      <div className='w-96 h-fit'>
-        <span className="flex justify-between">
-          <p className='block mb-2 font-semibold'>{product.supplier_name}</p>
-          <PopperMenu list={['Edit', 'Delete']} actions={[() => { setOpenEditProductModal(true) }, () => handleDeleteProduct(product.id)]}
-            containerStyle={{ background: theme.background, borderRadius: '0.375rem', border: '1px solid', borderColor: theme.border }}
-            renderButton={() => {
-              return (
-                <span className={`flex h-fit cursor-pointer rounded-full px-1 hover:bg-gray-300/50`}>
-                  <TbDots size={18} />
-                </span>
-              )
-            }} />
+      <div className='md:pl-2 pl-0 md:w-1/2 w-full md:border-none border-t h-full'>
+        <span className="flex ml-4 md:ml-0">
+          <p className='block md:mb-2 mb-0 font-semibold'>{product.supplier_name}</p>
         </span>
         <div className="flex">
-          <span className='inline-block mr-8'>
-            <p className='text-gray-400'>Stock</p>
-            <p className='text-xl font-semibold inline' style={{ color: product.low_on_stock ? theme.danger : theme.text }}>{product.stock}</p>
+          <span className='inline-block ml-4 md:ml-0'>
+            <p className='text-gray-400 md:text-base text-sm'>Stock</p>
+            <p className='md:text-xl text-lg font-semibold inline' style={{ color: product.low_on_stock ? theme.danger : theme.text }}>{product.stock}</p>
             {product.low_on_stock
               ? <p className="inline ml-1 text-xs" style={{ color: product.low_on_stock ? theme.danger : theme.text }}>{product.stock === 0 ? 'out of stock' : 'low'}</p>
               : null
             }
           </span>
-          <span className='inline-block ml-auto mr-10'>
-            <p className='text-gray-400'>Buying Price</p>
-            <p className='text-xl font-semibold'>{product.price}</p>
+          <span className='inline-block ml-auto mr-4 md:mr-2'>
+            <p className='text-gray-400 md:text-base text-sm'>Buying Price</p>
+            <p className='md:text-xl text-lg font-semibold'>{product.price}</p>
           </span>
         </div>
       </div>
+
+      <span className="absolute right-0">
+        <PopperMenu list={['Edit', 'Delete']} actions={[() => { setOpenEditProductModal(true) }, () => handleDeleteProduct(product.id)]}
+          containerStyle={{ background: theme.background, borderRadius: '0.375rem', border: '1px solid', borderColor: theme.border }}
+          renderButton={() => {
+            return (
+              <span className={`flex h-fit cursor-pointer rounded-full px-1 hover:bg-gray-300/50`}>
+                <TbDots size={18} />
+              </span>
+            )
+          }} />
+      </span>
 
       <Modal show={openEditProductModal} onClose={() => setOpenEditProductModal(false)} maxWidth={'2xl'}>
         <div className='p-4'>

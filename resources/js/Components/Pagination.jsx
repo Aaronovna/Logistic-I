@@ -1,10 +1,13 @@
 import { useState } from "react";
-
 import { useStateContext } from "@/context/contextProvider";
+
+const calculateTotalPages = (totalItems, itemsPerPage) => {
+  return Math.ceil(totalItems / itemsPerPage);
+};
 
 const usePagination = ({ totalItems, itemsPerPage }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const totalPages = calculateTotalPages(totalItems, itemsPerPage);
 
   const handlePageChange = (page) => {
     if (page < 1 || page > totalPages) return;
@@ -21,8 +24,7 @@ const usePagination = ({ totalItems, itemsPerPage }) => {
 };
 
 export default function Pagination({ data = [], filteredData = [], itemsPerPage = 20, renderItem, visible = true, hidePage = false, className = '' }) {
-  const {theme} = useStateContext();
-  
+  const { theme } = useStateContext();
   const effectiveData = filteredData.length > 0 ? filteredData : data;
   const { currentPage, totalPages, handlePageChange, startIndex, endIndex } = usePagination({
     totalItems: effectiveData.length,
@@ -31,16 +33,30 @@ export default function Pagination({ data = [], filteredData = [], itemsPerPage 
 
   const currentData = effectiveData.slice(startIndex, endIndex);
 
+  // Adjust page range display to show only 20 pages
+  const maxPageButtons = 10;
+
+  // Ensure the displayed page numbers always include 20 items
+  let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
+  let endPage = startPage + maxPageButtons - 1;
+
+  // If endPage exceeds totalPages, adjust startPage so that we still display 20 pages
+  if (endPage > totalPages) {
+    endPage = totalPages;
+    startPage = Math.max(1, endPage - maxPageButtons + 1);
+  }
+
   return (
-    <div className={'pagination relative w-full h-full ' + className}>
+    <div className={'relative w-full h-full flex flex-col ' + className}>
       <div className={`items-container ${visible ? '' : 'hidden'}`}>
         {currentData.map((item, index) => renderItem(item, index))}
       </div>
 
       <div
         style={{ outlineColor: theme?.border }}
-        className={`w-full flex outline-card bottom-4 sticky backdrop-blur-sm ${hidePage ? 'hidden' : ''}`}
+        className={`flex outline-card bottom-4 w-fit self-center ${hidePage ? 'hidden' : ''}`}
       >
+        {/* Previous Button */}
         <button
           style={{ background: theme?.accent, color: theme?.background }}
           className='p-2 rounded-l-md'
@@ -49,6 +65,8 @@ export default function Pagination({ data = [], filteredData = [], itemsPerPage 
         >
           {'<'}
         </button>
+
+        {/* First Page Button */}
         <button
           style={{ background: theme?.accent, color: theme?.background }}
           className='p-2'
@@ -57,13 +75,14 @@ export default function Pagination({ data = [], filteredData = [], itemsPerPage 
           {'<<'}
         </button>
 
-        {[...Array(totalPages).keys()].map((_, index) => {
-          const pageNumber = index + 1;
+        {/* Render page numbers within the adjusted range */}
+        {[...Array(endPage - startPage + 1).keys()].map((_, index) => {
+          const pageNumber = startPage + index;
           return (
             <button
               key={pageNumber}
               onClick={() => handlePageChange(pageNumber)}
-              className='flex-1'
+              className='w-10'
               style={{
                 background: currentPage === pageNumber ? theme?.secondary : theme?.blur,
                 color: theme?.text,
@@ -74,6 +93,7 @@ export default function Pagination({ data = [], filteredData = [], itemsPerPage 
           );
         })}
 
+        {/* Last Page Button */}
         <button
           style={{ background: theme?.accent, color: theme?.background }}
           className='p-2'
@@ -81,6 +101,8 @@ export default function Pagination({ data = [], filteredData = [], itemsPerPage 
         >
           {'>>'}
         </button>
+
+        {/* Next Button */}
         <button
           style={{ background: theme?.accent, color: theme?.background }}
           className='p-2 rounded-r-md'
