@@ -6,9 +6,13 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 
 import { TbPlus } from "react-icons/tb";
-import { TbBox } from "react-icons/tb";
-import { TbCurrencyPeso } from "react-icons/tb";
 import { TbSearch } from "react-icons/tb";
+
+import { TbPackage } from "react-icons/tb";
+import { TbPackages } from "react-icons/tb";
+import { TbCaretDownFilled } from "react-icons/tb";
+import { TbPackageOff } from "react-icons/tb";
+
 
 import { useStateContext } from '@/context/contextProvider';
 
@@ -17,7 +21,10 @@ import { ProductCard } from '@/Components/cards/ProductCard';
 
 import Modal from '@/Components/Modal';
 import Pagination from '@/Components/Pagination';
+import { feedback } from "@/Constants/themes";
 import { productToastMessages } from '@/Constants/toastMessages';
+
+const cardStyle = 'mb-2 snap-center mx-2 md:min-w-64 inline-block min-w-[100%]';
 
 export default function Product({ auth }) {
   const [products, setProducts] = useState([]);
@@ -27,6 +34,17 @@ export default function Product({ auth }) {
   const { theme } = useStateContext();
 
   const product_image_placeholder = 'https://psediting.websites.co.in/obaju-turquoise/img/product-placeholder.png';
+
+  const [productStats, setProductStats] = useState({});
+
+  const fetchProductStats = async () => {
+    try {
+      const response = await axios.get('/product/get/stats');
+      setProductStats(response.data);
+    } catch (error) {
+      toast.error('product stat error', error);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -121,7 +139,12 @@ export default function Product({ auth }) {
     fetchProducts();
     fetchCategories();
     fetchSuppliers();
+    fetchProductStats();
   }, []);
+
+  useEffect(() => {
+    console.log(productStats);
+  }, [productStats]);
 
   useEffect(() => {
     if (products) {
@@ -164,19 +187,21 @@ export default function Product({ auth }) {
       <Head title="Product" />
 
       <div className="content">
-        <div className='flex items-end mb-4 gap-4'>
-          <Card2 data={totalProductValue} name="Total Asset Value" Icon={TbCurrencyPeso} />
-          <Card2 data={products && products.length} name="Total Products" Icon={TbBox} />
+        <div className='md:items-end mb-2 md:mb-0 md:gap-4 overflow-x-auto snap-mandatory snap-x pb-1 whitespace-nowrap'>
+          <Card2 data={productStats?.totalStock} name="Total Stocks" className={cardStyle} Icon={TbPackages} iconColor={feedback.info} />
+          <Card2 data={productStats?.totalProducts} name="Total Products" className={cardStyle} Icon={TbPackage} iconColor={feedback.success} />
+          <Card2 data={productStats?.lowStockProducts} name="Low on Stock" className={cardStyle} Icon={TbCaretDownFilled} iconColor={feedback.warning} />
+          <Card2 data={productStats?.outOfStockProducts || 0} name="Out of Stock" className={cardStyle} Icon={TbPackageOff} iconColor={feedback.danger} />
         </div>
 
-        <div className='flex w-full gap-4 mb-4'>
+        <div className='flex sm:flex-row flex-col md:flex-row w-full gap-4 mb-4'>
           <span className='flex w-full relative items-center outline-card overflow-hidden ' style={{ outlineColor: theme.border }}>
             <span className='absolute pl-2'><TbSearch size={24} color={theme.border} /></span>
             <input
               type="text"
               placeholder="Search product's name, model or brand..."
               style={{ color: theme.text }}
-              className='pl-10 w-full border-none bg-transparent'
+              className='pl-10 w-full border-none bg-transparent p-2'
               value={searchedProduct}
               onChange={handleSearchProducts}
             />
@@ -200,7 +225,7 @@ export default function Product({ auth }) {
           <Pagination
             data={products}
             filteredData={filteredProducts}
-            itemsPerPage={5}
+            itemsPerPage={10}
             renderItem={renderProductItem}
             theme={theme}
             hidePage={!filteredProducts.length === 0}
