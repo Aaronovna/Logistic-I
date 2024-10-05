@@ -34,17 +34,44 @@ class UserFactory extends Factory
             'remember_token' => Str::random(10),
         ],
         [
-            'name' => 'Aaronovna Scitus',
-            'email' => 'aaronovna.scitus@example.com',
+            'name' => 'Ricardo Aron III',
+            'email' => 'aroniii.ricardo@gmail.com',
+            'email_verified_at' => now(),
+            'password' => Hash::make('password'),
+            'remember_token' => Str::random(10),
+        ],
+        [
+            'name' => 'Kent Mark Tejada',
+            'email' => 'strawberrymilkchicken@gmail.com',
+            'email_verified_at' => now(),
+            'password' => Hash::make('password'),
+            'remember_token' => Str::random(10),
+        ],
+        [
+            'name' => 'Kristel Casinillo',
+            'email' => 'casinillokristeldc17@gmail.com',
+            'email_verified_at' => now(),
+            'password' => Hash::make('password'),
+            'remember_token' => Str::random(10),
+        ],
+        [
+            'name' => 'John Vincent Dizon',
+            'email' => 'shotoooh123@gmail.com',
+            'email_verified_at' => now(),
+            'password' => Hash::make('password'),
+            'remember_token' => Str::random(10),
+        ],
+        [
+            'name' => 'Andy Barrantes',
+            'email' => '@marshallgustavo96@gmail.com',
             'email_verified_at' => now(),
             'password' => Hash::make('password'),
             'remember_token' => Str::random(10),
         ],
     ];
 
-    // Ensure the index alternates between the two users
     $user = $users[$userIndex];
-    $userIndex = ($userIndex + 1) % count($users);  // This will keep alternating between 0 and 1
+    $userIndex = ($userIndex + 1) % count($users);
 
     return $user;
 }
