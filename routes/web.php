@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -13,8 +12,8 @@ use App\Http\Controllers\SupplierController;
 
 Route::redirect('/', 'login');
 
+//? START: PAGES ROUTES ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// PAGES ROUTES
 Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/dashboard', fn () => Inertia::render('Dashboard'))->name('dashboard');
     Route::get('/category', fn () => Inertia::render('Category'))->name('category');
@@ -31,12 +30,21 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/auditors', fn () => Inertia::render('Auditors'))->name('auditors');
 });
 
+//! END: PAGES ROUTES //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // REQUEST ROUTES
 Route::middleware(["auth", "verified"])->group(function () {
+
+    //? START: PRODUCT REQUEST /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     Route::get('/product/get', [ProductController::class, 'index'])->name('product.index');
     Route::post('/product/store', [ProductController::class, 'store'])->name('product.store');
     Route::patch('/product/update/{id}', [ProductController::class, 'update'])->name('product.update');
     Route::delete('/product/delete/{id}', [ProductController::class, 'destroy'])->name('product.destroy');
+
+    Route::get('/product/get/stats', [ProductController::class, 'stats'])->name('product.stats');
+
+    //! END: PRODUCT REQUEST ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     Route::get('/supplier/get', [SupplierController::class, 'index'])->name('supplier.index');
 

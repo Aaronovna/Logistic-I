@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use Illuminate\Support\Facades\DB;
+use App\Models\Category;
+use App\Models\Supplier;
+
 
 class ProductController extends Controller
 {
@@ -102,5 +106,55 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
         $product->delete();
+    }
+
+    public function stats()
+    {
+        $totalProducts = Product::count();
+        $totalStock = Product::sum('stock');
+        $outOfStockProducts = Product::where('stock', 0)->count();
+        $lowStockProducts = Product::whereColumn('stock', '<', 'restock_point')->count();
+        $totalStockValue = Product::sum(DB::raw('price * stock'));
+
+        // $topSellingProducts = Product::withSum('sales', 'quantity')
+        //     ->orderBy('sales_sum_quantity', 'desc')
+        //     ->take(5)
+        //     ->get(['id', 'name', 'brand', 'model']); // Adjust fields as needed
+        $totalCategories = Category::count();
+        $totalSuppliers = Supplier::count();
+        $productsByCategory = Product::select('category_id', DB::raw('count(*) as total'))
+            ->groupBy('category_id')
+            ->with('category:id,name')
+            ->get();
+        $productsBySupplier = Product::select('supplier_id', DB::raw('count(*) as total'))
+            ->groupBy('supplier_id')
+            ->with('supplier:id,name')
+            ->get();
+
+        $productsMissingImage = Product::whereNull('image_url')->orWhere('image_url', '')->count();
+        $averagePrice = Product::avg('price');
+        $mostExpensiveProduct = Product::orderBy('price', 'desc')->first(['id', 'name', 'price']);
+        $leastExpensiveProduct = Product::orderBy('price', 'asc')->first(['id', 'name', 'price']);
+        $recentProducts = Product::orderBy('created_at', 'desc')->take(5)->get(['id', 'name', 'created_at']);
+
+        return response()->json([
+            'totalProducts' => $totalProducts,
+            'totalStock' => $totalStock,
+            'outOfStockProducts' => $outOfStockProducts,
+            'lowStockProducts' => $lowStockProducts,
+            'totalStockValue' => $totalStockValue,
+
+            // 'topSellingProducts' => $topSellingProducts,
+            'totalCategories' => $totalCategories,
+            'totalSuppliers' => $totalSuppliers,
+            'productsByCategory' => $productsByCategory,
+            'productsBySupplier' => $productsBySupplier,
+
+            'productsMissingImage' => $productsMissingImage,
+            'averagePrice' => $averagePrice,
+            'mostExpensiveProduct' => $mostExpensiveProduct,
+            'leastExpensiveProduct' => $leastExpensiveProduct,
+            'recentProducts' => $recentProducts,
+        ]);
     }
 }
