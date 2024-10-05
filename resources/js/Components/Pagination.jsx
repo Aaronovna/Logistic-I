@@ -34,7 +34,7 @@ export default function Pagination({ data = [], filteredData = [], itemsPerPage 
   const currentData = effectiveData.slice(startIndex, endIndex);
 
   // Adjust page range display to show only 20 pages
-  const maxPageButtons = 10;
+  const maxPageButtons = 1;
 
   // Ensure the displayed page numbers always include 20 items
   let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
@@ -54,11 +54,11 @@ export default function Pagination({ data = [], filteredData = [], itemsPerPage 
 
       <div
         style={{ outlineColor: theme?.border }}
-        className={`flex outline-card bottom-4 w-fit self-center ${hidePage ? 'hidden' : ''}`}
+        className={`flex bottom-4 md:w-fit w-full self-end ${hidePage ? 'hidden' : ''}`}
       >
         {/* Previous Button */}
         <button
-          style={{ background: theme?.accent, color: theme?.background }}
+          
           className='p-2 rounded-l-md'
           disabled={currentPage === 1}
           onClick={() => handlePageChange(currentPage - 1)}
@@ -68,7 +68,7 @@ export default function Pagination({ data = [], filteredData = [], itemsPerPage 
 
         {/* First Page Button */}
         <button
-          style={{ background: theme?.accent, color: theme?.background }}
+          
           className='p-2'
           onClick={() => handlePageChange(1)}
         >
@@ -82,11 +82,8 @@ export default function Pagination({ data = [], filteredData = [], itemsPerPage 
             <button
               key={pageNumber}
               onClick={() => handlePageChange(pageNumber)}
-              className='w-10'
-              style={{
-                background: currentPage === pageNumber ? theme?.secondary : theme?.blur,
-                color: theme?.text,
-              }}
+              className='md:w-10 w-0 flex-1 md:flex-none'
+              
             >
               {pageNumber}
             </button>
@@ -95,7 +92,7 @@ export default function Pagination({ data = [], filteredData = [], itemsPerPage 
 
         {/* Last Page Button */}
         <button
-          style={{ background: theme?.accent, color: theme?.background }}
+          
           className='p-2'
           onClick={() => handlePageChange(totalPages)}
         >
@@ -104,7 +101,7 @@ export default function Pagination({ data = [], filteredData = [], itemsPerPage 
 
         {/* Next Button */}
         <button
-          style={{ background: theme?.accent, color: theme?.background }}
+          
           className='p-2 rounded-r-md'
           disabled={currentPage === totalPages}
           onClick={() => handlePageChange(currentPage + 1)}
