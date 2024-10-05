@@ -98,7 +98,7 @@ select:focus {
 }
 
 .content {
-    @apply mx-4 mb-4 mt-24 md:mt-0;
+    @apply mx-4 mb-4;
 }
 
 * {
