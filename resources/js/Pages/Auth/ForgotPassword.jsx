@@ -18,6 +18,7 @@ export default function ForgotPassword({ status }) {
     return (
         <GuestLayout>
             <Head title="Forgot Password" />
+            <p className='font-semibold text-xl mb-4 text-center'>Forgot Password</p>
 
             <div className="mb-4 text-sm text-gray-600">
                 Forgot your password? No problem. Just let us know your email address and we will email you a password
@@ -27,12 +28,13 @@ export default function ForgotPassword({ status }) {
             {status && <div className="mb-4 font-medium text-sm text-green-600">{status}</div>}
 
             <form onSubmit={submit}>
-                <TextInput
+                <input
                     id="email"
                     type="email"
                     name="email"
                     value={data.email}
-                    className="mt-1 block w-full"
+                    className="mt-1 block w-full border-card"
+                    placeholder='Email'
                     isFocused={true}
                     onChange={(e) => setData('email', e.target.value)}
                 />
