@@ -65,8 +65,8 @@ export const ProductCard = ({ product, isFlip = false, className = '', categorie
     >
       <div className="flex flex-col w-full pr-2 md:border-r">
         <div className="relative flex cursor-pointer h-28" onClick={() => setflip(!flip)}>
-          <div style={{ outlineColor: theme.border, background: `url(${product_image_placeholder})`, backgroundSize: '100%' }}
-            className='w-28 aspect-square outline outline-1 rounded-l-md inline-block overflow-hidden'
+          <div style={{ outlineColor: theme.border, backgroundSize: '100%' }}
+            className='w-28 aspect-square outline outline-1 rounded-l-md inline-block overflow-hidden product-placeholder'
           >
             <img
               src={product.image_url || `https://picsum.photos/seed/${product.id}/200/200`}

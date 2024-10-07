@@ -240,8 +240,8 @@ export default function Product({ auth }) {
             <p className='font-semibold text-xl mt-2 mb-4'>Add Product</p>
             <form onSubmit={handleAddProductSubmit}>
               <div className='flex gap-2 mb-4'>
-                <div className='w-52 aspect-square border-card overflow-hidden'
-                  style={{ background: `url(${product_image_placeholder})`, backgroundSize: '100%' }}>
+                <div className='w-52 aspect-square border-card overflow-hidden product-placeholder bg-contain'
+                  style={{ backgroundSize: '100%' }}>
                   {addProductFormData.image_url === ''
                     ? null
                     : <img className='w-full h-full' src={addProductFormData.image_url} alt="Can't load image :(" />
