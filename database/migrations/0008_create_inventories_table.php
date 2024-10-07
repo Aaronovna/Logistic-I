@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('warehouse_id')->constrained('warehouses')->onDelete('restrict');
             $table->foreignId('user_id')->constrained('users')->onDelete('restrict');
             $table->integer('quantity');
+            $table->string('status');
             $table->timestamps();
         });
     }
