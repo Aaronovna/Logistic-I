@@ -26,7 +26,7 @@ const pages = [
 
 export default function Authenticated({ user, header, children }) {
   const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
-  const { setUserPermissions, theme, setThemePreference } = useStateContext(convertPermissions(user.permissions));
+  const { setUserPermissions, theme, setThemePreference } = useStateContext(user.permissions ? convertPermissions(user.permissions) : null);
 
   useEffect(() => {
     setUserPermissions(convertPermissions(user.permissions));
@@ -40,7 +40,7 @@ export default function Authenticated({ user, header, children }) {
     <div className="flex h-screen" style={{ background: theme.background }}>
       <Toaster
         position="top-right"
-        reverseOrder={false}Sidebar
+        reverseOrder={false}
         toastOptions={{
           style: {
             padding: '18px',
@@ -62,7 +62,7 @@ export default function Authenticated({ user, header, children }) {
 
         <p className='m-4 mb-12 font-bold text-2xl text-center' style={{ color: theme.accent }}>NextFleet Dynamics</p>
 
-        <div className={`flex flex-col h-auto overflow-hidden overflow-y-auto pr-4 gutter-stable duration-300 pb-10 ${isSidebarHovered ? 'scroll' : 'scroll-hide'}`} 
+        <div className={`flex flex-col h-auto overflow-hidden overflow-y-auto pr-4 gutter-stable duration-300 pb-10 ${isSidebarHovered ? 'scroll' : 'scroll-hide'}`}
           onMouseEnter={handleSidebarMouseEnter}
           onMouseLeave={handleSidebarMouseLeave}
         >
