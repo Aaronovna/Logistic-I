@@ -93,10 +93,10 @@ export default function Authenticated({ user, header, children }) {
           <NavLinkCategory routes={infrastructureLinks} Icon={TbBuildingCommunity} href='depot' label='Infrastructure' className='mr-4' />
           {infrastructureLinks.map((link, index) => {
             return (
-              <NavLink key={index} href={route(link.name)} active={route().current(link.name)}>
+              <NavLink key={index} href={route(Array.isArray(link.name) ? link.name[0] : link.name)} active={Array.isArray(link.name) ? link.name.some(name => route().current(name)) : route().current(link.name)}>
                 <span className='flex items-center gap-1 px-1'>
                   <link.Icon className='mr-1' />
-                  <p className=' capitalize'>{link.name}</p>
+                  <p className=' capitalize'>{Array.isArray(link.name) ? link.name[0] : link.name}</p>
                 </span>
               </NavLink>
             )

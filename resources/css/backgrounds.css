@@ -1,0 +1,31 @@
+.bus-bg {
+    background-image: url('../../public/assets/images/bus-background.jpg')
+}
+
+.bus-bg-croped {
+    background-image: url('../../public/assets/images/bus-background-croped.png')
+}
+
+.log {
+    background-image: url('../../public/assets/svgs/Logistics-rafiki.svg');
+}
+
+.terminal {
+    background-image: url('../../public/assets/svgs/airport-terminal-cuate.svg');
+}
+
+.bus-1{
+    background-image: url('../../public/assets/svgs/city-bus-amico.svg');
+}
+
+.bus-2{
+    background-image: url('../../public/assets/svgs/city-bus-rafiki.svg');
+}
+
+.bus-3{
+    background-image: url('../../public/assets/svgs/double-decker-bus-amico.svg');
+}
+
+.product-placeholder {
+    background-image: url('https://psediting.websites.co.in/obaju-turquoise/img/product-placeholder.png');
+}

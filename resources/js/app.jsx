@@ -1,6 +1,7 @@
 import './bootstrap';
 import '../css/global.css';
 import '../css/scrollbar.css';
+import '../css/backgrounds.css';
 
 import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';

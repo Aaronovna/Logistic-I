@@ -27,18 +27,6 @@
     padding-bottom: 1%;
 }
 
-.bus-bg {
-    background-image: url('../../public/assets/images/bus-background.jpg')
-}
-
-.bus-bg-croped {
-    background-image: url('../../public/assets/images/bus-background-croped.png')
-}
-
-.product-placeholder {
-    background-image: url('https://psediting.websites.co.in/obaju-turquoise/img/product-placeholder.png');
-}
-
 .border-card {
     @apply border rounded-lg p-2;
 }
@@ -153,10 +141,6 @@ select:focus {
 
     mask: linear-gradient(to bottom, transparent, black 35%);
     @apply backdrop-blur;
-}
-
-.log {
-    background-image: url('../../public/assets/svgs/Logistics-rafiki.svg');
 }
 
 .hover-r-grd:hover::after {
