@@ -41,7 +41,11 @@ class PositionSeeder extends Seeder
             "Inventory Data Analyst",
             "Warehouse Quality Inspector",
             "Audit Supervisor (Warehouse/Inventory)",
-            "Inventory Control Auditor"
+            "Inventory Control Auditor",
+            "Maintenance Executive",
+            "Logisitic Operator",
+            "Maintenance Planner",
+            "Maintenance Supervisor",
         ];
 
         foreach ($positions as $position) {
