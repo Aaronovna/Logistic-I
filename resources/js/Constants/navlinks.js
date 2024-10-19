@@ -72,7 +72,7 @@ import { TbBus } from "react-icons/tb";
 
 export const infrastructureLinks = [
     {
-        name: 'depot',
+        name: ['depot', 'depot-inventory', 'depot-maintenance'],
         Icon: TbHomeCog
     },
     {

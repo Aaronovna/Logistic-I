@@ -25,6 +25,8 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/dispatch', fn () => Inertia::render('Dispatch'))->name('dispatch');
     Route::get('/warehouse', fn () => Inertia::render('Warehouse'))->name('warehouse');
     Route::get('/depot', fn () => Inertia::render('Depot'))->name('depot');
+    Route::get('/depot/inventory', fn () => Inertia::render('Depot.Inventory'))->name('depot-inventory');
+    Route::get('/depot/maintenance', fn () => Inertia::render('Depot.Maintenance'))->name('depot-maintenance');
     Route::get('/terminal', fn () => Inertia::render('Terminal'))->name('terminal');
     Route::get('/terminal/request', fn () => Inertia::render('Terminal.Request'))->name('terminal-request');
     Route::get('/audits', action: fn () => Inertia::render('Audits'))->name('audits');

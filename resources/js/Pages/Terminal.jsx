@@ -22,7 +22,7 @@ export default function Terminal({ auth }) {
   const searchInMyLocation = async () => {
     if (!currentLocation) {
       console.warn('Current location is not available.');
-      return; // Stop if location is not available
+      return;
     }
 
     try {
@@ -44,7 +44,7 @@ export default function Terminal({ auth }) {
       user={auth.user}
       header={<h2 className="header" style={{ color: theme.text }}>Terminal</h2>}
     >
-      <Head title="Receipt" />
+      <Head title="Terminal" />
 
       <div className="content">
         <div className='border-card p-4 shadow-sm mb-4 flex md:flex-row flex-col-reverse min-h-28'>
@@ -59,7 +59,6 @@ export default function Terminal({ auth }) {
             </select>
           </div>
         </div>
-
 
         <div className='w-full flex md:flex-row flex-col-reverse gap-4'>
 
