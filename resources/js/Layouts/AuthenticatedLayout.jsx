@@ -78,7 +78,7 @@ export default function Authenticated({ user, header, children }) {
             )
           })}
 
-          <NavLinkCategory routes={inventoryLinks} Icon={TbPackages} href='product' label='Inventory' className='mr-4' />
+          <NavLinkCategory routes={inventoryLinks} Icon={TbPackages} href='receipt' label='Inventory' className='mr-4' />
           {inventoryLinks.map((link, index) => {
             return (
               <NavLink key={index} href={route(Array.isArray(link.name) ? link.name[0] : link.name)} active={Array.isArray(link.name) ? link.name.some(name => route().current(name)) : route().current(link.name)}>
@@ -102,7 +102,7 @@ export default function Authenticated({ user, header, children }) {
             )
           })}
 
-          <NavLinkCategory routes={auditLinks} Icon={TbClipboardCheck} href='product' label='Auditing' className='mr-4' />
+          <NavLinkCategory routes={auditLinks} Icon={TbClipboardCheck} href='audits' label='Auditing' className='mr-4' />
           {auditLinks.map((link, index) => {
             return (
               <NavLink key={index} href={route(link.name)} active={route().current(link.name)}>
@@ -114,7 +114,7 @@ export default function Authenticated({ user, header, children }) {
             )
           })}
 
-          <NavLinkCategory routes={managementLinks} Icon={TbSettingsCog} href='category' label='Management' className='mr-4' />
+          <NavLinkCategory routes={managementLinks} Icon={TbSettingsCog} href='user' label='Management' className='mr-4' />
           {managementLinks.map((link, index) => {
             return (
               <NavLink key={index} href={route(link.name)} active={route().current(link.name)}>
