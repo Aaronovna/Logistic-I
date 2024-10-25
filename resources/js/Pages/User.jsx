@@ -119,7 +119,9 @@ export default function User({ auth }) {
       const response = await axios.patch(`/position/update/permission/${positionSelectedData.id}`, { permissions: selectPositionPermissionsForm });
 
       toast.success(positionToastMessages.update_PositionPermission.success);
+      fetchPositions();
       fetchUsers();
+      setOpenEditPositionPermissionsModal(false);
     } catch (error) {
       toast.error(positionToastMessages.update_PositionPermission.error, error);
     }

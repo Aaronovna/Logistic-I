@@ -51,6 +51,16 @@ class PositionSeeder extends Seeder
         foreach ($positions as $position) {
             DB::table('positions')->insert([
                 'name' => $position,
+                'permissions' => json_encode([
+                    "100" => false,
+                    "101" => false,
+                    "150" => false,
+                    "151" => false,
+                    "200" => false,
+                    "201" => false,
+                    "250" => false,
+                    "251" => false,
+                ]),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

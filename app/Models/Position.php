@@ -9,5 +9,25 @@ class Position extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name','permissions'];
+    protected $fillable = ['name', 'permissions'];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($position) {
+            if (is_null($position->permissions)) {
+                $position->permissions = json_encode([
+                    "100" => false,
+                    "101" => false,
+                    "150" => false,
+                    "151" => false,
+                    "200" => false,
+                    "201" => false,
+                    "250" => false,
+                    "251" => false,
+                ]);
+            }
+        });
+    }
 }
