@@ -20,8 +20,10 @@ import { analyticsLinks, inventoryLinks, managementLinks, infrastructureLinks, a
 
 const pages = [
   'dashboard', 'report',
-  'product',
-  'category', 'user',
+  'receipt','dispatch','warehouse','product','category',
+  'depot','terminal',
+  'audits','auditors',
+  'user',
 ]
 
 export default function Authenticated({ user, header, children }) {
@@ -232,7 +234,7 @@ export default function Authenticated({ user, header, children }) {
               />
             </svg>
           </button>
-          <div className="">
+          <div className="overflow-y-auto">
             {pages && pages.map((page, index) => {
               return (
                 <ResponsiveNavLink key={index} href={route(page)} active={route().current(page)} className='capitalize'>
