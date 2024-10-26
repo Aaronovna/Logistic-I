@@ -1,8 +1,10 @@
 import GuestLayout from '@/Layouts/GuestLayout';
 import InputError from '@/Components/InputError';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { useStateContext } from '@/context/contextProvider';
 
 export default function Register() {
+    const { theme } = useStateContext();
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -21,6 +23,7 @@ export default function Register() {
     return (
         <GuestLayout>
             <Head title="Register" />
+            <p className='font-semibold text-xl mb-4 text-center'>Register</p>
 
             <form onSubmit={submit}>
                 <div className='mt-2'>
@@ -99,7 +102,7 @@ export default function Register() {
                         Already registered?
                     </Link>
 
-                    <button className="ms-4" disabled={processing}>
+                    <button className="ms-4 border-card" style={{ background: theme.accent, color: theme.background, borderColor: theme.border }} disabled={processing}>
                         Register
                     </button>
                 </div>

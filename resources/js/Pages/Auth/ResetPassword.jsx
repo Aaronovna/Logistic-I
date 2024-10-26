@@ -1,11 +1,12 @@
 import GuestLayout from '@/Layouts/GuestLayout';
 import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Head, useForm } from '@inertiajs/react';
+import { useStateContext } from '@/context/contextProvider';
 
 export default function ResetPassword({ token, email }) {
+    const { theme } = useStateContext();
     const { data, setData, post, processing, errors, reset } = useForm({
         token: token,
         email: email,
@@ -24,18 +25,17 @@ export default function ResetPassword({ token, email }) {
     return (
         <GuestLayout>
             <Head title="Reset Password" />
+            <p className='font-semibold text-xl mb-4 text-center'>Reset Password</p>
 
             <form onSubmit={submit}>
                 <div>
-                    <InputLabel htmlFor="email" value="Email" />
-
-                    <TextInput
+                    <input
                         id="email"
                         type="email"
                         name="email"
+                        placeholder='Email'
                         value={data.email}
                         className="mt-1 block w-full border-card"
-                        autoComplete="username"
                         onChange={(e) => setData('email', e.target.value)}
                     />
 
@@ -43,15 +43,13 @@ export default function ResetPassword({ token, email }) {
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
-
-                    <TextInput
+                    <input
                         id="password"
                         type="password"
                         name="password"
+                        placeholder='Password'
                         value={data.password}
                         className="mt-1 block w-full border-card"
-                        autoComplete="new-password"
                         isFocused={true}
                         onChange={(e) => setData('password', e.target.value)}
                     />
@@ -60,15 +58,13 @@ export default function ResetPassword({ token, email }) {
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel htmlFor="password_confirmation" value="Confirm Password" />
-
                     <TextInput
                         type="password"
                         id="password_confirmation"
                         name="password_confirmation"
+                        placeholder="Confirm Password"
                         value={data.password_confirmation}
                         className="mt-1 block w-full border-card"
-                        autoComplete="new-password"
                         onChange={(e) => setData('password_confirmation', e.target.value)}
                     />
 
@@ -76,9 +72,9 @@ export default function ResetPassword({ token, email }) {
                 </div>
 
                 <div className="flex items-center justify-end mt-4">
-                    <PrimaryButton className="ms-4" disabled={processing}>
+                    <button className="ms-4 border-card" style={{ background: theme.accent, color: theme.background, borderColor: theme.border }} disabled={processing}>
                         Reset Password
-                    </PrimaryButton>
+                    </button>
                 </div>
             </form>
         </GuestLayout>
