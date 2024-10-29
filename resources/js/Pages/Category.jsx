@@ -168,7 +168,7 @@ export default function Category({ auth }) {
           </div>
 
           <div>
-            <div className={`${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} style={{ height: '380px' }} >
+            <div className={`${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} style={{ height: '508px' }} >
               <AgGridReact
                 rowData={categories}
                 columnDefs={colDefs}
