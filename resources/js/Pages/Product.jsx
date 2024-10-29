@@ -57,6 +57,7 @@ export default function Product({ auth }) {
 
   const updateData = () => {
     fetchProducts();
+    fetchProductStats();
   };
 
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -129,6 +130,7 @@ export default function Product({ auth }) {
 
       toast.success(productToastMessages.store.success);
       fetchProducts();
+      fetchProductStats();
       setOpenAddProductModal(false);
     } catch (error) {
       toast.error(productToastMessages.store.error, error);
@@ -141,6 +143,11 @@ export default function Product({ auth }) {
     fetchSuppliers();
     fetchProductStats();
   }, []);
+
+  useEffect(() => {
+    setFilteredProducts([]);
+    setSearchedProduct("");
+  }, [products]);
 
   useEffect(() => {
     if (products) {
