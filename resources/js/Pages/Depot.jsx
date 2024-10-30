@@ -66,13 +66,13 @@ export default function Depot({ auth }) {
             <div className='flex justify-between items-end mb-4'>
               <p className='font-semibold text-xl'>Buses</p>
               <span className='flex gap-2'>
-                <Link
+                {/* <Link
                   className='ml-auto p-2 font-medium border-card'
                   style={{ background: theme.accent, borderColor: theme.border, color: theme.background }}
                   href={route('depot-maintenance')}
                 >
                   Manage Maintenance
-                </Link>
+                </Link> */}
                 <Link
                   className='ml-auto p-2 font-medium border-card'
                   style={{ background: theme.accent, borderColor: theme.border, color: theme.background }}

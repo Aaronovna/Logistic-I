@@ -70,10 +70,10 @@ export default function Terminal({ auth }) {
                 style={{ background: theme.accent, borderColor: theme.border, color: theme.background }}
                 href={route('terminal-request')}
               >
-                Manage Request
+                Request
               </Link>
             </div>
-            <div className='w-full flex flex-col gap-4 pb-4'>
+            <div className='w-full grid gap-4 grid-cols-2'>
               <BusCard x={query} />
               <BusCard x={query} />
               <BusCard x={query} />
