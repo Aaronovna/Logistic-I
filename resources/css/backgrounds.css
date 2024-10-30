@@ -29,3 +29,7 @@
 .product-placeholder {
     background-image: url('https://psediting.websites.co.in/obaju-turquoise/img/product-placeholder.png');
 }
+
+.audit {
+    background-image: url('../../public/assets/svgs/Audit-amico.svg');
+}
