@@ -78,6 +78,7 @@ export default function Product({ auth }) {
       product.stock.toString().toLowerCase().includes(searchQuery) ||
       product.name.toLowerCase().includes(searchQuery) ||
       product.brand.toLowerCase().includes(searchQuery) ||
+      product.model.toLowerCase().includes(searchQuery) ||
       product.category_name.toLowerCase().includes(searchQuery) ||
       product.supplier_name.toLowerCase().includes(searchQuery)
     );
