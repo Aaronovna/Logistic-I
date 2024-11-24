@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Category;
 use App\Models\Supplier;
 
-
 class ProductController extends Controller
 {
     /**
@@ -125,11 +124,18 @@ class ProductController extends Controller
         $productsByCategory = Product::select('category_id', DB::raw('count(*) as total'))
             ->groupBy('category_id')
             ->with('category:id,name')
-            ->get();
+            ->get()
+            ->map(function ($categoryData) {
+                return $this->formatData($categoryData, 'category');
+            });
+
         $productsBySupplier = Product::select('supplier_id', DB::raw('count(*) as total'))
             ->groupBy('supplier_id')
             ->with('supplier:id,name')
-            ->get();
+            ->get()
+            ->map(function ($supplierData) {
+                return $this->formatData($supplierData, 'supplier');
+            });
 
         $productsMissingImage = Product::whereNull('image_url')->orWhere('image_url', '')->count();
         $averagePrice = Product::avg('price');
@@ -156,5 +162,25 @@ class ProductController extends Controller
             'leastExpensiveProduct' => $leastExpensiveProduct,
             'recentProducts' => $recentProducts,
         ]);
+    }
+
+
+    private function formatData($data, $type)
+    {
+        if ($type === 'category') {
+            return [
+                'category_id' => $data->category_id,
+                'category_name' => $data->category->name ?? 'N/A',
+                'total' => $data->total
+            ];
+        } elseif ($type === 'supplier') {
+            return [
+                'supplier_id' => $data->supplier_id,
+                'supplier_name' => $data->supplier->name ?? 'N/A',
+                'total' => $data->total
+            ];
+        }
+
+        return [];
     }
 }

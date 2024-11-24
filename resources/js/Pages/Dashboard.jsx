@@ -5,47 +5,46 @@ import Chart from '@/Components/Chart';
 
 import { useStateContext } from '@/context/contextProvider';
 
+function getTop5(data) {
+  return data
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 5);
+}
+
 export default function Dashboard({ auth }) {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState(null);
-  const [totalProductPieChartData, setTotalProductPieChartData] = useState([]);
+  const { theme } = useStateContext();
+  const [productStats, setProductStats] = useState({});
 
-  const fetchProducts = async () => {
+  const fetchProductStats = async () => {
     try {
-      const response = await axios.get('/product/get');
-      setProducts(response.data);
+      const response = await axios.get('/product/get/stats');
+      setProductStats(response.data);
     } catch (error) {
-      toast.error(productToastMessages.show.error, error);
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const response = await axios.get('/category/get/count');
-      setCategories(response.data);
-    } catch (error) {
-      console.error(categoryToastMessages.show.error, error);
+      toast.error('product stat error', error);
     }
   };
 
   useEffect(() => {
-    fetchProducts();
-    fetchCategories();
+    fetchProductStats();
   }, []);
 
-  const series = [{
+  useEffect(() => {
+    console.log(productStats);
+  }, [productStats]);
+
+  const pieSeries = [{
     type: 'pie',
-    angleKey: 'total_product_category_stock',
+    angleKey: 'total',
     legendItemKey: 'category_name',
   }];
-
-  useEffect(() => {
-    if (categories && products) {
-      setTotalProductPieChartData(groupProductsByCategory(products, categories));
+  const barSeries = [
+    {
+      type: 'bar',
+      xKey: 'supplier_name',
+      yKey: 'total',
     }
-  }, [products, categories, totalProductPieChartData]);
+  ];
 
-  const { theme } = useStateContext();
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -54,40 +53,11 @@ export default function Dashboard({ auth }) {
       <Head title="Dashboard" />
 
       <div className="content">
-        <Chart data={totalProductPieChartData} series={series} legendPosition='right' title='Product Stock' />
+        <div className='flex gap-4'>
+          <Chart data={productStats?.productsByCategory} series={pieSeries} legendPosition='right' title='Product Stock' />
+          <Chart data={productStats.productsBySupplier && getTop5(productStats?.productsBySupplier)} series={barSeries} legendPosition='right' title='Supplier Distribution' />
+        </div>
       </div>
     </AuthenticatedLayout>
   );
-}
-
-function groupProductsByCategory(products, categories) {
-  const categoryMap = new Map();
-
-  products.forEach(product => {
-    const category = categories.find(cat => cat.id === product.category_id);
-    if (!category) return;
-
-    const { id: categoryId, name: categoryName } = category;
-
-    if (!categoryMap.has(categoryId)) {
-      categoryMap.set(categoryId, {
-        category_name: categoryName,
-        total_product_category_stock: 0,
-        products: []
-      });
-    }
-
-    const categoryData = categoryMap.get(categoryId);
-
-    categoryData.total_product_category_stock += product.stock;
-
-    categoryData.products.push({
-      name: product.name,
-      model: product.model,
-      brand: product.brand,
-      price: product.price
-    });
-  });
-
-  return Array.from(categoryMap.values());
 }

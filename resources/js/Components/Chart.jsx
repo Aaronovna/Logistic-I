@@ -1,11 +1,11 @@
 import { AgCharts } from 'ag-charts-react';
 import { useStateContext } from '@/context/contextProvider';
 
-const Chart = ({ data = [], series=[], legendPosition = 'bottom', title = '' }) => {
-    const { theme } = useStateContext();
+const Chart = ({ data = [], series=[], axes=[], legendPosition = 'bottom', title = '' }) => {
+    const { theme, themePreference } = useStateContext();
 
     const options = {
-        theme: 'ag-material',
+        theme: themePreference === 'light' ? 'ag-material' : 'ag-material-dark',
         data: data,
         title: {
             text: title,
@@ -24,7 +24,7 @@ const Chart = ({ data = [], series=[], legendPosition = 'bottom', title = '' }) 
         },
         background: {
             visible: false,
-        }
+        },
     }
 
     return (
