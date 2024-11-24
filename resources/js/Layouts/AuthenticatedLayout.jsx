@@ -10,9 +10,10 @@ import { TbClipboardCheck } from "react-icons/tb";
 import { TbBuildingCommunity } from "react-icons/tb";
 import { TbSettingsCog } from "react-icons/tb";
 
-
 import { Toaster } from 'react-hot-toast';
 
+import Modal from '@/Components/Modal';
+import Dev from '@/Pages/Dev';
 import { useStateContext } from '@/context/contextProvider';
 import { convertPermissions } from '@/functions/permissionsConverter';
 
@@ -38,8 +39,14 @@ export default function Authenticated({ user, header, children }) {
   const handleSidebarMouseEnter = () => setIsSidebarHovered(true);
   const handleSidebarMouseLeave = () => setIsSidebarHovered(false);
 
+  const [openDDG, setOpenDDG] = useState(false);
+
+  const closeModal = () => {
+    setOpenDDG(false);
+};
+
   return (
-    <div className="flex h-screen" style={{ background: theme.background }}>
+    <div className="flex h-screen relative" style={{ background: theme.background }}>
       <Toaster
         position="top-right"
         reverseOrder={false}
@@ -53,6 +60,18 @@ export default function Authenticated({ user, header, children }) {
           },
         }}
       />
+
+      <div
+        className='absolute border bottom-4 right-2 p-2 z-10 hover:opacity-100 opacity-30 duration-200 hover:cursor-pointer'
+        style={{background: theme.accent}}
+        onClick={()=>setOpenDDG(true)}
+      >
+        <p style={{color: theme.background}}>DDG</p>
+      </div>
+
+      <Modal show={openDDG} onClose={closeModal}>
+        <Dev></Dev>
+      </Modal>
 
       <div className='w-full h-4 absolute z-30 -left-2' style={{ background: theme.background }}></div>
       <div className='w-full h-4 absolute z-30 bottom-0 -left-2' style={{ background: theme.background }}></div>

@@ -10,7 +10,8 @@ import { TbSearch } from "react-icons/tb";
 const received = [1, 2, 3, 4, 5, 6];
 
 export default function Receipt({ auth }) {
-  const { theme } = useStateContext();
+  const { theme, ordersDummyData } = useStateContext();
+  
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -19,14 +20,23 @@ export default function Receipt({ auth }) {
       <Head title="Receipt" />
 
       <div className="content">
-        <div className='relative rounded-xl p-4 flex h-44 overflow-hidden shadow-xl cursor-pointer hover:shadow-2xl duration-200' style={{ background: gradients.evening_night }}>
+        <div 
+          className='relative rounded-xl p-4 flex h-44 overflow-hidden shadow-xl cursor-pointer hover:shadow-2xl duration-200' 
+          style={{ background: gradients.evening_night }}
+        >
           <div className='absolute log w-44 scale-150 top-1 right-10 h-full bg-no-repeat'></div>
           <div className='absolute w-full h-full top-0 left-0 hover-r-grd duration-150 hover:opacity-100 opacity-0 flex'>
             <p className='font-medium text-2xl text-white tracking-wide z-10 ml-auto mt-auto p-2 bg-black/50 rounded-tl-lg'>View Details</p>
           </div>
           <div className='flex flex-col'>
-            <p className='font-semibold text-3xl text-white tracking-wider'>Upcoming Shipment</p>
-            <p className='font-medium text-2xl text-white mt-auto'>Batch No. {`1232092724`}</p>
+            <p className='font-semibold text-3xl text-white tracking-wider'>
+              {`${ordersDummyData.length === 0 ? `No Upcoming Shipment` : `Upcoming Shipment`}`}
+              <sup className='text-lg font-semibold'>{`${ordersDummyData.length <= 1  ? `` : ` +${ordersDummyData.length -1 }`}`}</sup>
+            </p>
+            {ordersDummyData.length === 0
+              ? null
+              : <p className='font-medium text-2xl text-white mt-auto'>Batch No. {ordersDummyData[0]?.id}</p> 
+            }
           </div>
         </div>
 
