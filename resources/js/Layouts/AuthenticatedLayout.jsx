@@ -80,8 +80,8 @@ export default function Authenticated({ user, header, children }) {
         className='w-80 hidden md:flex md:flex-col border m-4 mr-0 rounded-lg overflow-hidden'
         style={{ background: theme.background, borderColor: theme.border }}
       >
-
-        <p className='m-4 mb-12 font-bold text-2xl text-center' style={{ color: theme.accent }}>NextFleet Dynamics</p>
+        <div className='logo m-4 mb-6 h-20 bg-no-repeat'></div>
+        {/* <p className='m-4 mb-12 font-bold text-2xl text-center' style={{ color: theme.accent }}>NextFleet Dynamics</p> */}
 
         <div className={`flex flex-col h-auto overflow-hidden overflow-y-auto pr-4 gutter-stable duration-300 pb-10 ${isSidebarHovered ? 'scroll' : 'scroll-hide'}`}
           onMouseEnter={handleSidebarMouseEnter}

@@ -33,3 +33,11 @@
 .audit {
     background-image: url('../../public/assets/svgs/Audit-amico.svg');
 }
+
+.logo {
+    background-image: url('../../public/assets/svgs/nexfleet-dynamics-logo.svg');
+}
+
+.logo-mini {
+    background-image: url('../../public/assets/svgs/nexfleet-dynamics-logo-mini.svg');
+}
