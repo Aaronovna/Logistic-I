@@ -1,7 +1,7 @@
 import { AgCharts } from 'ag-charts-react';
 import { useStateContext } from '@/context/contextProvider';
 
-const Chart = ({ data = [], series=[], axes=[], legendPosition = 'bottom', title = '' }) => {
+const Chart = ({ data = [], series=[], axes=[], legendPosition = 'bottom', title = '', className="" }) => {
     const { theme, themePreference } = useStateContext();
 
     const options = {
@@ -28,7 +28,7 @@ const Chart = ({ data = [], series=[], axes=[], legendPosition = 'bottom', title
     }
 
     return (
-        <AgCharts options={options} className='border-card w-1/2 shadow-md' style={{ borderColor: theme.border }} />
+        <AgCharts options={options} className={className} style={{ borderColor: theme.border }} />
     )
 }
 

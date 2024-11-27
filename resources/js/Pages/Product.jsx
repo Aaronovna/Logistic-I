@@ -194,8 +194,8 @@ export default function Product({ auth }) {
         <div className='md:items-end mb-2 md:mb-0 md:gap-4 overflow-x-auto snap-mandatory snap-x pb-1 whitespace-nowrap'>
           <Card2 data={productStats?.totalStock} name="Total Stocks" className={cardStyle} Icon={TbPackages} iconColor={feedbackVibrant.info} />
           <Card2 data={productStats?.totalProducts} name="Total Products" className={cardStyle} Icon={TbPackage} iconColor={feedbackVibrant.success} />
-          <Card2 data={productStats?.lowStockProducts} name="Low on Stock" className={cardStyle} Icon={TbCaretDownFilled} iconColor={feedbackVibrant.warning} />
-          <Card2 data={productStats?.outOfStockProducts || 0} name="Out of Stock" className={cardStyle} Icon={TbPackageOff} iconColor={feedbackVibrant.danger} />
+          <Card2 data={productStats?.lowStockProductsCount} name="Low on Stock" className={cardStyle} Icon={TbCaretDownFilled} iconColor={feedbackVibrant.warning} />
+          <Card2 data={productStats?.outOfStockProductsCount || 0} name="Out of Stock" className={cardStyle} Icon={TbPackageOff} iconColor={feedbackVibrant.danger} />
         </div>
 
         <div className='flex sm:flex-row flex-col md:flex-row w-full gap-4 mb-4'>

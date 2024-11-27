@@ -111,8 +111,10 @@ class ProductController extends Controller
     {
         $totalProducts = Product::count();
         $totalStock = Product::sum('stock');
-        $outOfStockProducts = Product::where('stock', 0)->count();
-        $lowStockProducts = Product::whereColumn('stock', '<', 'restock_point')->count();
+        $outOfStockProductsCount = Product::where('stock', 0)->count();
+        $outOfStockProducts = Product::where('stock', 0)->select('id', 'name', 'model','stock','restock_point')->get();
+        $lowStockProductsCount = Product::whereColumn('stock', '<', 'restock_point')->count();
+        $lowStockProducts = Product::whereColumn('stock', '<', 'restock_point')->where('stock', '>', 0)->get();
         $totalStockValue = Product::sum(DB::raw('price * stock'));
 
         // $topSellingProducts = Product::withSum('sales', 'quantity')
@@ -146,7 +148,9 @@ class ProductController extends Controller
         return response()->json([
             'totalProducts' => $totalProducts,
             'totalStock' => $totalStock,
+            'outOfStockProductsCount' => $outOfStockProductsCount,
             'outOfStockProducts' => $outOfStockProducts,
+            'lowStockProductsCount' => $lowStockProductsCount,
             'lowStockProducts' => $lowStockProducts,
             'totalStockValue' => $totalStockValue,
 
