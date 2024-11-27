@@ -9,10 +9,10 @@ export const analyticsLinks = [
         name: 'dashboard',
         Icon: TbLayoutDashboard
     },
-    {
+    /* {
         name: 'report',
         Icon: TbClipboardList
-    }
+    } */
 ];
 
 ////////////////////////////////////////////////////////
