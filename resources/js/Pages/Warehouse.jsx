@@ -5,6 +5,7 @@ import { useStateContext } from '@/context/contextProvider';
 import { Card2 } from '@/Components/Cards';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
+import { inventoryToastMessages } from '@/Constants/toastMessages';
 
 import Modal from '@/Components/Modal';
 
@@ -14,21 +15,26 @@ import { TbCurrencyPeso } from "react-icons/tb";
 import { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
+const cardStyle = 'mb-2 snap-center mx-2 md:min-w-64 inline-block min-w-[100%]';
 
 const formatValue = (value) => {
-  const formattedValue = new Intl.NumberFormat('fil-PH', {
-    //style: 'currency',
-    currency: 'PHP',
-  }).format(value);
+  if (value) {
+    const formattedValue = new Intl.NumberFormat('fil-PH', {
+      //style: 'currency',
+      currency: 'PHP',
+    }).format(value);
+    
+    return formattedValue;
+  }
 
-  return formattedValue;
+  return 0;
 }
 
 const colDefs = [
-  { field: "product_id", maxWidth: 100, flex: 1, headerName: 'ID' },
+  { field: "product_id", minWidth: 100, maxWidth: 120, flex: 1, headerName: 'ID' },
   { field: "product_name", filter: true, flex: 1, minWidth: 120, headerName: 'Product' },
   { field: "product_model", filter: true, flex: 1, minWidth: 120, headerName: 'Model' },
-  { field: "quantity", filter: true, maxWidth: 150, flex: 1 },
+  { field: "quantity", filter: true,minWidth: 130, maxWidth: 150, flex: 1 },
   {
     field: "product_price", filter: true, flex: 1, minWidth: 150, headerName: 'Price',
     cellRenderer: (params) => {
@@ -131,11 +137,12 @@ export default function Warehouse({ auth }) {
         product_id: '',
       });
 
-      toast.success('success');
+      toast.success(inventoryToastMessages.store.success);
+      fetchInventoryStats();
       fetchInventory();
       setOpenAddInventoryModal(false);
     } catch (error) {
-      toast.error('error');
+      toast.error(inventoryToastMessages.store.error,error);
     }
   };
 
@@ -215,11 +222,12 @@ export default function Warehouse({ auth }) {
         quantity: '',
       });
 
-      toast.success('success');
+      toast.success(inventoryToastMessages.update.success );
+      fetchInventoryStats();
       fetchInventory();
       setOpenEditInventoryModal(false);
     } catch (error) {
-      toast.error('error');
+      toast.error(inventoryToastMessages.update.error,error);
     }
   };
 
@@ -250,11 +258,11 @@ export default function Warehouse({ auth }) {
           </div>
         </div>
 
-        <div className='flex gap-4'>
-          <div className='flex flex-col gap-4 w-2/3'>
-            <div className='flex items-end gap-4 w-full'>
-              <Card2 data={totalProductValue} name="Total Asset Value" Icon={TbCurrencyPeso} className='w-1/2' iconColor={theme.text} />
-              <Card2 data={inventoryStats && inventoryStats?.totalStock} name="Total Stocks" Icon={TbBox} className='w-1/2' iconColor={theme.text} />
+        <div className='flex gap-4 flex-col md:flex-row'>
+          <div className='flex flex-col gap-4 md:w-2/3 w-full'>
+            <div className='md:items-end mb-2 md:mb-0 md:gap-4 overflow-x-auto snap-mandatory snap-x pb-1 whitespace-nowrap'>
+              <Card2 data={totalProductValue} name="Total Asset Value" className={cardStyle} Icon={TbCurrencyPeso} iconColor={theme.text} />
+              <Card2 data={inventoryStats && inventoryStats?.totalStock} name="Total Stocks" className={cardStyle} Icon={TbBox} iconColor={theme.text} />
             </div>
             <div className={`w-full ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} style={{ height: '434px' }} >
               <AgGridReact
@@ -268,7 +276,7 @@ export default function Warehouse({ auth }) {
             </div>
           </div>
 
-          <div className='w-1/3 flex flex-col' style={{ color: theme.text }}>
+          <div className='md:w-1/3 w-full flex flex-col' style={{ color: theme.text }}>
             <div className='flex gap-2 mb-2'>
               <button
                 onClick={() => setOpenAddInventoryModal(true)}
@@ -360,7 +368,7 @@ export default function Warehouse({ auth }) {
                 onChange={handleAddProductInputChange}
               />
 
-              <button className='border-card' style={{ background: theme.accent, color: theme.background }}>Add to Inventory</button>
+              <button className='border-card' style={{ background: theme.accent, color: theme.background }}>Add</button>
             </div>
           </form>
         </div>

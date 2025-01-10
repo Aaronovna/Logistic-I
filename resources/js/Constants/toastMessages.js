@@ -101,6 +101,25 @@ export const supplierToastMessages = {
     },
 }
 
+export const inventoryToastMessages = {
+    store: {
+        success:'item added successfully',
+        error:'Failed to add item',
+    },
+    update: {
+        success:'Iventory updated successfully',
+        error:'Failed to update inventory',
+    },
+    show: {
+        success:'',
+        error:'',
+    },
+    destroy: {
+        success:'',
+        error:'',
+    },
+}
+
 //TEMPLATE
 export const xToastMessages = {
     store: {
