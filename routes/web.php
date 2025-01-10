@@ -9,6 +9,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\InventoryController;
 
 Route::redirect('/', 'login');
 
@@ -41,11 +42,12 @@ Route::middleware(["auth", "verified"])->group(function () {
     //? START: PRODUCT REQUEST /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     Route::get('/product/get', [ProductController::class, 'index'])->name('product.index');
+    Route::get('/product/get/{id}', [ProductController::class, 'show'])->name('product.show');
     Route::post('/product/store', [ProductController::class, 'store'])->name('product.store');
     Route::patch('/product/update/{id}', [ProductController::class, 'update'])->name('product.update');
     Route::delete('/product/delete/{id}', [ProductController::class, 'destroy'])->name('product.destroy');
 
-    Route::get('/product/get/stats', [ProductController::class, 'stats'])->name('product.stats');
+    Route::get('/product/stats', [ProductController::class, 'stats'])->name('product.stats');
 
     //! END: PRODUCT REQUEST ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -67,7 +69,15 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post('/user/create', [UserController::class, 'store'])->name('user.store');
     Route::patch('/user/update/permission/{id}', [UserController::class, 'update_permission'])->name('user.update_permission');
     Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.destroy');
+
+    Route::get('/inventory/get', [InventoryController::class, 'index'])->name('inventory.index');
+    Route::get('/inventory/get/{id}', [InventoryController::class, 'show'])->name('inventory.show');
+    Route::post('/inventory/create', [InventoryController::class, 'store'])->name('inventory.store');
+    Route::delete('/inventory/delete/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
+    
+    Route::get('/inventory/stats', [InventoryController::class, 'stats'])->name('inventory.stats');
 });
+Route::patch('/inventory/update/{id}', [InventoryController::class, 'update'])->name('inventory.update');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

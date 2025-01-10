@@ -22,7 +22,6 @@ return new class extends Migration
             $table->string('description');
             $table->string('image_url')->default('')->nullable();
             $table->decimal('price');
-            $table->integer('stock')->default(0);
             $table->integer('restock_point');
             $table->timestamps();
         });
@@ -35,7 +34,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('inventories');
+        Schema::dropIfExists('inventory_trails');
         Schema::dropIfExists('products');
     }
 };

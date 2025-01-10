@@ -28,7 +28,7 @@ class ProductFactory extends Factory
             'brand' => $this->faker->company,
             'model' => $this->faker->bothify('Model-####'),
             'description' => $this->faker->sentence,
-            'stock' => $this->faker->numberBetween(1, 99),
+            /* 'stock' => $this->faker->numberBetween(1, 99), */
             'restock_point' => $this->faker->randomElement([10, 20, 30, 40, 50]),
             'price' => $this->faker->randomFloat(2, 10, 1000),
             'created_at' => now(),

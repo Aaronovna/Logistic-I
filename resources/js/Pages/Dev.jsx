@@ -1,45 +1,29 @@
-import { Link } from '@inertiajs/react';
-
 import { useStateContext } from '@/context/contextProvider';
 import { generateRandomNumber } from '@/functions/numberGenerator';
- const odd = [
-  {
+import { generateRandomItem } from '@/functions/itemGenerator';
+
+const status = [
+  'Out for Delivery',
+  'Delivered',
+  'Checked',
+  'Checking',
+  'Accepted', 'Rejected'
+];
+
+const orders = ['item1', 'item2', 'item3', 'item4'];
+
+const generateData = (count) => {
+  return Array.from({ length: count }, (_, index) => ({
     id: generateRandomNumber(8),
-    fleet:'fleet1234',
-    supplier: 'supplier_a',
-    orders: [
-      'item1',
-      'item2',
-      'item3',
-      'item4',
-    ]
-  },
-  {
-    id: generateRandomNumber(8),
-    fleet:'fleet5678',
-    supplier: 'supplier_b',
-    orders: [
-      'item1',
-      'item2',
-      'item3',
-      'item4',
-    ]
-  },
-  {
-    id: generateRandomNumber(8),
-    fleet:'fleet9012',
-    supplier: 'supplier_c',
-    orders: [
-      'item1',
-      'item2',
-      'item3',
-      'item4',
-    ]
-  },
- ]
+    fleet: `fleet ${index + 1}`,
+    supplier: `supplier ${index + 1}`,
+    status: generateRandomItem(status),
+    orders: [...orders],
+  }));
+};
 
 export default function Dev() {
-  const { theme, ordersDummyData, setOrdersDummyData } = useStateContext();
+  const { theme, setOrdersDummyData } = useStateContext();
 
   return (
     <div style={{ color: theme.text }}>
@@ -49,8 +33,8 @@ export default function Dev() {
         </div>
         <div className='p-4 w-full'>
           <p className='text-2xl my-2'>Receipt</p>
-          <hr className='mb-4'/>
-          <button className='border-card mr-2' onClick={()=>setOrdersDummyData(odd)}>Generate Order</button>
+          <hr className='mb-4' />
+          <button className='border-card mr-2' onClick={() => setOrdersDummyData(generateData(100))}>Generate Order</button>
         </div>
       </div>
     </div>

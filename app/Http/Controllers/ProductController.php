@@ -7,6 +7,7 @@ use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use App\Models\Category;
 use App\Models\Supplier;
+use App\Models\Inventory;
 
 class ProductController extends Controller
 {
@@ -15,30 +16,32 @@ class ProductController extends Controller
      */
     public function index()
     {
-
-        $products = Product::all();
+        $products = Product::with('inventory', 'category', 'supplier')->get();
 
         $products = $products->map(function ($product) {
+            $stock = $product->inventory->quantity ?? 'N/A';
+
             return [
                 'id' => $product->id,
                 'name' => $product->name,
                 'brand' => $product->brand,
-                'model' => $product['model'],
+                'model' => $product->model,
                 'description' => $product->description,
                 'image_url' => $product->image_url,
                 'price' => $product->price,
-                'stock' => $product->stock,
+                'stock' => $stock,
                 'restock_point' => $product->restock_point,
                 'category_id' => $product->category_id,
                 'supplier_id' => $product->supplier_id,
                 'category_name' => $product->category->name ?? 'N/A',
                 'supplier_name' => $product->supplier->name ?? 'N/A',
-                'low_on_stock' => $product->stock <= $product->restock_point,
+                'low_on_stock' => $stock <= $product->restock_point,
             ];
         });
 
         return response()->json($products);
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -67,9 +70,35 @@ class ProductController extends Controller
      * Display the specified resource.
      */
     public function show(string $id)
-    {
-        //
+{
+    // Retrieve the product using its ID
+    $product = Product::with('inventory', 'category', 'supplier')->find($id);
+
+    if (!$product) {
+        return response()->json(['message' => 'Product not found.'], 404);
     }
+
+    $stock = $product->inventory->quantity ?? 'N/A';
+
+    $response = [
+        'id' => $product->id,
+        'name' => $product->name,
+        'brand' => $product->brand,
+        'model' => $product->model,
+        'description' => $product->description,
+        'image_url' => $product->image_url,
+        'price' => $product->price,
+        'stock' => $stock,
+        'restock_point' => $product->restock_point,
+        'category_id' => $product->category_id,
+        'supplier_id' => $product->supplier_id,
+        'category_name' => $product->category->name ?? 'N/A',
+        'supplier_name' => $product->supplier->name ?? 'N/A',
+        'low_on_stock' => $stock <= $product->restock_point,
+    ];
+
+    return response()->json($response);
+}
 
     /**
      * Update the specified resource in storage.
@@ -110,17 +139,13 @@ class ProductController extends Controller
     public function stats()
     {
         $totalProducts = Product::count();
-        $totalStock = Product::sum('stock');
-        $outOfStockProductsCount = Product::where('stock', 0)->count();
-        $outOfStockProducts = Product::where('stock', 0)->select('id', 'name', 'model','stock','restock_point')->get();
-        $lowStockProductsCount = Product::whereColumn('stock', '<', 'restock_point')->count();
-        $lowStockProducts = Product::whereColumn('stock', '<', 'restock_point')->where('stock', '>', 0)->get();
-        $totalStockValue = Product::sum(DB::raw('price * stock'));
+        //$totalStock = Product::sum('stock');
+        //$outOfStockProductsCount = Product::where('stock', 0)->count();
+        //$outOfStockProducts = Product::where('stock', 0)->select('id', 'name', 'model', 'stock', 'restock_point')->get();
+        //$lowStockProductsCount = Product::whereColumn('stock', '<', 'restock_point')->count();
+        //$lowStockProducts = Product::whereColumn('stock', '<', 'restock_point')->where('stock', '>', 0)->get();
+        //$totalStockValue = Product::sum(DB::raw('price * stock'));
 
-        // $topSellingProducts = Product::withSum('sales', 'quantity')
-        //     ->orderBy('sales_sum_quantity', 'desc')
-        //     ->take(5)
-        //     ->get(['id', 'name', 'brand', 'model']); // Adjust fields as needed
         $totalCategories = Category::count();
         $totalSuppliers = Supplier::count();
         $productsByCategory = Product::select('category_id', DB::raw('count(*) as total'))
@@ -147,12 +172,12 @@ class ProductController extends Controller
 
         return response()->json([
             'totalProducts' => $totalProducts,
-            'totalStock' => $totalStock,
-            'outOfStockProductsCount' => $outOfStockProductsCount,
-            'outOfStockProducts' => $outOfStockProducts,
-            'lowStockProductsCount' => $lowStockProductsCount,
-            'lowStockProducts' => $lowStockProducts,
-            'totalStockValue' => $totalStockValue,
+            //'totalStock' => $totalStock,
+            //'outOfStockProductsCount' => $outOfStockProductsCount,
+            //'outOfStockProducts' => $outOfStockProducts,
+            //'lowStockProductsCount' => $lowStockProductsCount,
+            //'lowStockProducts' => $lowStockProducts,
+            //'totalStockValue' => $totalStockValue,
 
             // 'topSellingProducts' => $topSellingProducts,
             'totalCategories' => $totalCategories,
@@ -167,8 +192,6 @@ class ProductController extends Controller
             'recentProducts' => $recentProducts,
         ]);
     }
-
-
     private function formatData($data, $type)
     {
         if ($type === 'category') {

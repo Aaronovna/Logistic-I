@@ -18,7 +18,7 @@ export default function Dashboard({ auth }) {
 
   const fetchProductStats = async () => {
     try {
-      const response = await axios.get('/product/get/stats');
+      const response = await axios.get('/product/stats');
       setProductStats(response.data);
     } catch (error) {
       toast.error('product stat error', error);

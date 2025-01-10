@@ -1,5 +1,8 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
+
+import ReceiptCard from '@/Components/cards/ReceiptCard';
 
 import { useStateContext } from '@/context/contextProvider';
 import { gradients } from "@/Constants/themes";
@@ -7,11 +10,20 @@ import { Link } from '@inertiajs/react';
 
 import { TbSearch } from "react-icons/tb";
 
-const received = [1, 2, 3, 4, 5, 6];
+const filterOrdersByStatuses = (orders, statuses) => {
+  return orders.filter(order => statuses.includes(order?.status));
+};
 
 export default function Receipt({ auth }) {
   const { theme, ordersDummyData } = useStateContext();
-  
+  const [OFD, setOFD] = useState([]);
+  const [RD, setRD] = useState([]);
+
+  useEffect(() => {
+    setOFD(filterOrdersByStatuses(ordersDummyData, ['Out for Delivery']));
+    setRD(filterOrdersByStatuses(ordersDummyData, ['Delivered', 'Checking','Checked',]));
+  }, [ordersDummyData])
+
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -20,8 +32,8 @@ export default function Receipt({ auth }) {
       <Head title="Receipt" />
 
       <div className="content">
-        <div 
-          className='relative rounded-xl p-4 flex h-44 overflow-hidden shadow-xl cursor-pointer hover:shadow-2xl duration-200' 
+        <div
+          className='relative rounded-xl p-4 flex h-44 overflow-hidden shadow-xl cursor-pointer hover:shadow-2xl duration-200'
           style={{ background: gradients.evening_night }}
         >
           <div className='absolute log w-44 scale-150 top-1 right-10 h-full bg-no-repeat'></div>
@@ -30,12 +42,12 @@ export default function Receipt({ auth }) {
           </div>
           <div className='flex flex-col'>
             <p className='font-semibold text-3xl text-white tracking-wider'>
-              {`${ordersDummyData.length === 0 ? `No Upcoming Shipment` : `Upcoming Shipment`}`}
-              <sup className='text-lg font-semibold'>{`${ordersDummyData.length <= 1  ? `` : ` +${ordersDummyData.length -1 }`}`}</sup>
+              {`${OFD.length === 0 ? `No Upcoming Shipment` : `Upcoming Shipment`}`}
+              <sup className='text-lg font-semibold'>{`${OFD.length <= 1 ? `` : ` +${OFD.length - 1}`}`}</sup>
             </p>
-            {ordersDummyData.length === 0
+            {OFD.length === 0
               ? null
-              : <p className='font-medium text-2xl text-white mt-auto'>Batch No. {ordersDummyData[0]?.id}</p> 
+              : <p className='font-medium text-2xl text-white mt-auto'>Batch No. {OFD[0]?.id}</p>
             }
           </div>
         </div>
@@ -61,17 +73,9 @@ export default function Receipt({ auth }) {
             />
           </div>
           <div className='grid grid-cols-2 gap-4 overflow-y-scroll pr-2' style={{ height: '528px' }}>
-            {received.map((item, index) => {
+            {RD?.map((data, index) => {
               return (
-                <div key={index}
-                  className='w-full border-card p-4 cursor-pointer hover:shadow-lg shadow-none shadow-gray-300 duration-200'
-                  style={{ height: '256px', borderColor: theme.border, color: theme.text }}
-                >
-                  <p>Batch No. {item + 100000}</p>
-                  <p>Supplier:xyc{item}</p>
-                  <p>Fleet: fltvan{item}</p>
-                  <p>Status: xxxxxxx</p>
-                </div>
+                <ReceiptCard data={data} key={index} />
               )
             })}
           </div>

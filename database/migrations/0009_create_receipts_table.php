@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id();
             $table->integer('order_id');
             $table->string('status');
+            $table->json('products')->nullable();
             $table->timestamps();
         });
 

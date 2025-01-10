@@ -14,10 +14,18 @@ return new class extends Migration
         Schema::create('inventories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->constrained('products')->onDelete('restrict');
-            $table->foreignId('warehouse_id')->constrained('warehouses')->onDelete('restrict');
+            /* $table->foreignId('warehouse_id')->constrained('warehouses')->onDelete('restrict'); */
+            $table->integer('quantity')->default(0);
+            $table->timestamps();
+        });
+
+        Schema::create('inventory_trails', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('restrict');
-            $table->integer('quantity');
-            $table->string('status');
+            $table->foreignId('product_id')->constrained('products')->onDelete('restrict');
+            $table->integer('quantity')->default(0);
+            $table->string('log')->default('');
+            $table->boolean('update')->default(false);
             $table->timestamps();
         });
     }
@@ -28,5 +36,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('inventories');
+        Schema::dropIfExists('inventory_trail');
     }
 };

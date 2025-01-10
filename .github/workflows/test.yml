@@ -1,0 +1,102 @@
+name: test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  laravel-tests:
+    name: Laravel PHPUnit Tests
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_DATABASE: stock_test
+          MYSQL_ROOT_PASSWORD: root
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        ports:
+          - 3306:3306
+        volumes:
+          - /var/lib/mysql
+
+    steps:
+   
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+  
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: mbstring, pdo, pdo_mysql
+          coverage: none
+
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v2
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+
+      - name: Install Dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+ 
+      - name: Copy .env.testing
+        run: cp .env.example .env.testing
+
+      - name: Generate Laravel Application Key
+        run: php artisan key:generate --env=testing
+
+      - name: Set up the test database
+        run: |
+          php artisan migrate --env=testing --force
+
+   
+      - name: Run PHPUnit Tests
+        run: php artisan test --env=testing
+
+  react-tests:
+    name: React Jest Tests
+    runs-on: ubuntu-latest
+
+    steps:
+ 
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+  
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+
+      - name: Install Dependencies
+        run: npm install
+
+
+      - name: Run Jest Tests
+        run: npm test -- --ci --coverage
