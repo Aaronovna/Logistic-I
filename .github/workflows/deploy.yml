@@ -25,6 +25,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no lgstc2675@157.173.111.118 -p 2298 << 'EOF'
             cd public_html
+            git stash
             git pull origin main
             composer install
             npm install
