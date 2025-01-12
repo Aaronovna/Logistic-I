@@ -10,6 +10,7 @@ use App\Http\Controllers\PositionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\ReceiptController;
 
 Route::redirect('/', 'login');
 
@@ -73,11 +74,17 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/inventory/get', [InventoryController::class, 'index'])->name('inventory.index');
     Route::get('/inventory/get/{id}', [InventoryController::class, 'show'])->name('inventory.show');
     Route::post('/inventory/create', [InventoryController::class, 'store'])->name('inventory.store');
+    Route::patch('/inventory/update/{id}', [InventoryController::class, 'update'])->name('inventory.update');
     Route::delete('/inventory/delete/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
     
     Route::get('/inventory/stats', [InventoryController::class, 'stats'])->name('inventory.stats');
+
+    Route::get('/receipt/get', [ReceiptController::class, 'index'])->name('receipt.index');
+    Route::get('/receipt/get/{id}', [ReceiptController::class, 'show'])->name('receipt.show');
+    Route::post('/receipt/create', [ReceiptController::class, 'store'])->name('receipt.store');
+    Route::patch('/receipt/update/{id}', [ReceiptController::class, 'update'])->name('receipt.update');
+    Route::delete('/receipt/delete/{id}', [ReceiptController::class, 'destroy'])->name('receipt.destroy');
 });
-Route::patch('/inventory/update/{id}', [InventoryController::class, 'update'])->name('inventory.update');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

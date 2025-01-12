@@ -9,14 +9,41 @@ const filterOrdersByStatuses = (orders, statuses) => {
   return orders.filter(order => statuses.includes(order?.status));
 };
 
+const options = {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  hour: 'numeric',
+  minute: 'numeric',
+  second: 'numeric',
+  hour12: true, // Use 12-hour format
+  timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // User's local timezone
+};
+
 export default function Receipt_History({ auth }) {
-  const { theme, ordersDummyData } = useStateContext();
+  const { theme } = useStateContext();
   const [history, setHistory] = useState([]);
 
+  const [receivedShipment, setReceivedShipment] = useState();
+  const fetchReceivedShipment = async () => {
+    try {
+      const response = await axios.get('/receipt/get');
+      setReceivedShipment(response.data);
+    } catch (error) {
+      console.error('error');
+    }
+  };
+
   useEffect(() => {
-    setHistory(filterOrdersByStatuses(ordersDummyData, ['Accepted', 'Rejected']));
-  }, [ordersDummyData])
-  
+    fetchReceivedShipment();
+  }, [])
+
+  useEffect(() => {
+    if (receivedShipment) {
+      setHistory(filterOrdersByStatuses(receivedShipment, ['Success', 'Return']));
+    }
+  }, [receivedShipment])
+
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -28,7 +55,7 @@ export default function Receipt_History({ auth }) {
         {
           history?.map((data, index) => {
             return (
-              <p key={index}>{`${data.id} ${data.supplier} ${data.status}`}</p>
+              <p key={index}>{`${data.id} ${new Date(data.order_date + 'Z').toLocaleString('en-PH', options)} ${data.supplier_id} ${data.status}`}</p>
             )
           })
         }

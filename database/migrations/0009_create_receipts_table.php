@@ -14,9 +14,14 @@ return new class extends Migration
     {
         Schema::create('receipts', function (Blueprint $table) {
             $table->id();
-            $table->integer('order_id');
+            $table->integer('order_id')->unique();
             $table->string('status');
             $table->json('products')->nullable();
+            $table->integer('supplier_id');
+            $table->string('fleet');
+            $table->datetime('order_date');
+            $table->string('destination');
+            $table->boolean('accepted')->default(false);
             $table->timestamps();
         });
 
