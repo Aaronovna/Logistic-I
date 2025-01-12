@@ -33,6 +33,8 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/terminal/request', fn () => Inertia::render('Terminal.Request'))->name('terminal-request');
     Route::get('/audits', action: fn () => Inertia::render('Audits'))->name('audits');
     Route::get('/auditors', fn () => Inertia::render('Auditors'))->name('auditors');
+    Route::get('/module', fn () => Inertia::render('Module'))->name('module');
+    Route::get('/infrastructure', fn () => Inertia::render('Infrastructure'))->name('infrastructure');
 });
 
 //! END: PAGES ROUTES //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

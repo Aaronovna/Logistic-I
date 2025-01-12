@@ -82,6 +82,7 @@ export const infrastructureLinks = [
 import { TbUserCog } from "react-icons/tb";
 import { TbCategory } from "react-icons/tb";
 import { TbBuildingCog } from "react-icons/tb";
+import { TbPuzzle } from "react-icons/tb";
 
 export const managementLinks = [
     {
@@ -92,10 +93,14 @@ export const managementLinks = [
         name: 'category',
         Icon: TbCategory
     },
-    /* {
+    {
         name: 'infrastructure',
         Icon: TbBuildingCog
-    }, */
+    },
+    {
+        name: 'module', 
+        Icon: TbPuzzle
+    },
 ];
 
 ////////////////////////////////////////////////////////
