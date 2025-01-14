@@ -6,6 +6,7 @@ use Inertia\Inertia;
 
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\InfrastructureController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SupplierController;
@@ -35,6 +36,13 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/auditors', fn () => Inertia::render('Auditors'))->name('auditors');
     Route::get('/module', fn () => Inertia::render('Module'))->name('module');
     Route::get('/infrastructure', fn () => Inertia::render('Infrastructure'))->name('infrastructure');
+    //Route::get('/infrastructure/view', fn () => Inertia::render('Infrastructure.View'))->name('infrastructure-view');
+    Route::get('/infrastructure/view', function (\Illuminate\Http\Request $request) {
+        return Inertia::render('Infrastructure.View', [
+            'id' => $request->query('id'), // Extract 'name' from the query string
+        ]);
+    })->name('infrastructure-view');
+    
 });
 
 //! END: PAGES ROUTES //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,6 +94,12 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post('/receipt/create', [ReceiptController::class, 'store'])->name('receipt.store');
     Route::patch('/receipt/update/{id}', [ReceiptController::class, 'update'])->name('receipt.update');
     Route::delete('/receipt/delete/{id}', [ReceiptController::class, 'destroy'])->name('receipt.destroy');
+
+    Route::get('/infrastructure/get', [InfrastructureController::class, 'index'])->name('infrastructure.index');
+    Route::get('/infrastructure/get/{id}', [InfrastructureController::class, 'show'])->name('infrastructure.show');
+    Route::post('/infrastructure/create', [InfrastructureController::class, 'store'])->name('infrastructure.store');
+    Route::patch('/infrastructure/update/{id}', [InfrastructureController::class, 'update'])->name('infrastructure.update');
+    Route::delete('/receipt/delete/{id}', [InfrastructureController::class, 'destroy'])->name(name: 'infrastructure.destroy');
 });
 
 Route::middleware('auth')->group(function () {
