@@ -8,7 +8,7 @@
 ## Modules
 - Inventory Management
 - Warehouse Management
-- Infrastructure Maintenance Management (Asset Management)
+- Infrastructure Maintenance Management
 - Audit Management
 
 ## Database Scheme
