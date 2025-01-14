@@ -1,4 +1,4 @@
-@tailwind base;
+ @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -53,4 +53,9 @@
 
 .scroll-hide::-webkit-scrollbar-thumb:hover {
     background-color: transparent;
+}
+
+.scroll-hide{
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
