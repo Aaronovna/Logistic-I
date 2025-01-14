@@ -28,7 +28,7 @@ export default function ({routes = [], Icon, label = 'Label', href = '/', classN
                 ...(flatRoutes.some(r => route().current(r)) && { color: theme.background })
               }}
             >
-                <span className="flex items-center gap-1 text-lg px-1">
+                <span className="flex items-center gap-1 text-lg px-1 font-medium">
                     <Icon className='mr-1' />
                     {label}
                 </span>

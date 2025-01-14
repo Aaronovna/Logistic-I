@@ -94,7 +94,7 @@ export const managementLinks = [
         Icon: TbCategory
     },
     {
-        name: 'infrastructure',
+        name: ['infrastructure', 'infrastructure-view'],
         Icon: TbBuildingCog
     },
     {

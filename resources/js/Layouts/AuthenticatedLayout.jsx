@@ -21,9 +21,9 @@ import { analyticsLinks, inventoryLinks, managementLinks, infrastructureLinks, a
 
 const pages = [
   'dashboard', 'report',
-  'receipt','dispatch','warehouse','product','category',
-  'depot','terminal',
-  'audits','auditors',
+  'receipt', 'dispatch', 'warehouse', 'product', 'category',
+  'depot', 'terminal',
+  'audits', 'auditors',
   'user',
 ]
 
@@ -43,7 +43,7 @@ export default function Authenticated({ user, header, children }) {
 
   const closeModal = () => {
     setOpenDDG(false);
-};
+  };
 
   return (
     <div className="flex h-screen relative" style={{ background: theme.background }}>
@@ -63,10 +63,10 @@ export default function Authenticated({ user, header, children }) {
 
       <div
         className='absolute border bottom-4 right-2 p-2 z-10 hover:opacity-100 opacity-30 duration-200 hover:cursor-pointer'
-        style={{background: theme.accent}}
-        onClick={()=>setOpenDDG(true)}
+        style={{ background: theme.accent }}
+        onClick={() => setOpenDDG(true)}
       >
-        <p style={{color: theme.background}}>DDG</p>
+        <p style={{ color: theme.background }}>DDG</p>
       </div>
 
       <Modal show={openDDG} onClose={closeModal}>
@@ -138,10 +138,10 @@ export default function Authenticated({ user, header, children }) {
           <NavLinkCategory routes={managementLinks} Icon={TbSettingsCog} href='user' label='Management' className='mr-4' />
           {managementLinks.map((link, index) => {
             return (
-              <NavLink key={index} href={route(link.name)} active={route().current(link.name)}>
+              <NavLink key={index} href={route(Array.isArray(link.name) ? link.name[0] : link.name)} active={Array.isArray(link.name) ? link.name.some(name => route().current(name)) : route().current(link.name)}>
                 <span className='flex items-center gap-1 px-1'>
                   <link.Icon className='mr-1' />
-                  <p className=' capitalize'>{link.name}</p>
+                  <p className=' capitalize'>{Array.isArray(link.name) ? link.name[0] : link.name}</p>
                 </span>
               </NavLink>
             )
