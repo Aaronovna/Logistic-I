@@ -6,6 +6,7 @@ import { Card2 } from '@/Components/Cards';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { inventoryToastMessages } from '@/Constants/toastMessages';
+import { filterArray } from '@/functions/filterArray';
 
 import Modal from '@/Components/Modal';
 
@@ -34,7 +35,14 @@ const colDefs = [
   { field: "product_id", minWidth: 100, maxWidth: 120, flex: 1, headerName: 'ID' },
   { field: "product_name", filter: true, flex: 1, minWidth: 120, headerName: 'Product' },
   { field: "product_model", filter: true, flex: 1, minWidth: 120, headerName: 'Model' },
-  { field: "quantity", filter: true,minWidth: 130, maxWidth: 150, flex: 1 },
+  {
+    field: "quantity", filter: true, flex: 1, minWidth: 150,
+    cellRenderer: (params) => {
+      return (
+        <p>{`${formatValue(params.data.quantity)} (${params.data.warehouse_name})`}</p>
+      )
+    }
+  },
   {
     field: "product_price", filter: true, flex: 1, minWidth: 150, headerName: 'Price',
     cellRenderer: (params) => {
@@ -59,6 +67,16 @@ export default function Warehouse({ auth }) {
     try {
       const response = await axios.get('/inventory/get');
       setInventory(response.data);
+    } catch (error) {
+      toast.error(productToastMessages.show.error, error);
+    }
+  };
+
+  const [infrastructures, setInfrastructures] = useState([]);
+  const fetchInfrastructures = async () => {
+    try {
+      const response = await axios.get('/infrastructure/get');
+      setInfrastructures(response.data);
     } catch (error) {
       toast.error(productToastMessages.show.error, error);
     }
@@ -119,12 +137,13 @@ export default function Warehouse({ auth }) {
     fetchSuppliers();
     fetchProducts();
     fetchInventoryStats();
+    fetchInfrastructures();
   }, []);
 
   const [addInventoryFormData, setAddInventoryFormData] = useState({
     quantity: '',
     product_id: '',
-    warehouse_id: '',
+    warehouse_id: 0,
   });
 
   const handleAddInventorySubmit = async (e) => {
@@ -135,6 +154,7 @@ export default function Warehouse({ auth }) {
       setAddInventoryFormData({
         quantity: '',
         product_id: '',
+        warehouse_id: addInventoryFormData.warehouse_id,
       });
 
       toast.success(inventoryToastMessages.store.success);
@@ -145,13 +165,14 @@ export default function Warehouse({ auth }) {
       toast.error(inventoryToastMessages.store.error,error);
     }
   };
-
+  
   const [openProductDropdown, setOpenProductDropdown] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState("");
   const [searchedProduct, setSearchedProduct] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
   const productDropdownRef = useRef(null);
-
+  const [selectedWarehouse, setSelectedWarehouse] = useState(0);
+  
   const handleSearchProduct = (e) => {
     const searchQuery = e.target.value.toLowerCase();
     setSearchedProduct(searchQuery);
@@ -181,6 +202,7 @@ export default function Warehouse({ auth }) {
     const { name, value } = e.target;
 
     setAddInventoryFormData({ ...addInventoryFormData, [name]: value });
+    setSelectedWarehouse(value);
   };
 
   const handleAddInventoryInput = (product) => {
@@ -211,15 +233,21 @@ export default function Warehouse({ auth }) {
 
   const [editInventoryFormData, setEditInventoryFormData] = useState({
     quantity: '',
+    warehouse_id: 0,
   });
 
   const handleEditInventorySubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await axios.patch(`/inventory/update/${selectedData.id}`, editInventoryFormData);
+      const response = await axios.patch(`/inventory/update/${selectedData.id}`, {
+        quantity: editInventoryFormData.quantity,
+        warehouse_id: selectedData.warehouse_id,
+      });
+
       setEditInventoryFormData({
         quantity: '',
+        warehouse_id: 0,
       });
 
       toast.success(inventoryToastMessages.update.success );
@@ -237,6 +265,7 @@ export default function Warehouse({ auth }) {
     setEditInventoryFormData({ ...editInventoryFormData, [name]: value });
   };
 
+
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -251,9 +280,14 @@ export default function Warehouse({ auth }) {
             <p>Address</p>
           </div>
           <div className='ml-auto'>
-            <select className='p-2' name="select_warehouse" id="select_warehouse">
-              <option value="0">All Warehouses</option>
-              <option value="1">Warehouse 1</option>
+            <select className='p-2' name="warehouse_id" id="warehouse_id" onChange={handleAddProductInputChange}>
+              <option value={0}>All Warehouses</option>
+              { filterArray && filterArray(infrastructures, 'type', [100]).map((warehouse, index)=>{
+                return (
+                  <option key={index} value={warehouse.id}>{warehouse.name}</option>
+                )
+              })
+              }
             </select>
           </div>
         </div>
@@ -376,7 +410,7 @@ export default function Warehouse({ auth }) {
 
       <Modal show={openEditInventoryModal} onClose={() => setOpenEditInventoryModal(false)} maxWidth='lg'>
         <div className='p-4' style={{ color: theme.text }}>
-          <p className='font-semibold text-xl mt-2 mb-4'>Edit Stock</p>
+          <p className='font-semibold text-xl mt-2 mb-4'>{`Edit Stock ${selectedData?.warehouse_name}(${selectedData?.warehouse_id})`}</p>
           <form onSubmit={handleEditInventorySubmit} className="flex flex-col" style={{ color: theme.text }}>
             <div className='py-4'>
               <p>{`Product ID: ${selectedData ? selectedData?.product_id : ''}`}</p>

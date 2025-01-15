@@ -81,26 +81,28 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::patch('/user/update/permission/{id}', [UserController::class, 'update_permission'])->name('user.update_permission');
     Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.destroy');
 
-    Route::get('/inventory/get', [InventoryController::class, 'index'])->name('inventory.index');
     Route::get('/inventory/get/{id}', [InventoryController::class, 'show'])->name('inventory.show');
     Route::post('/inventory/create', [InventoryController::class, 'store'])->name('inventory.store');
     Route::patch('/inventory/update/{id}', [InventoryController::class, 'update'])->name('inventory.update');
     Route::delete('/inventory/delete/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
     
     Route::get('/inventory/stats', [InventoryController::class, 'stats'])->name('inventory.stats');
-
+    
     Route::get('/receipt/get', [ReceiptController::class, 'index'])->name('receipt.index');
     Route::get('/receipt/get/{id}', [ReceiptController::class, 'show'])->name('receipt.show');
     Route::post('/receipt/create', [ReceiptController::class, 'store'])->name('receipt.store');
     Route::patch('/receipt/update/{id}', [ReceiptController::class, 'update'])->name('receipt.update');
     Route::delete('/receipt/delete/{id}', [ReceiptController::class, 'destroy'])->name('receipt.destroy');
-
+    
     Route::get('/infrastructure/get', [InfrastructureController::class, 'index'])->name('infrastructure.index');
     Route::get('/infrastructure/get/{id}', [InfrastructureController::class, 'show'])->name('infrastructure.show');
     Route::post('/infrastructure/create', [InfrastructureController::class, 'store'])->name('infrastructure.store');
     Route::patch('/infrastructure/update/{id}', [InfrastructureController::class, 'update'])->name('infrastructure.update');
     Route::delete('/receipt/delete/{id}', [InfrastructureController::class, 'destroy'])->name(name: 'infrastructure.destroy');
 });
+Route::get('/inventory/get', [InventoryController::class, 'index'])->name('inventory.index');
+Route::get('/inventory/get/warehouse/group', [InventoryController::class, 'groupIndex'])->name('inventory.groupIndex');
+Route::get('/inventory/get/warehouse/{id}', [InventoryController::class, 'indexByWarehouse'])->name('inventory.indexByWarehouse');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

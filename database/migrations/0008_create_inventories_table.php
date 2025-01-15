@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('inventories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->constrained('products')->onDelete('restrict');
-            /* $table->foreignId('warehouse_id')->constrained('warehouses')->onDelete('restrict'); */
+            $table->foreignId('warehouse_id')->constrained('infrastructures')->onDelete('restrict');
             $table->integer('quantity')->default(0);
             $table->timestamps();
         });

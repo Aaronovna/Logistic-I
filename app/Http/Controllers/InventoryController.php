@@ -20,6 +20,8 @@ class InventoryController extends Controller
                 'id' => $inventory->id,
                 'quantity' => $inventory->quantity,
                 'product_id' => $inventory->product_id,
+                'warehouse_id' => $inventory->warehouse_id,
+                'warehouse_name' => $inventory->warehouse->name,
                 'product_name' => $inventory->product->name ?? 'N/A',
                 'product_model' => $inventory->product->model ?? 'N/A',
                 'product_price' => $inventory->product->price ?? 'N/A',
@@ -30,6 +32,52 @@ class InventoryController extends Controller
         return response()->json($inventory);
     }
 
+    public function groupIndex()
+    {
+        // Retrieve all inventories
+        $inventory = Inventory::all();
+
+        // Group by product_id and sum quantities for products with the same ID
+        $groupedInventory = $inventory->groupBy('product_id')->map(function ($group) {
+            $firstItem = $group->first();
+            return [
+                'id' => $firstItem->id,
+                'product_id' => $firstItem->product_id,
+                'product_name' => $firstItem->product->name ?? 'N/A',
+                'product_model' => $firstItem->product->model ?? 'N/A',
+                'product_price' => $firstItem->product->price ?? 'N/A',
+                'restock_point' => $firstItem->product->restock_point ?? 'N/A',
+                'quantity' => $group->sum('quantity'),
+            ];
+        });
+
+        return response()->json($groupedInventory->values());
+    }
+
+    public function indexByWarehouse($warehouseId)
+    {
+        // Retrieve inventories for the specified warehouse ID
+        $inventory = Inventory::where('warehouse_id', $warehouseId)->get();
+
+        // Map the data to include necessary details
+        $inventory = $inventory->map(function ($inventory) {
+            return [
+                'id' => $inventory->id,
+                'quantity' => $inventory->quantity,
+                'product_id' => $inventory->product_id,
+                'warehouse_id' => $inventory->warehouse_id,
+                'warehouse_name' => $inventory->warehouse->name,
+                'product_name' => $inventory->product->name ?? 'N/A',
+                'product_model' => $inventory->product->model ?? 'N/A',
+                'product_price' => $inventory->product->price ?? 'N/A',
+                'restock_point' => $inventory->product->restock_point ?? 'N/A',
+            ];
+        });
+
+        return response()->json($inventory);
+    }
+
+
     /**
      * Store a newly created resource in storage.
      */
@@ -39,12 +87,14 @@ class InventoryController extends Controller
         $validatedData = $request->validate([
             'quantity' => 'required|integer|min:0',
             'product_id' => 'required|exists:products,id',
-            /* 'warehouse_id' => 'required|exists:warehouses,id', */
+            'warehouse_id' => 'required|exists:infrastructures,id',
         ]);
 
         DB::transaction(function () use ($validatedData) {
-            // Check if the product already exists in inventories
-            $inventory = Inventory::where('product_id', $validatedData['product_id'])->first();
+            // Check if the product and warehouse combination already exists in inventories
+            $inventory = Inventory::where('product_id', $validatedData['product_id'])
+                ->where('warehouse_id', $validatedData['warehouse_id'])
+                ->first();
 
             if ($inventory) {
                 // Add the new quantity to the existing inventory
@@ -56,7 +106,7 @@ class InventoryController extends Controller
                     'user_id' => auth('web')->id(),
                     'product_id' => $validatedData['product_id'],
                     'quantity' => $validatedData['quantity'],
-                    'log' => auth('web')->user()->name . " added {$validatedData['quantity']} units to inventory for product_id: {$validatedData['product_id']}. Total is now: $newQuantity",
+                    'log' => auth('web')->user()->name . " added {$validatedData['quantity']} units to inventory for product_id: {$validatedData['product_id']} in warehouse_id: {$validatedData['warehouse_id']}. Total is now: $newQuantity",
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -69,7 +119,7 @@ class InventoryController extends Controller
                     'user_id' => auth('web')->id(),
                     'product_id' => $validatedData['product_id'],
                     'quantity' => $validatedData['quantity'],
-                    'log' => auth('web')->user()->name . " created new inventory for product_id: {$validatedData['product_id']} with {$validatedData['quantity']} units",
+                    'log' => auth('web')->user()->name . " created new inventory for product_id: {$validatedData['product_id']} in warehouse_id: {$validatedData['warehouse_id']} with {$validatedData['quantity']} units",
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -78,6 +128,7 @@ class InventoryController extends Controller
 
         return response()->json(['message' => 'Inventory processed successfully']);
     }
+
 
     /**
      * Display the specified resource.
@@ -94,10 +145,17 @@ class InventoryController extends Controller
     {
         $validatedData = $request->validate([
             'quantity' => 'required|integer|min:0',
+            'warehouse_id' => 'required|exists:infrastructures,id',
         ]);
 
         DB::transaction(function () use ($validatedData, $id) {
+            // Find the inventory record or fail
             $inventory = Inventory::findOrFail($id);
+
+            // Ensure the warehouse_id matches
+            if ($inventory->warehouse_id != $validatedData['warehouse_id']) {
+                throw new \Exception("The warehouse_id does not match the inventory's associated warehouse.");
+            }
 
             // Update the inventory quantity
             $inventory->update(['quantity' => $validatedData['quantity']]);
@@ -107,7 +165,7 @@ class InventoryController extends Controller
                 'user_id' => auth('web')->id(),
                 'product_id' => $inventory->product_id,
                 'quantity' => $validatedData['quantity'],
-                'log' => auth('web')->user()->name . " set inventory for product_id: {$inventory->product_id} to {$validatedData['quantity']} units",
+                'log' => auth('web')->user()->name . " set inventory for product_id: {$inventory->product_id} to {$validatedData['quantity']} units in warehouse_id: {$inventory->warehouse_id}",
                 'update' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -116,6 +174,7 @@ class InventoryController extends Controller
 
         return response()->json(['message' => 'Inventory updated successfully']);
     }
+
 
 
     /**

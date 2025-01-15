@@ -16,10 +16,13 @@ class ProductController extends Controller
      */
     public function index()
     {
+        // Retrieve all products with related inventory, category, and supplier data
         $products = Product::with('inventory', 'category', 'supplier')->get();
 
+        // Map the data to include the total stock per product across all warehouses
         $products = $products->map(function ($product) {
-            $stock = $product->inventory->quantity ?? 'N/A';
+            // Sum up the quantities of inventory for each product only if product_id is the same
+            $totalStock = $product->inventory ? $product->inventory->where('product_id', $product->id)->sum('quantity') : 0;
 
             return [
                 'id' => $product->id,
@@ -29,19 +32,18 @@ class ProductController extends Controller
                 'description' => $product->description,
                 'image_url' => $product->image_url,
                 'price' => $product->price,
-                'stock' => $stock,
+                'stock' => $totalStock, // Total stock per product across all warehouses
                 'restock_point' => $product->restock_point,
                 'category_id' => $product->category_id,
                 'supplier_id' => $product->supplier_id,
                 'category_name' => $product->category->name ?? 'N/A',
                 'supplier_name' => $product->supplier->name ?? 'N/A',
-                'low_on_stock' => $stock <= $product->restock_point,
+                'low_on_stock' => $totalStock <= $product->restock_point,
             ];
         });
 
         return response()->json($products);
     }
-
 
     /**
      * Store a newly created resource in storage.
@@ -70,35 +72,35 @@ class ProductController extends Controller
      * Display the specified resource.
      */
     public function show(string $id)
-{
-    // Retrieve the product using its ID
-    $product = Product::with('inventory', 'category', 'supplier')->find($id);
+    {
+        // Retrieve the product using its ID
+        $product = Product::with('inventory', 'category', 'supplier')->find($id);
 
-    if (!$product) {
-        return response()->json(['message' => 'Product not found.'], 404);
+        if (!$product) {
+            return response()->json(['message' => 'Product not found.'], 404);
+        }
+
+        $stock = $product->inventory->quantity ?? 'N/A';
+
+        $response = [
+            'id' => $product->id,
+            'name' => $product->name,
+            'brand' => $product->brand,
+            'model' => $product->model,
+            'description' => $product->description,
+            'image_url' => $product->image_url,
+            'price' => $product->price,
+            'stock' => $stock,
+            'restock_point' => $product->restock_point,
+            'category_id' => $product->category_id,
+            'supplier_id' => $product->supplier_id,
+            'category_name' => $product->category->name ?? 'N/A',
+            'supplier_name' => $product->supplier->name ?? 'N/A',
+            'low_on_stock' => $stock <= $product->restock_point,
+        ];
+
+        return response()->json($response);
     }
-
-    $stock = $product->inventory->quantity ?? 'N/A';
-
-    $response = [
-        'id' => $product->id,
-        'name' => $product->name,
-        'brand' => $product->brand,
-        'model' => $product->model,
-        'description' => $product->description,
-        'image_url' => $product->image_url,
-        'price' => $product->price,
-        'stock' => $stock,
-        'restock_point' => $product->restock_point,
-        'category_id' => $product->category_id,
-        'supplier_id' => $product->supplier_id,
-        'category_name' => $product->category->name ?? 'N/A',
-        'supplier_name' => $product->supplier->name ?? 'N/A',
-        'low_on_stock' => $stock <= $product->restock_point,
-    ];
-
-    return response()->json($response);
-}
 
     /**
      * Update the specified resource in storage.
