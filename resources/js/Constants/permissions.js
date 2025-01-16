@@ -31,4 +31,20 @@ export const permissions = [
         code: 251,
         alias: 'edit_product',
     },
+
+
+
+
+    {
+        code: 2050,
+        alias: 'system',
+    },
+    {
+        code: 2051,
+        alias: 'staff',
+    },
+    {
+        code: 2052,
+        alias: 'auditor',
+    },
 ]
