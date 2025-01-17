@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';
-import { router } from '@inertiajs/react';
 
 import Modal from '@/Components/Modal';
 import Dev from '@/Pages/Dev';
@@ -11,14 +10,6 @@ export default function Authenticated({ user, children }) {
   const { setUserPermissions, setUserType, userPermissions, userType, theme } = useStateContext(user.permissions ? convertPermissions(user.permissions) : null);
 
   const [loading, setLoading] = useState(true); // Added loading state
-
-  const logout = () => {
-    router.post('/logout', {}, {
-      onFinish: () => {
-        router.visit('/login');
-      },
-    });
-  };
 
   useEffect(() => {
     setUserPermissions(convertPermissions(user.permissions));
@@ -48,7 +39,6 @@ export default function Authenticated({ user, children }) {
         if (!loading) {
           console.log("Setting userType to unknown");
           setUserType(3000);
-          //logout();
         }
       }
     } else {
@@ -68,10 +58,9 @@ export default function Authenticated({ user, children }) {
     setOpenDDG(false);
   };
 
-  // Show a loading spinner while userType is being determined
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-screen" style={{ background: theme.background }}>
         <p>Loading, please wait...</p>
       </div>
     );
@@ -106,6 +95,7 @@ export default function Authenticated({ user, children }) {
       </Modal>
 
       {children}
+      
     </div>
   );
 }
