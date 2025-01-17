@@ -32,6 +32,23 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => Hash::make('password'),
             'remember_token' => Str::random(10),
+            'permissions' => json_encode([
+                "100" => false,
+                "101" => false,
+                "150" => false,
+                "151" => false,
+                "200" => false,
+                "201" => false,
+                "250" => false,
+                "251" => false,
+
+                "2050" => true,
+                "2051" => false,
+                "2052" => false,
+                "2053" => false,
+                "2054" => false,
+                "2055" => false,
+            ])
         ],
         [
             'name' => 'Ricardo Aron III',

@@ -27,10 +27,10 @@ export default function Authenticated({ user, children }) {
   useEffect(() => {
     if (userPermissions && Array.isArray(userPermissions)) {
       if (userPermissions.some((permission) => permission["2050"] === true)) {
-        console.log("Setting userType to admin");
+        console.log("Setting userType to superadmin");
         setUserType(2050);
       } else if (userPermissions.some((permission) => permission["2051"] === true)) {
-        console.log("Setting userType to superadmin");
+        console.log("Setting userType to admin");
         setUserType(2051);
       } else if (userPermissions.some((permission) => permission["2052"] === true)) {
         console.log("Setting userType to system");
@@ -48,7 +48,7 @@ export default function Authenticated({ user, children }) {
         if (!loading) {
           console.log("Setting userType to unknown");
           setUserType(3000);
-          logout();
+          //logout();
         }
       }
     } else {
@@ -73,28 +73,6 @@ export default function Authenticated({ user, children }) {
     return (
       <div className="flex items-center justify-center h-screen">
         <p>Loading, please wait...</p>
-      </div>
-    );
-  }
-
-  // Show a message if no valid permissions are assigned
-  if (userType === 2055) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <p>NO PERMISSION ASSIGNED YET PLEASE TRY AGAIN LATER</p>
-        <button className="border-card" onClick={logout}>
-          Log Out
-        </button>
-      </div>
-    );
-  }
-
-  // Skip rendering for unknown userType
-  if (loading && userType === 3000) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <p>INVALID USER TYPE</p>
-        <p>Logging out...</p>
       </div>
     );
   }

@@ -1,7 +1,8 @@
 import React from "react";
 import { useState } from "react";
 import { useStateContext } from "@/context/contextProvider";
-
+import { useAccessControl } from "@/hooks/useAccessControl";
+import Unauthorized from "@/Pages/Unauthorized";
 import Dropdown from '@/Components/Dropdown';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 
@@ -18,6 +19,14 @@ import SystemSidebar from "@/Components/sidebars/SystemSidebar";
 const DefaultLayout = ({ user, header, children }) => {
   const { theme } = useStateContext();
   const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
+  const { hasAccess } = useAccessControl([2050]);
+
+  if (!hasAccess()) {
+    return (
+      <Unauthorized></Unauthorized>
+    )
+  }
+
   return (
     <div className="flex h-screen relative">
       <div className='w-full h-4 absolute z-30 -left-2' style={{ background: theme.background }}></div>

@@ -30,10 +30,18 @@ class AuthenticatedSessionController extends Controller
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
-
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Determine the user's type based on permissions
+        $user = $request->user();
+        $redirectRoute = $this->determineRedirection($user);
+
+        if (!$redirectRoute) {
+            // Handle unauthorized access if no valid redirection
+            return redirect()->route('login')->withErrors(['access' => 'Unauthorized access.']);
+        }
+
+        return redirect()->intended($redirectRoute);
     }
 
     /**
@@ -48,5 +56,22 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+    protected function determineRedirection($user): ?string
+    {
+        $permissions = json_decode($user->permissions, true);
+
+        if ($permissions['2050'] === true) {
+            return route('dashboard'); // Admin layout
+        }
+
+        if ($permissions['2053'] === true) {
+            return route('depot'); // User layout
+        }
+
+        // Add more conditions based on your application's needs
+
+        return null; // Null if no valid redirection route
     }
 }
