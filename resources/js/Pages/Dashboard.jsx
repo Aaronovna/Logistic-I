@@ -4,6 +4,7 @@ import { Head } from '@inertiajs/react';
 import Chart from '@/Components/Chart';
 import { generateRandomNumber } from '@/functions/numberGenerator';
 import DefaultLayout from '@/Layouts/DefaultLayout';
+import toast from 'react-hot-toast';
 
 import { useStateContext } from '@/context/contextProvider';
 
