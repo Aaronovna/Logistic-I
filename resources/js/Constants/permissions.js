@@ -32,16 +32,13 @@ export const permissions = [
         alias: 'edit_product',
     },
 
-
-
-
     {
         code: 2050,
-        alias: 'admin',
+        alias: 'superadmin',
     },
     {
         code: 2051,
-        alias: 'superadmin',
+        alias: 'admin',
     },
     {
         code: 2052,

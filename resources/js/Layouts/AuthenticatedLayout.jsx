@@ -27,26 +27,35 @@ export default function Authenticated({ user, children }) {
   useEffect(() => {
     if (userPermissions && Array.isArray(userPermissions)) {
       if (userPermissions.some((permission) => permission["2050"] === true)) {
-        console.log("Setting userType to system");
-        setUserType("system");
+        console.log("Setting userType to admin");
+        setUserType(2050);
       } else if (userPermissions.some((permission) => permission["2051"] === true)) {
-        console.log("Setting userType to staff");
-        setUserType("staff");
+        console.log("Setting userType to superadmin");
+        setUserType(2051);
       } else if (userPermissions.some((permission) => permission["2052"] === true)) {
-        console.log("Setting userType to auditor");
-        setUserType("auditor");
+        console.log("Setting userType to system");
+        setUserType(2052);
       } else if (userPermissions.some((permission) => permission["2053"] === true)) {
+        console.log("Setting userType to staff");
+        setUserType(2053);
+      } else if (userPermissions.some((permission) => permission["2054"] === true)) {
+        console.log("Setting userType to auditor");
+        setUserType(2054);
+      } else if (userPermissions.some((permission) => permission["2055"] === true)) {
         console.log("Setting userType to none");
-        setUserType("none");
+        setUserType(2055);
       } else {
-        console.log("Setting userType to unknown");
-        setUserType("unknown");
-        logout();
+        if (!loading) {
+          console.log("Setting userType to unknown");
+          setUserType(3000);
+          logout();
+        }
       }
     } else {
-      console.error("userPermissions is not valid:", userPermissions);
+      console.log("userPermissions is not valid:", userPermissions);
     }
-    setLoading(false); // Mark loading as complete after processing
+
+    setLoading(false);
   }, [userPermissions]);
 
   useEffect(() => {
@@ -69,9 +78,9 @@ export default function Authenticated({ user, children }) {
   }
 
   // Show a message if no valid permissions are assigned
-  if (!userType || userType === "none") {
+  if (userType === 2055) {
     return (
-      <div className="p-4">
+      <div className="flex flex-col items-center justify-center h-screen">
         <p>NO PERMISSION ASSIGNED YET PLEASE TRY AGAIN LATER</p>
         <button className="border-card" onClick={logout}>
           Log Out
@@ -81,8 +90,13 @@ export default function Authenticated({ user, children }) {
   }
 
   // Skip rendering for unknown userType
-  if (userType === "unknown") {
-    return null;
+  if (loading && userType === 3000) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <p>INVALID USER TYPE</p>
+        <p>Logging out...</p>
+      </div>
+    );
   }
 
   return (
