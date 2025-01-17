@@ -1,12 +1,10 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
 import { Link, useForm, usePage } from '@inertiajs/react';
 import { Transition } from '@headlessui/react';
+import { useStateContext } from '@/context/contextProvider';
 
 export default function UpdateProfileInformation({ mustVerifyEmail, status, className = '' }) {
     const user = usePage().props.auth.user;
+    const { theme } = useStateContext();
 
     const { data, setData, patch, errors, processing, recentlySuccessful } = useForm({
         name: user.name,
@@ -22,44 +20,43 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status, clas
     return (
         <section className={className}>
             <header>
-                <h2 className="text-lg font-medium text-gray-900">Profile Information</h2>
+                <h2 className="text-lg font-medium text-gray-900" style={{ color: theme.text }}>Profile Information</h2>
 
-                <p className="mt-1 text-sm text-gray-600">
+                <p className="mt-1 text-sm text-gray-600" style={{ color: theme.text }}>
                     Update your account's profile information and email address.
                 </p>
             </header>
 
             <form onSubmit={submit} className="mt-6 space-y-6">
                 <div>
-                    <InputLabel htmlFor="name" value="Name" />
+                    <label htmlFor="name" style={{ color: theme.text }}>Name</label>
 
-                    <TextInput
+                    <input
                         id="name"
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full border-card"
                         value={data.name}
                         onChange={(e) => setData('name', e.target.value)}
-                        required
-                        isFocused
-                        autoComplete="name"
                     />
 
-                    <InputError className="mt-2" message={errors.name} />
+                    <p className='text-sm text-red-600'>
+                        {errors.name}
+                    </p>
                 </div>
 
                 <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                    <label htmlFor="name" style={{ color: theme.text }}>Email</label>
 
-                    <TextInput
+                    <input
                         id="email"
                         type="email"
-                        className="mt-1 block w-full"
+                        className="mt-1 block w-full border-card"
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
-                        required
-                        autoComplete="username"
                     />
 
-                    <InputError className="mt-2" message={errors.email} />
+                    <p className='text-sm text-red-600'>
+                        {errors.email}
+                    </p>
                 </div>
 
                 {mustVerifyEmail && user.email_verified_at === null && (
@@ -85,7 +82,7 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status, clas
                 )}
 
                 <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
+                    <button disabled={processing} className='border-card' style={{ color: theme.text }}>Save</button>
 
                     <Transition
                         show={recentlySuccessful}
@@ -94,7 +91,7 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status, clas
                         leave="transition ease-in-out"
                         leaveTo="opacity-0"
                     >
-                        <p className="text-sm text-gray-600">Saved.</p>
+                        <p className="text-sm" style={{ color: theme.text }}>Saved.</p>
                     </Transition>
                 </div>
             </form>
