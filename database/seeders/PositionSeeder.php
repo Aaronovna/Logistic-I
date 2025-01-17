@@ -65,6 +65,8 @@ class PositionSeeder extends Seeder
                     "2051" => false,
                     "2052" => false,
                     "2053" => false,
+                    "2054" => false,
+                    "2055" => true,
                 ]),
                 'created_at' => now(),
                 'updated_at' => now(),

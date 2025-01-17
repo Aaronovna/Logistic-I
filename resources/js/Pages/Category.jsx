@@ -12,6 +12,7 @@ import { useStateContext } from '@/context/contextProvider';
 import Modal from '@/Components/Modal';
 import { Card } from '@/Components/Cards';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import DefaultLayout from '@/Layouts/DefaultLayout';
 import { categoryToastMessages } from '@/Constants/toastMessages';
 
 import { TbCategory } from "react-icons/tb";
@@ -149,49 +150,49 @@ export default function Category({ auth }) {
   return (
     <AuthenticatedLayout
       user={auth.user}
-      header={<h2 className="header" style={{ color: theme.text }}>Manage Categories</h2>}
     >
       <Head title="Category" />
 
-      <div className="content">
-        <div className='flex flex-col gap-4'>
-          <div className='flex items-end'>
-            <Card data={categories ? categories.length : "-"} name="Categories" Icon={TbCategory} />
-            <button
-              onClick={() => setOpenAddModal(true)}
-              className='rounded-lg h-fit py-2 px-2 ml-auto hover:scale-105 hover:shadow-xl duration-200 flex items-center'
-              style={{ background: theme.accent, color: theme.background }}
-            >
-              <TbPlus size={18} />
-              <p className='ml-1'>Add Category</p>
-            </button>
-          </div>
-
-          <div>
-            <div className={`${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} style={{ height: '508px' }} >
-              <AgGridReact
-                rowData={categories}
-                columnDefs={colDefs}
-                rowSelection='single'
-                pagination={true}
-                onGridReady={onGridReady}
-                onSelectionChanged={onSelectionChanged}
-              />
+      <DefaultLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Manage Categories</h2>}>
+        <div className="content">
+          <div className='flex flex-col gap-4'>
+            <div className='flex items-end'>
+              <Card data={categories ? categories.length : "-"} name="Categories" Icon={TbCategory} />
+              <button
+                onClick={() => setOpenAddModal(true)}
+                className='rounded-lg h-fit py-2 px-2 ml-auto hover:scale-105 hover:shadow-xl duration-200 flex items-center'
+                style={{ background: theme.accent, color: theme.background }}
+              >
+                <TbPlus size={18} />
+                <p className='ml-1'>Add Category</p>
+              </button>
             </div>
-          </div>
 
-          {selectedData ?
-            <div className='border-card p-4' style={{ color: theme.text }}>
-              <span className='flex mb-2'>
-                <p className='text-gray-300/50 mr-2'>{selectedData.id}</p>
-                <p className='font-semibold'>{selectedData.name}</p>
-              </span>
-              <p>{selectedData.description}</p>
+            <div>
+              <div className={`${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} style={{ height: '508px' }} >
+                <AgGridReact
+                  rowData={categories}
+                  columnDefs={colDefs}
+                  rowSelection='single'
+                  pagination={true}
+                  onGridReady={onGridReady}
+                  onSelectionChanged={onSelectionChanged}
+                />
+              </div>
             </div>
-            : null}
+
+            {selectedData ?
+              <div className='border-card p-4' style={{ color: theme.text }}>
+                <span className='flex mb-2'>
+                  <p className='text-gray-300/50 mr-2'>{selectedData.id}</p>
+                  <p className='font-semibold'>{selectedData.name}</p>
+                </span>
+                <p>{selectedData.description}</p>
+              </div>
+              : null}
+          </div>
         </div>
-      </div>
-
+      </DefaultLayout>
 
       {/* MODAL FOR CREATING NEW CATEGORY */}
       <Modal show={openAddModal} onClose={() => setOpenAddModal(false)} maxWidth='lg'>

@@ -1,4 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import DefaultLayout from '@/Layouts/DefaultLayout';
 import { Head } from '@inertiajs/react';
 
 import { useStateContext } from '@/context/contextProvider';
@@ -24,7 +25,7 @@ const formatValue = (value) => {
       //style: 'currency',
       currency: 'PHP',
     }).format(value);
-    
+
     return formattedValue;
   }
 
@@ -162,17 +163,17 @@ export default function Warehouse({ auth }) {
       fetchInventory();
       setOpenAddInventoryModal(false);
     } catch (error) {
-      toast.error(inventoryToastMessages.store.error,error);
+      toast.error(inventoryToastMessages.store.error, error);
     }
   };
-  
+
   const [openProductDropdown, setOpenProductDropdown] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState("");
   const [searchedProduct, setSearchedProduct] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
   const productDropdownRef = useRef(null);
   const [selectedWarehouse, setSelectedWarehouse] = useState(0);
-  
+
   const handleSearchProduct = (e) => {
     const searchQuery = e.target.value.toLowerCase();
     setSearchedProduct(searchQuery);
@@ -250,12 +251,12 @@ export default function Warehouse({ auth }) {
         warehouse_id: 0,
       });
 
-      toast.success(inventoryToastMessages.update.success );
+      toast.success(inventoryToastMessages.update.success);
       fetchInventoryStats();
       fetchInventory();
       setOpenEditInventoryModal(false);
     } catch (error) {
-      toast.error(inventoryToastMessages.update.error,error);
+      toast.error(inventoryToastMessages.update.error, error);
     }
   };
 
@@ -269,91 +270,92 @@ export default function Warehouse({ auth }) {
   return (
     <AuthenticatedLayout
       user={auth.user}
-      header={<h2 className="header" style={{ color: theme.text }}>Warehouse</h2>}
     >
       <Head title="Receipt" />
 
-      <div className="content">
-        <div className='border-card p-4 shadow-sm mb-6 flex h-28'>
-          <div>
-            <p className='text-2xl font-semibold tracking-wider'>Warehouse Name</p>
-            <p>Address</p>
+      <DefaultLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Warehouse</h2>}>
+        <div className="content">
+          <div className='border-card p-4 shadow-sm mb-6 flex h-28'>
+            <div>
+              <p className='text-2xl font-semibold tracking-wider'>Warehouse Name</p>
+              <p>Address</p>
+            </div>
+            <div className='ml-auto'>
+              <select className='p-2' name="warehouse_id" id="warehouse_id" onChange={handleAddProductInputChange}>
+                <option value={0}>All Warehouses</option>
+                {filterArray && filterArray(infrastructures, 'type', [100]).map((warehouse, index) => {
+                  return (
+                    <option key={index} value={warehouse.id}>{warehouse.name}</option>
+                  )
+                })
+                }
+              </select>
+            </div>
           </div>
-          <div className='ml-auto'>
-            <select className='p-2' name="warehouse_id" id="warehouse_id" onChange={handleAddProductInputChange}>
-              <option value={0}>All Warehouses</option>
-              { filterArray && filterArray(infrastructures, 'type', [100]).map((warehouse, index)=>{
-                return (
-                  <option key={index} value={warehouse.id}>{warehouse.name}</option>
-                )
-              })
-              }
-            </select>
+
+          <div className='flex gap-4 flex-col md:flex-row'>
+            <div className='flex flex-col gap-4 md:w-2/3 w-full'>
+              <div className='md:items-end mb-2 md:mb-0 md:gap-4 overflow-x-auto snap-mandatory snap-x pb-1 whitespace-nowrap'>
+                <Card2 data={totalProductValue} name="Total Asset Value" className={cardStyle} Icon={TbCurrencyPeso} iconColor={theme.text} />
+                <Card2 data={inventoryStats && inventoryStats?.totalStock} name="Total Stocks" className={cardStyle} Icon={TbBox} iconColor={theme.text} />
+              </div>
+              <div className={`w-full ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} style={{ height: '434px' }} >
+                <AgGridReact
+                  rowData={inventory}
+                  columnDefs={colDefs}
+                  rowSelection='single'
+                  pagination={true}
+                  onGridReady={onGridReady}
+                  onSelectionChanged={onSelectionChanged}
+                />
+              </div>
+            </div>
+
+            <div className='md:w-1/3 w-full flex flex-col' style={{ color: theme.text }}>
+              <div className='flex gap-2 mb-2'>
+                <button
+                  onClick={() => setOpenAddInventoryModal(true)}
+                  className='border-card w-full font-medium'
+                  style={{ background: theme.accent, borderColor: theme.border, color: theme.background }}
+                >
+                  Add Inventory
+                </button>
+              </div>
+              <div className='border-card p-4 w-full flex flex-1 flex-col'>
+                <div className='flex gap-4'>
+                  <div className='product-placeholder w-1/2 aspect-square rounded-md bg-contain'>
+                    <img src={product?.image_url} alt={product?.name} />
+                  </div>
+                  <div>
+                    <p className='text-lg font-semibold mb-2'>{product?.id ? product?.id : '--'}</p>
+                    <p>Restock Point <span className='font-semibold'>{product?.restock_point ? product?.restock_point : '--'}</span></p>
+                    <p>Stock <span className='font-semibold'>{product?.stock ? product?.stock : '--'}</span></p>
+                    <p>Price <span className='font-semibold'>{product?.price ? product?.price : '--'}</span></p>
+                  </div>
+                </div>
+
+                <div className='mt-4'>
+                  <p>Brand <span className='font-semibold'>{product?.brand ? product?.brand : '--'}</span></p>
+                  <p>Name <span className='font-semibold'>{product?.name ? product?.name : '--'}</span></p>
+                  <p>Model <span className='font-semibold'>{product?.model ? product?.model : '--'}</span></p>
+                  <p className='py-4'>{product?.description}</p>
+                  <p className='text-lg text-gray-500'>{product?.supplier_name ? product?.supplier_name : '--'}</p>
+                  <p className='text-sm text-gray-500'>{product?.category_name ? product?.category_name : '--'}</p>
+                </div>
+                <button
+                  className='border-card ml-auto mt-auto font-medium'
+                  style={{ background: theme.accent, borderColor: theme.border, color: theme.background }}
+                  onClick={() => setOpenEditInventoryModal(true)}
+                  disabled={selectedData ? false : true}
+                >
+                  Edit Stock
+                </button>
+
+              </div>
+            </div>
           </div>
         </div>
-
-        <div className='flex gap-4 flex-col md:flex-row'>
-          <div className='flex flex-col gap-4 md:w-2/3 w-full'>
-            <div className='md:items-end mb-2 md:mb-0 md:gap-4 overflow-x-auto snap-mandatory snap-x pb-1 whitespace-nowrap'>
-              <Card2 data={totalProductValue} name="Total Asset Value" className={cardStyle} Icon={TbCurrencyPeso} iconColor={theme.text} />
-              <Card2 data={inventoryStats && inventoryStats?.totalStock} name="Total Stocks" className={cardStyle} Icon={TbBox} iconColor={theme.text} />
-            </div>
-            <div className={`w-full ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} style={{ height: '434px' }} >
-              <AgGridReact
-                rowData={inventory}
-                columnDefs={colDefs}
-                rowSelection='single'
-                pagination={true}
-                onGridReady={onGridReady}
-                onSelectionChanged={onSelectionChanged}
-              />
-            </div>
-          </div>
-
-          <div className='md:w-1/3 w-full flex flex-col' style={{ color: theme.text }}>
-            <div className='flex gap-2 mb-2'>
-              <button
-                onClick={() => setOpenAddInventoryModal(true)}
-                className='border-card w-full font-medium'
-                style={{ background: theme.accent, borderColor: theme.border, color: theme.background }}
-              >
-                Add Inventory
-              </button>
-            </div>
-            <div className='border-card p-4 w-full flex flex-1 flex-col'>
-              <div className='flex gap-4'>
-                <div className='product-placeholder w-1/2 aspect-square rounded-md bg-contain'>
-                  <img src={product?.image_url} alt={product?.name} />
-                </div>
-                <div>
-                  <p className='text-lg font-semibold mb-2'>{product?.id ? product?.id : '--'}</p>
-                  <p>Restock Point <span className='font-semibold'>{product?.restock_point ? product?.restock_point : '--'}</span></p>
-                  <p>Stock <span className='font-semibold'>{product?.stock ? product?.stock : '--'}</span></p>
-                  <p>Price <span className='font-semibold'>{product?.price ? product?.price : '--'}</span></p>
-                </div>
-              </div>
-
-              <div className='mt-4'>
-                <p>Brand <span className='font-semibold'>{product?.brand ? product?.brand : '--'}</span></p>
-                <p>Name <span className='font-semibold'>{product?.name ? product?.name : '--'}</span></p>
-                <p>Model <span className='font-semibold'>{product?.model ? product?.model : '--'}</span></p>
-                <p className='py-4'>{product?.description}</p>
-                <p className='text-lg text-gray-500'>{product?.supplier_name ? product?.supplier_name : '--'}</p>
-                <p className='text-sm text-gray-500'>{product?.category_name ? product?.category_name : '--'}</p>
-              </div>
-              <button
-                className='border-card ml-auto mt-auto font-medium'
-                style={{ background: theme.accent, borderColor: theme.border, color: theme.background }}
-                onClick={()=>setOpenEditInventoryModal(true)}
-                disabled={selectedData ? false : true} 
-              >
-                Edit Stock
-              </button>
-
-            </div>
-          </div>
-        </div>
-      </div>
+      </DefaultLayout>
 
       <Modal show={openAddInventoryModal} onClose={() => setOpenAddInventoryModal(false)} maxWidth='lg'>
         <div className='p-4' style={{ color: theme.text }}>

@@ -37,14 +37,26 @@ export const permissions = [
 
     {
         code: 2050,
-        alias: 'system',
+        alias: 'admin',
     },
     {
         code: 2051,
-        alias: 'staff',
+        alias: 'superadmin',
     },
     {
         code: 2052,
+        alias: 'system',
+    },
+    {
+        code: 2053,
+        alias: 'staff',
+    },
+    {
+        code: 2054,
         alias: 'auditor',
+    },
+    {
+        code: 2055,
+        alias: 'none',
     },
 ]

@@ -7,6 +7,7 @@ export const ContextProvider = ({ children }) => {
     const [themePreference, setThemePreference] = useState('light');
     const [theme, setTheme] = useState({});
     const [userPermissions, setUserPermissions] = useState();
+    const [userType, setUserType] = useState(null);
 
     //Dummy Data
     const [ordersDummyData, setOrdersDummyData] = useState([]);
@@ -25,6 +26,7 @@ export const ContextProvider = ({ children }) => {
                 theme, setTheme,
                 themePreference, setThemePreference,
                 userPermissions, setUserPermissions,
+                userType, setUserType,
 
                 ordersDummyData, setOrdersDummyData,
             }}

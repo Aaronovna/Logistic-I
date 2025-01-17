@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
 import Chart from '@/Components/Chart';
 import { generateRandomNumber } from '@/functions/numberGenerator';
+import DefaultLayout from '@/Layouts/DefaultLayout';
 
 import { useStateContext } from '@/context/contextProvider';
 
@@ -89,39 +90,38 @@ export default function Dashboard({ auth }) {
   return (
     <AuthenticatedLayout
       user={auth.user}
-      header={<h2 className="header" style={{ color: theme.text }}>Dashboard</h2>}
     >
       <Head title="Dashboard" />
 
-      <div className="content">
+      <DefaultLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Dashboard</h2>}>
+        <div className="content">
+          <div className='flex gap-4'>
+            <Chart data={productStats?.productsByCategory} series={pieSeries} legendPosition='right' title='Product Stock' className='border-card w-1/2 shadow-md' />
+            <Chart data={productStats?.productsBySupplier && getTop5(productStats?.productsBySupplier)} series={barSeries} legendPosition='right' title='Supplier Distribution' className='border-card w-1/2 shadow-md' />
+          </div>
 
-        <div className='flex gap-4'>
-          <Chart data={productStats?.productsByCategory} series={pieSeries} legendPosition='right' title='Product Stock' className='border-card w-1/2 shadow-md' />
-          <Chart data={productStats?.productsBySupplier && getTop5(productStats?.productsBySupplier)} series={barSeries} legendPosition='right' title='Supplier Distribution' className='border-card w-1/2 shadow-md' />
-        </div>
-
-        <div className='mt-4 flex gap-4 h-80'>
-          <Chart data={data} series={lineSeries} title='Stock Levels' className='border-card w-3/4 shadow-md' />
-          <div className='border-card shadow-md w-1/4 h-80' style={{ background: theme.background, borderColor: theme.border }}>
-            <p className='text-center my-2'>Out of Stock</p>
-            <div className='overflow-y-auto h-60'>
-              {
-                productStats?.outOfStockProducts?.map((product, index) => {
-                  return (
-                    <div className='p-1' key={index}>
-                      <div className='mb-2 py-2'>
-                        <p className='font-semibold text-lg'>{`${product.name} ${product.model}`}</p>
+          <div className='mt-4 flex gap-4 h-80'>
+            <Chart data={data} series={lineSeries} title='Stock Levels' className='border-card w-3/4 shadow-md' />
+            <div className='border-card shadow-md w-1/4 h-80' style={{ background: theme.background, borderColor: theme.border }}>
+              <p className='text-center my-2'>Out of Stock</p>
+              <div className='overflow-y-auto h-60'>
+                {
+                  productStats?.outOfStockProducts?.map((product, index) => {
+                    return (
+                      <div className='p-1' key={index}>
+                        <div className='mb-2 py-2'>
+                          <p className='font-semibold text-lg'>{`${product.name} ${product.model}`}</p>
+                        </div>
+                        <hr />
                       </div>
-                      <hr />
-                    </div>
-                  )
-                })
-              }
+                    )
+                  })
+                }
+              </div>
             </div>
           </div>
-        </div>
 
-        <div>
+          <div>
             <div className='flex gap-2'>
               <div className='border-card shadow-md mt-4 w-1/2' style={{ background: theme.background, borderColor: theme.border }}>
                 <p className='text-center my-4'>Low on Stock</p>
@@ -146,7 +146,9 @@ export default function Dashboard({ auth }) {
               </div>
             </div>
           </div>
-      </div>
+        </div>
+      </DefaultLayout>
+
     </AuthenticatedLayout>
   );
 }
