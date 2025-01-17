@@ -73,11 +73,11 @@ export default function Warehouse({ auth }) {
     }
   };
 
-  const [infrastructures, setInfrastructures] = useState([]);
+  const [warehouses, setWarehouses] = useState([]);
   const fetchInfrastructures = async () => {
     try {
       const response = await axios.get('/infrastructure/get');
-      setInfrastructures(response.data);
+      setWarehouses(filterArray(response.data, 'type', [100]));
     } catch (error) {
       toast.error(productToastMessages.show.error, error);
     }
@@ -172,7 +172,7 @@ export default function Warehouse({ auth }) {
   const [searchedProduct, setSearchedProduct] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
   const productDropdownRef = useRef(null);
-  const [selectedWarehouse, setSelectedWarehouse] = useState(0);
+  const [selectedWarehouse, setSelectedWarehouse] = useState('0');
 
   const handleSearchProduct = (e) => {
     const searchQuery = e.target.value.toLowerCase();
@@ -203,7 +203,9 @@ export default function Warehouse({ auth }) {
     const { name, value } = e.target;
 
     setAddInventoryFormData({ ...addInventoryFormData, [name]: value });
-    setSelectedWarehouse(value);
+    if (name === 'warehouse_id') {
+      setSelectedWarehouse(value);
+    }
   };
 
   const handleAddInventoryInput = (product) => {
@@ -275,17 +277,17 @@ export default function Warehouse({ auth }) {
 
       <DefaultLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Warehouse</h2>}>
         <div className="content">
-          <div className='border-card p-4 shadow-sm mb-6 flex h-28'>
+          <div className='border-card p-4 shadow-sm mb-6 flex h-28' style={{ color: theme.text }}>
             <div>
-              <p className='text-2xl font-semibold tracking-wider'>Warehouse Name</p>
-              <p>Address</p>
+              <p className='text-2xl font-semibold tracking-wider'>{selectedWarehouse === '0' ? 'All Warehouses' : warehouses[selectedWarehouse-1]?.name}</p>
+              <p>{selectedWarehouse === '0' ? null : warehouses[selectedWarehouse-1]?.address}</p>
             </div>
             <div className='ml-auto'>
-              <select className='p-2' name="warehouse_id" id="warehouse_id" onChange={handleAddProductInputChange}>
+              <select className='p-2' name="warehouse_id" id="warehouse_id" style={{ background: theme.background }} onChange={handleAddProductInputChange}>
                 <option value={0}>All Warehouses</option>
-                {filterArray && filterArray(infrastructures, 'type', [100]).map((warehouse, index) => {
+                {warehouses && warehouses.map((warehouse, index) => {
                   return (
-                    <option key={index} value={warehouse.id}>{warehouse.name}</option>
+                    <option key={index} value={warehouse.id} >{warehouse.name}</option>
                   )
                 })
                 }
@@ -315,7 +317,8 @@ export default function Warehouse({ auth }) {
               <div className='flex gap-2 mb-2'>
                 <button
                   onClick={() => setOpenAddInventoryModal(true)}
-                  className='border-card w-full font-medium'
+                  disabled={selectedWarehouse === '0' ? true : false}
+                  className='border-card w-full font-medium if-disable'
                   style={{ background: theme.accent, borderColor: theme.border, color: theme.background }}
                 >
                   Add Inventory
@@ -343,7 +346,7 @@ export default function Warehouse({ auth }) {
                   <p className='text-sm text-gray-500'>{product?.category_name ? product?.category_name : '--'}</p>
                 </div>
                 <button
-                  className='border-card ml-auto mt-auto font-medium'
+                  className='border-card ml-auto mt-auto font-medium if-disable'
                   style={{ background: theme.accent, borderColor: theme.border, color: theme.background }}
                   onClick={() => setOpenEditInventoryModal(true)}
                   disabled={selectedData ? false : true}
@@ -359,7 +362,7 @@ export default function Warehouse({ auth }) {
 
       <Modal show={openAddInventoryModal} onClose={() => setOpenAddInventoryModal(false)} maxWidth='lg'>
         <div className='p-4' style={{ color: theme.text }}>
-          <p className='font-semibold text-xl mt-2 mb-4'>Add Product</p>
+          <p className='font-semibold text-xl mt-2 mb-4'>Add Inventory</p>
           <form onSubmit={handleAddInventorySubmit} className="flex flex-col" style={{ color: theme.text }}>
             <div className='relative w-full'>
               <input

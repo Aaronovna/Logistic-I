@@ -146,3 +146,7 @@ input:-webkit-autofill:focus {
 input[data-autocompleted] {
     background-color: transparent !important;
 }
+
+.if-disable {
+    @apply disabled:cursor-not-allowed disabled:!bg-gray-300 disabled:!text-gray-700;
+}
