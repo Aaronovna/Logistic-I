@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
         ]);
         
         Supplier::factory(10)->create();
-        User::factory(5)->create();
+        User::factory(6)->create();
         Product::factory(500)->create();
     }
 }

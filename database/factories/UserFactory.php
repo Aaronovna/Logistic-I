@@ -22,76 +22,161 @@ class UserFactory extends Factory
      * @return array<string, mixed>
      */
     public function definition(): array
-{
-    static $userIndex = 0;  // This will help keep track of which user to generate next.
+    {
+        static $userIndex = 0;  // This will help keep track of which user to generate next.
 
-    $users = [
-        [
-            'name' => 'Ashleigh Koepp',
-            'email' => 'ashleigh.koepp@example.net',
-            'email_verified_at' => now(),
-            'password' => Hash::make('password'),
-            'remember_token' => Str::random(10),
-            'permissions' => json_encode([
-                "100" => false,
-                "101" => false,
-                "150" => false,
-                "151" => false,
-                "200" => false,
-                "201" => false,
-                "250" => false,
-                "251" => false,
+        $users = [
+            [
+                'name' => 'Ashleigh Koepp',
+                'email' => 'ashleigh.koepp@example.net',
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+                'remember_token' => Str::random(10),
+                'permissions' => json_encode([
+                    "100" => false,
+                    "101" => false,
+                    "150" => false,
+                    "151" => false,
+                    "200" => false,
+                    "201" => false,
+                    "250" => false,
+                    "251" => false,
 
-                "2050" => true,
-                "2051" => false,
-                "2052" => false,
-                "2053" => false,
-                "2054" => false,
-                "2055" => false,
-            ])
-        ],
-        [
-            'name' => 'Ricardo Aron III',
-            'email' => 'aroniii.ricardo@gmail.com',
-            'email_verified_at' => now(),
-            'password' => Hash::make('password'),
-            'remember_token' => Str::random(10),
-        ],
-        [
-            'name' => 'Kent Mark Tejada',
-            'email' => 'strawberrymilkchicken@gmail.com',
-            'email_verified_at' => now(),
-            'password' => Hash::make('password'),
-            'remember_token' => Str::random(10),
-        ],
-        [
-            'name' => 'Kristel Casinillo',
-            'email' => 'casinillokristeldc17@gmail.com',
-            'email_verified_at' => now(),
-            'password' => Hash::make('password'),
-            'remember_token' => Str::random(10),
-        ],
-        [
-            'name' => 'John Vincent Dizon',
-            'email' => 'shotoooh123@gmail.com',
-            'email_verified_at' => now(),
-            'password' => Hash::make('password'),
-            'remember_token' => Str::random(10),
-        ],
-        [
-            'name' => 'Andy Barrantes',
-            'email' => '@marshallgustavo96@gmail.com',
-            'email_verified_at' => now(),
-            'password' => Hash::make('password'),
-            'remember_token' => Str::random(10),
-        ],
-    ];
+                    "2050" => true,
+                    "2051" => false,
+                    "2052" => false,
+                    "2053" => false,
+                    "2054" => false,
+                    "2055" => false,
+                ])
+            ],
+            [
+                'name' => 'Ricardo Aron III',
+                'email' => 'aroniii.ricardo@gmail.com',
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+                'remember_token' => Str::random(10),
+                'permissions' => json_encode([
+                    "100" => false,
+                    "101" => false,
+                    "150" => false,
+                    "151" => false,
+                    "200" => false,
+                    "201" => false,
+                    "250" => false,
+                    "251" => false,
 
-    $user = $users[$userIndex];
-    $userIndex = ($userIndex + 1) % count($users);
+                    "2050" => false,
+                    "2051" => true,
+                    "2052" => false,
+                    "2053" => false,
+                    "2054" => false,
+                    "2055" => false,
+                ])
+            ],
+            [
+                'name' => 'Kent Mark Tejada',
+                'email' => 'strawberrymilkchicken@gmail.com',
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+                'remember_token' => Str::random(10),
+                'permissions' => json_encode([
+                    "100" => false,
+                    "101" => false,
+                    "150" => false,
+                    "151" => false,
+                    "200" => false,
+                    "201" => false,
+                    "250" => false,
+                    "251" => false,
 
-    return $user;
-}
+                    "2050" => false,
+                    "2051" => false,
+                    "2052" => true,
+                    "2053" => false,
+                    "2054" => false,
+                    "2055" => false,
+                ])
+            ],
+            [
+                'name' => 'Kristel Casinillo',
+                'email' => 'casinillokristeldc17@gmail.com',
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+                'remember_token' => Str::random(10),
+                'permissions' => json_encode([
+                    "100" => false,
+                    "101" => false,
+                    "150" => false,
+                    "151" => false,
+                    "200" => false,
+                    "201" => false,
+                    "250" => false,
+                    "251" => false,
+
+                    "2050" => false,
+                    "2051" => false,
+                    "2052" => false,
+                    "2053" => true,
+                    "2054" => false,
+                    "2055" => false,
+                ])
+            ],
+            [
+                'name' => 'John Vincent Dizon',
+                'email' => 'shotoooh123@gmail.com',
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+                'remember_token' => Str::random(10),
+                'permissions' => json_encode([
+                    "100" => false,
+                    "101" => false,
+                    "150" => false,
+                    "151" => false,
+                    "200" => false,
+                    "201" => false,
+                    "250" => false,
+                    "251" => false,
+
+                    "2050" => false,
+                    "2051" => false,
+                    "2052" => false,
+                    "2053" => false,
+                    "2054" => true,
+                    "2055" => false,
+                ])
+            ],
+            [
+                'name' => 'Andy Barrantes',
+                'email' => '@marshallgustavo96@gmail.com',
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+                'remember_token' => Str::random(10),
+                'permissions' => json_encode([
+                    "100" => false,
+                    "101" => false,
+                    "150" => false,
+                    "151" => false,
+                    "200" => false,
+                    "201" => false,
+                    "250" => false,
+                    "251" => false,
+
+                    "2050" => false,
+                    "2051" => false,
+                    "2052" => false,
+                    "2053" => false,
+                    "2054" => false,
+                    "2055" => true,
+                ])
+            ],
+        ];
+
+        $user = $users[$userIndex];
+        $userIndex = ($userIndex + 1) % count($users);
+
+        return $user;
+    }
 
     /**
      * Indicate that the model's email address should be unverified.
