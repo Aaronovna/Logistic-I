@@ -12,6 +12,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\RequestMaterialController;
 
 Route::redirect('/', 'login');
 
@@ -85,6 +86,9 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post('/inventory/create', [InventoryController::class, 'store'])->name('inventory.store');
     Route::patch('/inventory/update/{id}', [InventoryController::class, 'update'])->name('inventory.update');
     Route::delete('/inventory/delete/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
+    Route::get('/inventory/get', [InventoryController::class, 'index'])->name('inventory.index');
+    Route::get('/inventory/get/warehouse/group', [InventoryController::class, 'groupIndex'])->name('inventory.groupIndex');
+    Route::get('/inventory/get/warehouse/{id}', [InventoryController::class, 'indexByWarehouse'])->name('inventory.indexByWarehouse');
     
     Route::get('/inventory/stats', [InventoryController::class, 'stats'])->name('inventory.stats');
     
@@ -98,11 +102,16 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/infrastructure/get/{id}', [InfrastructureController::class, 'show'])->name('infrastructure.show');
     Route::post('/infrastructure/create', [InfrastructureController::class, 'store'])->name('infrastructure.store');
     Route::patch('/infrastructure/update/{id}', [InfrastructureController::class, 'update'])->name('infrastructure.update');
-    Route::delete('/receipt/delete/{id}', [InfrastructureController::class, 'destroy'])->name(name: 'infrastructure.destroy');
+    Route::delete('/infrastructure/delete/{id}', [InfrastructureController::class, 'destroy'])->name('infrastructure.destroy');
+
+    Route::get('/request/get', [RequestMaterialController::class, 'index'])->name('request.index');
+    Route::get('/request/get/{id}', [RequestMaterialController::class, 'show'])->name('request.show');
+    Route::get('/request/get/infrastructure/depot', [RequestMaterialController::class, 'indexByDepot'])->name('request.indexByDepot');
+    Route::get('/request/get/infrastructure/terminal', [RequestMaterialController::class, 'indexByTerminal'])->name('request.indexByTerminal');
+    Route::post('/request/create', [RequestMaterialController::class, 'store'])->name('request.store');
+    Route::patch('/request/update/{id}', [RequestMaterialController::class, 'update'])->name('request.update');
+    Route::delete('/request/delete/{id}', [RequestMaterialController::class, 'destroy'])->name('request.destroy');
 });
-Route::get('/inventory/get', [InventoryController::class, 'index'])->name('inventory.index');
-Route::get('/inventory/get/warehouse/group', [InventoryController::class, 'groupIndex'])->name('inventory.groupIndex');
-Route::get('/inventory/get/warehouse/{id}', [InventoryController::class, 'indexByWarehouse'])->name('inventory.indexByWarehouse');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

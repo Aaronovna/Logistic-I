@@ -1,97 +1,368 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { useEffect, useState } from 'react';
+import InfrastructureLayout from '@/Layouts/InfrastructureLayout';
+import { useEffect, useState, useRef } from 'react';
 import { Head } from '@inertiajs/react';
-import { Link } from '@inertiajs/react';
 
 import { useStateContext } from '@/context/contextProvider';
-import { useCurrentLocation } from '@/hooks/useCurrentLocation';
-import { Card2 } from '@/Components/Cards';
-import BusCard from '@/Components/cards/BusCard';
+import { filterArray } from '@/functions/filterArray';
+import toast from 'react-hot-toast';
 
-import { TbBus } from "react-icons/tb";
-import { TbMapPin } from "react-icons/tb";
-import { TbCircleOff } from "react-icons/tb";
-import { feedbackVibrant } from '@/Constants/themes';
+import { AgGridReact } from 'ag-grid-react';
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-quartz.css";
+
+import Modal from '@/Components/Modal';
 
 export default function Terminal({ auth }) {
-  const { theme } = useStateContext();
-  const { currentLocation, loading } = useCurrentLocation();
+  const { theme, themePreference } = useStateContext();
 
-  const [query, setQuery] = useState('');
+  const [terminals, setTerminals] = useState();
+  const fetchInfrastructures = async () => {
+    try {
+      const response = await axios.get('/infrastructure/get');
+      setTerminals(filterArray(response.data, 'type', [102]));
+    } catch (error) {
+      toast.error(productToastMessages.show.error, error);
+    }
+  };
 
-  const searchInMyLocation = async () => {
-    if (!currentLocation) {
-      console.warn('Current location is not available.');
+  const [products, setProducts] = useState();
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get('/product/get');
+      setProducts(response.data);
+    } catch (error) {
+      toast.error(productToastMessages.show.error, error);
+    }
+  };
+
+  useEffect(() => {
+    fetchRequest();
+    fetchInfrastructures();
+    fetchProducts();
+  }, [])
+
+  const handleTerminalChange = (e) => {
+    const { value } = e.target;
+    setSelectedTerminal(terminals.find(terminal => terminal.id === parseInt(value)));
+  };
+
+  const [selectedTerminal, setSelectedTerminal] = useState();
+
+  useEffect(() => {
+    if (terminals) {
+      setSelectedTerminal(terminals[0]);
+    }
+  }, [terminals])
+
+  const colDefs = [
+    { field: "user_name", filter: true, flex: 1, minWidth: 120, headerName: 'User' },
+    { field: "type", filter: true, flex: 1, minWidth: 120 },
+    { field: "items", filter: true, flex: 1, minWidth: 120, headerName: 'Requested Material', autoHeight: true,
+      cellRenderer: (params) => {
+        const items  = JSON.parse(params.data.items);
+        
+        return (
+          <div>
+            {
+              items.map((item, index)=>{
+                return (
+                  <p key={index}>{`${item.product_name ? item.product_name : `ID:${item.product_id}`} ${item.quantity}`}</p>
+                )
+              })
+            }
+          </div>
+        )
+      }
+     },
+    { field: "status", filter: true, flex: 1, minWidth: 120 },
+    { field: "Action", maxWidth: 100,
+      cellRenderer: (params => {
+        const handleDelete = async (id) => {
+          try {
+            const response = await axios.delete(`/request/delete/${id}`);  // Replace with your actual delete endpoint
+            if (response.status === 200) {
+              alert('Product deleted successfully');
+            } else {
+              alert('Failed to delete product');
+            }
+          } catch (error) {
+            console.error('Error deleting product:', error);
+            alert('Failed to delete product');
+          }
+        };
+  
+        return (
+          <button
+            onClick={() => handleDelete(params.data.id)}  // Assuming `product_id` is the ID to delete
+            className="px-2 py-1"
+          >
+            Delete
+          </button>
+        );
+      })
+     },
+  ];
+
+  const [openRequestModal, setOpenRequestModal] = useState(false);
+
+  const [requestMaterialFormData, setRequestMaterialFormData] = useState({
+    user_id: null,
+    infrastructure_id: null,
+    type: 'maintenance',
+    items: [],
+  });
+
+  const [openProductDropdown, setOpenProductDropdown] = useState(false);
+  const [searchedProduct, setSearchedProduct] = useState("");
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const productDropdownRef = useRef(null);
+
+  const handleSearchProduct = (e) => {
+    const searchQuery = e.target.value.toLowerCase();
+    setSearchedProduct(searchQuery);
+
+    if (searchQuery.trim() === "") {
+      setFilteredProducts([]);
       return;
     }
 
+    const filtered = products.filter(products =>
+      products.id.toString().toLowerCase().includes(searchQuery) ||
+      products.name.toLowerCase().includes(searchQuery) ||
+      products.model.toLowerCase().includes(searchQuery)
+    );
+
+    setFilteredProducts(filtered);
+    setOpenProductDropdown(true);
+  };
+
+  const [requestedItems, setRequestedItems] = useState([]);
+  const handleSelectProduct = (product) => {
+    setRequestedItems((prevItems) => {
+      const productExists = prevItems.some((item) => item.id === product.id);
+
+      if (productExists) {
+        return prevItems; // If the product already exists, return the existing array
+      }
+
+      // Add the product to both `requestedItems` and `requestMaterialFormData.items`
+      const updatedItems = [...prevItems, product];
+
+      setRequestMaterialFormData((prevData) => ({
+        ...prevData,
+        items: [...prevData.items, { product_id: product.id, product_name: product.name, quantity: '' }], // Initialize quantity to 0
+      }));
+
+      return updatedItems;
+    });
+
+    setSearchedProduct('');
+    setOpenProductDropdown(false);
+  };
+
+  const handleDeleteItem = (id) => {
+    setRequestedItems((prevItems) => {
+      const updatedItems = prevItems.filter((item) => item.id !== id);
+
+      // Remove the corresponding item from `requestMaterialFormData.items`
+      setRequestMaterialFormData((prevData) => ({
+        ...prevData,
+        items: prevData.items.filter((item) => item.product_id !== id),
+      }));
+
+      return updatedItems;
+    });
+  };
+
+  const handleQuantityChange = (id, value) => {
+    // Update quantity in `requestedItems`
+    setRequestedItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, quantity: value } : item
+      )
+    );
+
+    // Update quantity in `requestMaterialFormData.items`
+    setRequestMaterialFormData((prevData) => ({
+      ...prevData,
+      items: prevData.items.map((item) =>
+        item.product_id === id ? { ...item, quantity: value } : item
+      ),
+    }));
+  };
+
+  const handleAddRequestSubmit = async (e) => {
+    e.preventDefault();
+
+    const data = {
+      user_id: auth.user.id,
+      infrastructure_id: selectedTerminal.id,
+      type: requestMaterialFormData.type,
+      items: JSON.stringify(requestMaterialFormData.items),
+    }
+
+    console.log(data);
+
     try {
-      const response = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLocation.lat}&lon=${currentLocation.lng}`);
-      setQuery(response.data.display_name);
+      const response = await axios.post('/request/create', data);
+
     } catch (error) {
-      console.error("Error getting address: ", error);
+
     }
   }
 
-  useEffect(() => {
-    if (!loading) {
-      searchInMyLocation();
+  const handleAddRequestInputChange = (e) => {
+    const { name, value } = e.target;
+    setRequestMaterialFormData({ ...requestMaterialFormData, [name]: value });
+  };
+
+  const [requests, setRequests] = useState();
+  const fetchRequest = async () => {
+    try {
+      const response = await axios.get('request/get/infrastructure/terminal');
+      setRequests(response.data);
+    } catch (error) {
+      toast.error(productToastMessages.show.error, error);
     }
-  }, [loading, currentLocation]);
+  };
 
   return (
     <AuthenticatedLayout
       user={auth.user}
-      header={<h2 className="header" style={{ color: theme.text }}>Terminal</h2>}
     >
-      <Head title="Terminal" />
-
-      <div className="content">
-        <div className='border-card p-4 shadow-sm mb-4 flex md:flex-row flex-col-reverse min-h-28'>
-          <div className='flex flex-col w-full'>
-            <p className='text-2xl font-semibold tracking-wider'>Terminal Name</p>
-            <p className='mt-auto text-ellipsis overflow-hidden whitespace-nowrap'>{query}</p>
+      <Head title="Depot" />
+      <InfrastructureLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Terminal</h2>}>
+        <div className="content">
+          <div className='border-card p-4 shadow-sm mb-4 flex flex-col h-56 bg-cover'
+            style={{
+              backgroundImage: selectedTerminal?.image_url ? `url(${selectedTerminal.image_url})` : 'none',
+            }}>
+            <div className='flex'>
+              <p className='text-xl font-semibold py-2 px-4 bg-white/40 backdrop-blur-sm rounded-full shadow-sm w-fit'>{selectedTerminal?.name}</p>
+              <div className='ml-auto bg-white/10 backdrop-blur-sm rounded-full h-fit duration-200 px-2'>
+                <select className='p-2 bg-transparent border-0' name="selectdepot" id="selectdepot" onChange={handleTerminalChange}>
+                  {terminals && terminals.map((terminal, index) => {
+                    return (
+                      <option key={index} value={terminal.id} style={{ background: theme.background, color: theme.text }}>{terminal.name}</option>
+                    )
+                  })
+                  }
+                </select>
+              </div>
+            </div>
+            <p className=' mt-auto py-1 px-2 bg-white/40 backdrop-blur-sm rounded-full shadow-md w-fit'>{selectedTerminal?.address}</p>
           </div>
-          <div className='md:ml-auto'>
-            <select className='p-2 w-full md:w-auto' name="select_warehouse" id="select_warehouse">
-              <option value="0">All Terminal</option>
-              <option value="1">Terminal 1</option>
-            </select>
+
+          <div className='w-full flex gap-2 mb-4'>
+            <button className='border-card font-semibold' style={{ background: theme.accent, color: theme.background }}>Return</button>
+            <button
+              className='border-card font-semibold'
+              style={{ background: theme.accent, color: theme.background }}
+              onClick={() => setOpenRequestModal(true)}
+            >
+              Request
+            </button>
+          </div>
+
+          <div className={`w-full ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} style={{ height: '434px' }} >
+            <AgGridReact
+              rowData={requests}
+              columnDefs={colDefs}
+              rowSelection='single'
+              pagination={true}
+            /* onGridReady={onGridReady}
+            onSelectionChanged={onSelectionChanged} */
+            />
           </div>
         </div>
 
-        <div className='w-full flex md:flex-row flex-col-reverse gap-4'>
+        <Modal show={openRequestModal} onClose={() => setOpenRequestModal(false)}>
+          <div className='p-4' style={{ color: theme.text }}>
+            <p className='font-semibold text-xl mt-2 mb-4'>Request Materials</p>
+            <form onSubmit={handleAddRequestSubmit}>
+              <div className='flex gap-2'>
+                <div className='relative w-full'>
+                  <input
+                    type="text"
+                    placeholder="Search product..."
+                    className='border-card w-full mb-2 bg-transparent'
+                    value={searchedProduct}
+                    onChange={handleSearchProduct}
+                    onClick={() => setOpenProductDropdown(!openProductDropdown)}
+                    style={{ borderColor: theme.border }}
+                  />
+                  {openProductDropdown &&
+                    <div
+                      ref={productDropdownRef}
+                      className="absolute w-full rounded-md max-h-44 overflow-y-auto z-50 backdrop-blur border-card"
+                    >
+                      {searchedProduct.trim() === ""
+                        ? <p className="p-2">Search Product</p>
+                        : filteredProducts.length > 0
+                          ? filteredProducts.map((product, index) =>
+                            <button key={index} className="block p-2 hover:bg-gray-300/50 w-full text-left" onClick={() => { handleSelectProduct(product) }}>
+                              {`${product.id} ${product.name} ${product.model}`}
+                            </button>)
+                          : <p className="p-2 text-[#FF9E8D]">No Product Found</p>
+                      }
+                    </div>}
+                </div>
 
-          <div className='md:w-4/5 w-full'>
-            <div className='flex justify-between items-end mb-4'>
-              <p className='font-semibold text-xl'>Terminal's Buses</p>
-              <Link
-                className='ml-auto p-2 font-medium border-card'
-                style={{ background: theme.accent, borderColor: theme.border, color: theme.background }}
-                href={route('terminal-request')}
-              >
-                Request
-              </Link>
-            </div>
-            <div className='w-full grid gap-4 grid-cols-2'>
-              <BusCard x={query} />
-              <BusCard x={query} />
-              <BusCard x={query} />
-              <BusCard x={query} />
-              <BusCard x={query} />
-              <BusCard x={query} />
-            </div>
-          </div>
+                <select name="type" id="type" className='border-card h-fit' onChange={handleAddRequestInputChange}>
+                  <option value="maintenance">Maintenance</option>
+                  <option value="repair">Repair</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div className='h-96 overflow-y-auto my-4'>
+                <table className="w-full border-collapse table-auto border">
+                  <thead className='sticky top-0 z-10'>
+                    <tr className="bg-gray-300">
+                      <th className="text-left p-2 w-3/5 font-semibold">Item Name & Model</th>
+                      <th className="text-left p-2 w-2/5 font-semibold">Quantity</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {requestedItems &&
+                      requestedItems.map((item, index) => (
+                        <tr
+                          key={index}
+                          className="even:bg-gray-200 group relative"
+                          style={{ height: 'auto' }} // Ensure rows are only as tall as their content
+                        >
+                          {/* Item Name and Model */}
+                          <td className="p-2 align-top">
+                            {`${item.name} - ${item.model}`}
+                            <span
+                              className="absolute top-0 right-0 cursor-pointer opacity-0 m-1 group-hover:opacity-100 text-red-500"
+                              onClick={() => handleDeleteItem(item.id)}
+                            >
+                              &#215;
+                            </span>
+                          </td>
 
-          <div className='px-0 md:w-1/5 w-full'>
-            <div className='flex md:flex-col flex-row overflow-auto gap-4'>
-              <Card2 name='Available' data={5} Icon={TbBus} iconColor={feedbackVibrant.success} />
-              <Card2 name='On trip' data={7} Icon={TbMapPin} iconColor={feedbackVibrant.info} />
-              <Card2 name='Unavailable' data={3} Icon={TbCircleOff} iconColor={feedbackVibrant.danger} />
-            </div>
+                          {/* Quantity Input */}
+                          <td className="p-2 pr-6 align-top">
+                            <input
+                              type="number"
+                              className="border border-gray-300 p-1 rounded w-full"
+                              style={{ height: 'auto' }} // Ensure input height does not stretch
+                              value={requestMaterialFormData.items.find((i) => i.product_id === item.id)?.quantity} // Show current quantity
+                              onChange={(e) => handleQuantityChange(item.id, e.target.value)}
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+
+              </div>
+              <button className='border-card'>Request</button>
+            </form>
           </div>
-        </div>
-      </div>
+        </Modal>
+      </InfrastructureLayout>
     </AuthenticatedLayout>
   );
 }
