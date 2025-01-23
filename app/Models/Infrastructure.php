@@ -12,4 +12,9 @@ class Infrastructure extends Model
     protected $fillable = [
         'type', 'name', 'address', 'access', 'image_url'
     ];
+
+    public function request()
+    {
+        return $this->hasMany(RequestMaterial::class);
+    }
 }
