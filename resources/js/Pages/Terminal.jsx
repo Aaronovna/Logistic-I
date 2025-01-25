@@ -151,7 +151,7 @@ export default function Terminal({ auth }) {
 
       setRequestMaterialFormData((prevData) => ({
         ...prevData,
-        items: [...prevData.items, { product_id: product.id, product_name: product.name, quantity: '' }], // Initialize quantity to 0
+        items: [...prevData.items, { product_id: product.id, product_name: product.name, quantity: '', filled: false }], // Initialize quantity to 0
       }));
 
       return updatedItems;

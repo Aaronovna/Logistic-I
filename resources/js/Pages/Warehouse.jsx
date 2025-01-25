@@ -144,13 +144,20 @@ export default function Warehouse({ auth }) {
   const [addInventoryFormData, setAddInventoryFormData] = useState({
     quantity: '',
     product_id: '',
-    warehouse_id: 0,
+    warehouse_id: null,
   });
 
   const handleAddInventorySubmit = async (e) => {
     e.preventDefault();
+
+    const payload = {
+      quantity: addInventoryFormData.quantity,
+      product_id: addInventoryFormData.product_id,
+      warehouse_id: selectedWarehouse.id,
+    }
+
     try {
-      const response = await axios.post('/inventory/create', addInventoryFormData);
+      const response = await axios.post('/inventory/create', payload);
 
       setAddInventoryFormData({
         quantity: '',
@@ -172,7 +179,7 @@ export default function Warehouse({ auth }) {
   const [searchedProduct, setSearchedProduct] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
   const productDropdownRef = useRef(null);
-  const [selectedWarehouse, setSelectedWarehouse] = useState('0');
+  const [selectedWarehouse, setSelectedWarehouse] = useState(null);
 
   const handleSearchProduct = (e) => {
     const searchQuery = e.target.value.toLowerCase();
@@ -199,13 +206,15 @@ export default function Warehouse({ auth }) {
     setOpenProductDropdown(false);
   };
 
+  const handleWarehouseChange = (e) => {
+    const { value } = e.target;
+    setSelectedWarehouse(warehouses.find(warehouse => warehouse.id === parseInt(value)));
+  };
+
   const handleAddProductInputChange = (e) => {
     const { name, value } = e.target;
 
     setAddInventoryFormData({ ...addInventoryFormData, [name]: value });
-    if (name === 'warehouse_id') {
-      setSelectedWarehouse(value);
-    }
   };
 
   const handleAddInventoryInput = (product) => {
@@ -241,7 +250,7 @@ export default function Warehouse({ auth }) {
 
   const handleEditInventorySubmit = async (e) => {
     e.preventDefault();
-
+    
     try {
       const response = await axios.patch(`/inventory/update/${selectedData.id}`, {
         quantity: editInventoryFormData.quantity,
@@ -279,18 +288,18 @@ export default function Warehouse({ auth }) {
         <div className="content">
           <div className='border-card p-4 shadow-sm mb-6 flex h-28' style={{ color: theme.text }}>
             <div>
-              <p className='text-2xl font-semibold tracking-wider'>{selectedWarehouse === '0' ? 'All Warehouses' : warehouses[selectedWarehouse-1]?.name}</p>
-              <p>{selectedWarehouse === '0' ? null : warehouses[selectedWarehouse-1]?.address}</p>
+              <p className='text-2xl font-semibold tracking-wider'>{selectedWarehouse?.name}</p>
+              <p>{selectedWarehouse?.name}</p>
             </div>
             <div className='ml-auto'>
-              <select className='p-2' name="warehouse_id" id="warehouse_id" style={{ background: theme.background }} onChange={handleAddProductInputChange}>
-                <option value={0}>All Warehouses</option>
+              <select className='p-2' name="warehouse_id" id="warehouse_id" style={{ background: theme.background }} onChange={handleWarehouseChange}>
                 {warehouses && warehouses.map((warehouse, index) => {
                   return (
                     <option key={index} value={warehouse.id} >{warehouse.name}</option>
                   )
                 })
                 }
+                <option value={0}>All Warehouses</option>
               </select>
             </div>
           </div>
@@ -317,7 +326,7 @@ export default function Warehouse({ auth }) {
               <div className='flex gap-2 mb-2'>
                 <button
                   onClick={() => setOpenAddInventoryModal(true)}
-                  disabled={selectedWarehouse === '0' ? true : false}
+                  disabled={!selectedWarehouse}
                   className='border-card w-full font-medium if-disable'
                   style={{ background: theme.accent, borderColor: theme.border, color: theme.background }}
                 >
@@ -332,7 +341,7 @@ export default function Warehouse({ auth }) {
                   <div>
                     <p className='text-lg font-semibold mb-2'>{product?.id ? product?.id : '--'}</p>
                     <p>Restock Point <span className='font-semibold'>{product?.restock_point ? product?.restock_point : '--'}</span></p>
-                    <p>Stock <span className='font-semibold'>{product?.stock ? product?.stock : '--'}</span></p>
+                    <p>Stock <span className='font-semibold'>{product?.total_stock ? product?.total_stock : '--'}</span></p>
                     <p>Price <span className='font-semibold'>{product?.price ? product?.price : '--'}</span></p>
                   </div>
                 </div>

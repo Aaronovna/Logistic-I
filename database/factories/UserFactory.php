@@ -148,7 +148,7 @@ class UserFactory extends Factory
             ],
             [
                 'name' => 'Andy Barrantes',
-                'email' => '@marshallgustavo96@gmail.com',
+                'email' => 'marshallgustavo96@gmail.com',
                 'email_verified_at' => now(),
                 'password' => Hash::make('password'),
                 'remember_token' => Str::random(10),

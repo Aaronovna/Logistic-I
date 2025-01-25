@@ -26,4 +26,9 @@ class RequestMaterial extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function dispatch()
+    {
+        return $this->hasOne(DispatchMaterial::class);
+    }
 }

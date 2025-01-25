@@ -135,8 +135,42 @@ class InventoryController extends Controller
      */
     public function show(string $id)
     {
-        //
+        // Retrieve the inventory for the given product ID, including related warehouses and products
+        $inventories = Inventory::with('warehouse', 'product')->where('product_id', $id)->get();
+
+        if ($inventories->isEmpty()) {
+            return response()->json(['message' => 'Product not found or no inventory available.'], 404);
+        }
+
+        // Calculate the total quantity across all warehouses
+        $totalQuantity = $inventories->sum('quantity');
+
+        // Map the data for each warehouse
+        $inventoryData = $inventories->map(function ($inventory) {
+            return [
+                'warehouse_id' => $inventory->warehouse_id,
+                'warehouse_name' => $inventory->warehouse->name ?? 'N/A',
+                'quantity' => $inventory->quantity,
+            ];
+        });
+
+        // Use the first inventory item to fetch product details
+        $product = $inventories->first()->product;
+
+        // Prepare the response data
+        $response = [
+            'product_id' => $id,
+            'product_name' => $product->name ?? 'N/A',
+            'product_model' => $product->model ?? 'N/A',
+            'product_price' => $product->price ?? 'N/A',
+            'restock_point' => $product->restock_point ?? 'N/A',
+            'total_quantity' => $totalQuantity,
+            'warehouses' => $inventoryData,
+        ];
+
+        return response()->json($response);
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -175,6 +209,39 @@ class InventoryController extends Controller
         return response()->json(['message' => 'Inventory updated successfully']);
     }
 
+    public function updateStock(Request $request, string $id)
+    {
+        $validatedData = $request->validate([
+            'quantity' => 'required|integer',
+        ]);
+
+        DB::transaction(function () use ($validatedData, $id) {
+            // Find the inventory record by product_id
+            $inventory = Inventory::where('product_id', $id)->firstOrFail();
+
+            // Update the inventory quantity
+            $newQuantity = $inventory->quantity - $validatedData['quantity'];
+
+            if ($newQuantity < 0) {
+                throw new \Exception("Not enough stock available for product ID: {$id}");
+            }
+
+            $inventory->update(['quantity' => $newQuantity]);
+
+            // Log the update action in inventory_trails
+            DB::table('inventory_trails')->insert([
+                'user_id' => auth('web')->id(),
+                'product_id' => $id,
+                'quantity' => $validatedData['quantity'],
+                'log' => auth('web')->user()->name . " deducted {$validatedData['quantity']} units for product_id: {$id}. Remaining stock: {$newQuantity}",
+                'update' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        });
+
+        return response()->json(['message' => 'Stock updated successfully']);
+    }
 
 
     /**

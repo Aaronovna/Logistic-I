@@ -6,6 +6,7 @@ use Inertia\Inertia;
 
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DispatchMaterialController;
 use App\Http\Controllers\InfrastructureController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\UserController;
@@ -27,6 +28,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/receipt', fn () => Inertia::render('Receipt'))->name('receipt');
     Route::get('/receipt/history', fn () => Inertia::render('Receipt.History'))->name('receipt-history');
     Route::get('/dispatch', fn () => Inertia::render('Dispatch'))->name('dispatch');
+    Route::get('/dispatch/history', fn () => Inertia::render('Dispatch.History'))->name('dispatch-history');
     Route::get('/warehouse', fn () => Inertia::render('Warehouse'))->name('warehouse');
     Route::get('/depot', fn () => Inertia::render('Depot'))->name('depot');
     Route::get('/depot/inventory', fn () => Inertia::render('Depot.Inventory'))->name('depot-inventory');
@@ -54,7 +56,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     //? START: PRODUCT REQUEST /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     Route::get('/product/get', [ProductController::class, 'index'])->name('product.index');
-    Route::get('/product/get/{id}', [ProductController::class, 'show'])->name('product.show');
+    
     Route::post('/product/store', [ProductController::class, 'store'])->name('product.store');
     Route::patch('/product/update/{id}', [ProductController::class, 'update'])->name('product.update');
     Route::delete('/product/delete/{id}', [ProductController::class, 'destroy'])->name('product.destroy');
@@ -64,7 +66,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     //! END: PRODUCT REQUEST ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     Route::get('/supplier/get', [SupplierController::class, 'index'])->name('supplier.index');
-
+    Route::get('/product/get/{id}', [ProductController::class, 'show'])->name('product.show');
     Route::get('/category/get', [CategoryController::class, 'index'])->name('category.index');
     Route::post('/category/create', [CategoryController::class, 'store'])->name('category.store');
     Route::delete('/category/delete/{id}', [CategoryController::class, 'destroy'])->name('category.destroy');
@@ -82,15 +84,16 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::patch('/user/update/permission/{id}', [UserController::class, 'update_permission'])->name('user.update_permission');
     Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.destroy');
 
+    Route::get('/inventory/get', [InventoryController::class, 'index'])->name('inventory.index');
     Route::get('/inventory/get/{id}', [InventoryController::class, 'show'])->name('inventory.show');
     Route::post('/inventory/create', [InventoryController::class, 'store'])->name('inventory.store');
     Route::patch('/inventory/update/{id}', [InventoryController::class, 'update'])->name('inventory.update');
     Route::delete('/inventory/delete/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
-    Route::get('/inventory/get', [InventoryController::class, 'index'])->name('inventory.index');
     Route::get('/inventory/get/warehouse/group', [InventoryController::class, 'groupIndex'])->name('inventory.groupIndex');
     Route::get('/inventory/get/warehouse/{id}', [InventoryController::class, 'indexByWarehouse'])->name('inventory.indexByWarehouse');
-    
     Route::get('/inventory/stats', [InventoryController::class, 'stats'])->name('inventory.stats');
+    Route::patch('/inventory/stock/update/{id}', [InventoryController::class, 'updateStock'])->name('inventory.updateStock');
+
     
     Route::get('/receipt/get', [ReceiptController::class, 'index'])->name('receipt.index');
     Route::get('/receipt/get/{id}', [ReceiptController::class, 'show'])->name('receipt.show');
@@ -111,6 +114,12 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post('/request/create', [RequestMaterialController::class, 'store'])->name('request.store');
     Route::patch('/request/update/{id}', [RequestMaterialController::class, 'update'])->name('request.update');
     Route::delete('/request/delete/{id}', [RequestMaterialController::class, 'destroy'])->name('request.destroy');
+
+    Route::get('/dispatch/get', [DispatchMaterialController::class, 'index'])->name('dispatch.index');
+    Route::get('/dispatch/get/{id}', [DispatchMaterialController::class, 'show'])->name('dispatch.show');
+    Route::post('/dispatch/create', [DispatchMaterialController::class, 'store'])->name('dispatch.store');
+    Route::patch('/dispatch/update/{id}', [DispatchMaterialController::class, 'update'])->name('dispatch.update');
+    Route::delete('/dispatch/delete/{id}', [DispatchMaterialController::class, 'destroy'])->name('dispatch.destroy');
 });
 
 Route::middleware('auth')->group(function () {

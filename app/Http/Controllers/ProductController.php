@@ -73,15 +73,26 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        // Retrieve the product using its ID
-        $product = Product::with('inventory', 'category', 'supplier')->find($id);
+        // Retrieve the product using its ID and load related models
+        $product = Product::with(['inventory.warehouse', 'category', 'supplier'])->find($id);
 
         if (!$product) {
             return response()->json(['message' => 'Product not found.'], 404);
         }
 
-        $stock = $product->inventory->quantity ?? 'N/A';
+        // Calculate total stock across all warehouses
+        $totalStock = $product->inventory->sum('quantity');
 
+        // Map the inventory to include warehouse-specific stock details
+        $warehouseStockDetails = $product->inventory->map(function ($inventory) {
+            return [
+                'warehouse_id' => $inventory->warehouse->id ?? 'N/A',
+                'warehouse_name' => $inventory->warehouse->name ?? 'N/A',
+                'quantity' => $inventory->quantity,
+            ];
+        });
+
+        // Prepare the response data
         $response = [
             'id' => $product->id,
             'name' => $product->name,
@@ -90,17 +101,19 @@ class ProductController extends Controller
             'description' => $product->description,
             'image_url' => $product->image_url,
             'price' => $product->price,
-            'stock' => $stock,
+            'total_stock' => $totalStock, // Total stock across all warehouses
             'restock_point' => $product->restock_point,
             'category_id' => $product->category_id,
             'supplier_id' => $product->supplier_id,
             'category_name' => $product->category->name ?? 'N/A',
             'supplier_name' => $product->supplier->name ?? 'N/A',
-            'low_on_stock' => $stock <= $product->restock_point,
+            'low_on_stock' => $totalStock <= $product->restock_point, // Based on total stock
+            'warehouse_stock_details' => $warehouseStockDetails, // Stock details for each warehouse
         ];
 
         return response()->json($response);
     }
+
 
     /**
      * Update the specified resource in storage.

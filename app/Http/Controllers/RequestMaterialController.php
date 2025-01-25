@@ -21,8 +21,10 @@ class RequestMaterialController extends Controller
                 'status' => $request->status,
                 'user_id' => $request->user_id,
                 'user_name' => $request->user->name ?? 'N/A',
-                'infrastructure_id' => $request->infrastructure->name ?? 'N/A',
+                'infrastructure_id' => $request->infrastructure_id,
+                'infrastructure_name' => $request->infrastructure->name ?? 'N/A',
                 'items' => $request->items,
+                'created_at' => $request->created_at,
             ];
         });
 
@@ -44,8 +46,10 @@ class RequestMaterialController extends Controller
                 'status' => $request->status,
                 'user_id' => $request->user_id,
                 'user_name' => $request->user->name ?? 'N/A',
-                'infrastructure_id' => $request->infrastructure->name ?? 'N/A',
+                'infrastructure_id' => $request->infrastructure_id,
+                'infrastructure_name' => $request->infrastructure->name ?? 'N/A',
                 'items' => $request->items,
+                'created_at' => $request->created_at,
             ];
         });
 
@@ -67,8 +71,10 @@ class RequestMaterialController extends Controller
                 'status' => $request->status,
                 'user_id' => $request->user_id,
                 'user_name' => $request->user->name ?? 'N/A',
-                'infrastructure_id' => $request->infrastructure->name ?? 'N/A',
+                'infrastructure_id' => $request->infrastructure_id,
+                'infrastructure_name' => $request->infrastructure->name ?? 'N/A',
                 'items' => $request->items,
+                'created_at' => $request->created_at,
             ];
         });
 
@@ -87,7 +93,7 @@ class RequestMaterialController extends Controller
             'items' => 'required|json'
         ]);
 
-        $validatedData['status'] = $validatedData['status'] ?? 'waiting for response';
+        $validatedData['status'] = $validatedData['status'] ?? 'Request Created';
 
         try {
             $order = RequestMaterial::create($validatedData);
@@ -117,8 +123,31 @@ class RequestMaterialController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        // Validate the request
+        $validatedData = $request->validate([
+            'status' => 'required|string',
+            'items' => 'sometimes|json', // Ensure 'items' is valid JSON
+        ]);
+
+        // Find the record by ID
+        $requestMaterial = RequestMaterial::find($id);
+
+        // Check if the record exists
+        if (!$requestMaterial) {
+            return response()->json(['message' => 'Request material not found.'], 404);
+        }
+
+        // Update only the fields that are present in the request
+        $requestMaterial->fill($validatedData);
+        $requestMaterial->save();
+
+        return response()->json([
+            'message' => 'Request material updated successfully.',
+            'data' => $requestMaterial,
+        ]);
     }
+
+
 
     /**
      * Remove the specified resource from storage.

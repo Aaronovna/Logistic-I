@@ -19,7 +19,7 @@ const options = {
   timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // User's local timezone
 };
 
-export default function Receipt_History({ auth }) {
+export default function Dispatch_History({ auth }) {
   const { theme } = useStateContext();
   const [history, setHistory] = useState([]);
 
@@ -47,8 +47,8 @@ export default function Receipt_History({ auth }) {
     <AuthenticatedLayout
       user={auth.user}
     >
-      <Head title="Receipt History" />
-      <DefaultLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>{`Receipt > History`}</h2>}>
+      <Head title="Dispatch History" />
+      <DefaultLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>{`Dispatch > History`}</h2>}>
         <div className="content">
           {
             history?.map((data, index) => {

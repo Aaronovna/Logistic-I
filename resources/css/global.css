@@ -150,3 +150,7 @@ input[data-autocompleted] {
 .if-disable {
     @apply disabled:cursor-not-allowed disabled:!bg-gray-300 disabled:!text-gray-700;
 }
+
+.modal-header{
+    @apply font-semibold text-xl mt-2 mb-4;
+}
