@@ -1,6 +1,3 @@
-import { useEffect, useState } from 'react';
-import { router } from '@inertiajs/react';
-
 import { useStateContext } from '@/context/contextProvider';
 
 export const useAccessControl = (requiredUserTypes) => {

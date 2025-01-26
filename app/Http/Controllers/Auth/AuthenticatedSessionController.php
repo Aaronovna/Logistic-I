@@ -67,7 +67,11 @@ class AuthenticatedSessionController extends Controller
         }
 
         if ($permissions['2053'] === true) {
-            return route('depot'); // User layout
+            return route('depot'); // Staff layout
+        }
+
+        if ($permissions['2054'] === true) {
+            return route('audits'); // Auditor layout
         }
 
         // Add more conditions based on your application's needs
