@@ -152,5 +152,5 @@ input[data-autocompleted] {
 }
 
 .modal-header{
-    @apply font-semibold text-xl mt-2 mb-4;
+    @apply text-lg font-semibold mt-2 mb-4 border-b pb-2;
 }

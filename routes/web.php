@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuditTaskController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -120,6 +121,12 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post('/dispatch/create', [DispatchMaterialController::class, 'store'])->name('dispatch.store');
     Route::patch('/dispatch/update/{id}', [DispatchMaterialController::class, 'update'])->name('dispatch.update');
     Route::delete('/dispatch/delete/{id}', [DispatchMaterialController::class, 'destroy'])->name('dispatch.destroy');
+
+    Route::get('/audit/task/get', [AuditTaskController::class, 'index'])->name('auditTask.index');
+    Route::get('/audit/task/get/{id}', [AuditTaskController::class, 'show'])->name('auditTask.show');
+    Route::post('/audit/task/create', [AuditTaskController::class, 'store'])->name('auditTask.store');
+    Route::patch('/audit/task/update/{id}', [AuditTaskController::class, 'update'])->name('auditTask.update');
+    Route::delete('/audit/task/delete/{id}', [AuditTaskController::class, 'destroy'])->name('auditTask.destroy');
 });
 
 Route::middleware('auth')->group(function () {

@@ -83,7 +83,7 @@ export default function Authenticated({ user, children }) {
       />
 
       <div
-        className="absolute border bottom-4 right-2 p-2 z-10 hover:opacity-100 opacity-30 duration-200 hover:cursor-pointer"
+        className="absolute border bottom-4 left-4 p-2 z-10 hover:opacity-100 opacity-30 duration-200 hover:cursor-pointer"
         style={{ background: theme.accent }}
         onClick={() => setOpenDDG(true)}
       >

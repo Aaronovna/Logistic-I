@@ -1,25 +1,23 @@
 import { useStateContext } from "@/context/contextProvider";
+import { dateTimeFormatShort } from "@/Constants/options";
+import { auditTaskStatus } from "@/functions/status";
 
-const AuditTaskCard = () => {
+const AuditTaskCard = ({ data = {}, onClick = () => { } }) => {
   const { theme } = useStateContext();
   return (
-    <div className='border-card p-4 hover:shadow-md duration-200 h-48 flex flex-col'>
+    <div onClick={onClick} className='border-card p-4 hover:shadow-lg shadow-sm duration-200 h-48 flex flex-col overflow-hidden cursor-pointer'>
       <div className="flex justify-between">
-        <p className="font-medium">Auto generated task from order</p>
-        <p className="text-gray-600">Date: 10-29-24</p>
+        <div>
+          <p className="text-gray-600 font-semibold text-ellipsis overflow-hidden whitespace-nowrap">{data.type}</p>
+          <p className="text-gray-600 text-sm">{new Date(data.created_at).toLocaleString(undefined, dateTimeFormatShort)}</p>
+        </div>
+
+        <p className={`rounded-md py-1 px-2 h-fit w-fit ${auditTaskStatus.find(status => status.name === data.status)?.color}`} >{data.status}</p>
       </div>
 
       <hr className="my-2" />
-      <p className="my-2 font-medium text-lg">Inventory Audit</p>
-      <p className="text-ellipsis overflow-hidden whitespace-nowrap">ABCD ABCD ABCD ABCD ABCD ABCD ABCD ABCD ABCD ABCD ABCD ABCD</p>
-
-      <div className='w-full flex mt-auto'>
-        <p>Status</p>
-        <span className='ml-auto'>
-          <button className='font-medium mr-2' style={{ color: theme.primary }}>View Details</button>
-          <button className='font-medium' style={{ color: theme.accent }}>Assign Auditor</button>
-        </span>
-      </div>
+      <p className="my-2 font-semibold text-ellipsis overflow-hidden whitespace-nowrap">{data.title}</p>
+      <p className={`mt-auto ${data.auditor_id ? null : 'text-gray-500'}`}>{data.auditor_id ? data.auditor_id : 'No Auditor Assigned yet'}</p>
     </div>
   )
 }
