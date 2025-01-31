@@ -70,4 +70,9 @@ class User extends Authenticatable implements MustVerifyEmail
             }
         });
     }
+
+    public function auditTasks()
+    {
+        return $this->hasMany(AuditTask::class, 'assigned_to');
+    }
 }

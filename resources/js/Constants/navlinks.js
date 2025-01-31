@@ -2,7 +2,7 @@
 ////////////////////////////////////////////////////////
 
 import { TbLayoutDashboard } from "react-icons/tb";
-import { TbClipboardList } from "react-icons/tb";
+//import { TbClipboardList } from "react-icons/tb";
 
 export const analyticsLinks = [
     {
@@ -45,17 +45,22 @@ export const inventoryLinks = [
 ////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////
 
-import { TbUserSearch } from "react-icons/tb";
-import { TbListSearch } from "react-icons/tb";
+import { TbPinned } from "react-icons/tb";
+import { TbClipboardList } from "react-icons/tb";
+import { TbClipboardData } from "react-icons/tb";
 
 export const auditLinks = [
     {
-        name: 'audits',
-        Icon: TbListSearch
+        name: 'tasks',
+        Icon: TbClipboardList
     },
     {
-        name: 'auditors',
-        Icon: TbUserSearch
+        name: 'reports',
+        Icon: TbClipboardData
+    },
+    {
+        name: ['assignments','assignments-view'],
+        Icon: TbPinned
     },
 ];
 

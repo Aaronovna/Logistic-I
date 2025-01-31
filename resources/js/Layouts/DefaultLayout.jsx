@@ -13,7 +13,7 @@ const pages = [
   'dashboard', /* 'report', */
   'receipt', 'dispatch', 'warehouse', 'product', 'category',
   'depot', 'terminal',
-  'audits', 'auditors',
+  'tasks', 'reports',
   'user',
 ]
 

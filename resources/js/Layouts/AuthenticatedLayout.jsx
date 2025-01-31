@@ -18,38 +18,38 @@ export default function Authenticated({ user, children }) {
   useEffect(() => {
     if (userPermissions && Array.isArray(userPermissions)) {
       if (userPermissions.some((permission) => permission["2050"] === true)) {
-        console.log("Setting userType to superadmin");
+        //console.log("Setting userType to superadmin");
         setUserType(2050);
       } else if (userPermissions.some((permission) => permission["2051"] === true)) {
-        console.log("Setting userType to admin");
+        //console.log("Setting userType to admin");
         setUserType(2051);
       } else if (userPermissions.some((permission) => permission["2052"] === true)) {
-        console.log("Setting userType to system");
+        //console.log("Setting userType to system");
         setUserType(2052);
       } else if (userPermissions.some((permission) => permission["2053"] === true)) {
-        console.log("Setting userType to staff");
+        //console.log("Setting userType to staff");
         setUserType(2053);
       } else if (userPermissions.some((permission) => permission["2054"] === true)) {
-        console.log("Setting userType to auditor");
+        //console.log("Setting userType to auditor");
         setUserType(2054);
       } else if (userPermissions.some((permission) => permission["2055"] === true)) {
-        console.log("Setting userType to none");
+        //console.log("Setting userType to none");
         setUserType(2055);
       } else {
         if (!loading) {
-          console.log("Setting userType to unknown");
+          //console.log("Setting userType to unknown");
           setUserType(3000);
         }
       }
     } else {
-      console.log("userPermissions is not valid:", userPermissions);
+      //console.log("userPermissions is not valid:", userPermissions);
     }
 
     setLoading(false);
   }, [userPermissions]);
 
   useEffect(() => {
-    console.log("userType changed:", userType);
+    //console.log("userType changed:", userType);
   }, [userType]);
 
   const [openDDG, setOpenDDG] = useState(false);

@@ -1,9 +1,7 @@
 <?php
 
-use App\Http\Controllers\AuditTaskController;
-use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
@@ -15,38 +13,46 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\RequestMaterialController;
+use App\Http\Controllers\AuditTaskController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\FileController;
+use App\Http\Controllers\AuditReportController;
 
 Route::redirect('/', 'login');
 
 //? START: PAGES ROUTES ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Route::middleware(["auth", "verified"])->group(function () {
-    Route::get('/dashboard', fn () => Inertia::render('Dashboard'))->name('dashboard');
-    Route::get('/category', fn () => Inertia::render('Category'))->name('category');
-    Route::get('/user', fn () => Inertia::render('User'))->name('user');
-    Route::get('/report', fn () => Inertia::render('Report'))->name('report');
-    Route::get('/product', fn () => Inertia::render('Product'))->name('product');
-    Route::get('/receipt', fn () => Inertia::render('Receipt'))->name('receipt');
-    Route::get('/receipt/history', fn () => Inertia::render('Receipt.History'))->name('receipt-history');
-    Route::get('/dispatch', fn () => Inertia::render('Dispatch'))->name('dispatch');
-    Route::get('/dispatch/history', fn () => Inertia::render('Dispatch.History'))->name('dispatch-history');
-    Route::get('/warehouse', fn () => Inertia::render('Warehouse'))->name('warehouse');
-    Route::get('/depot', fn () => Inertia::render('Depot'))->name('depot');
-    Route::get('/depot/inventory', fn () => Inertia::render('Depot.Inventory'))->name('depot-inventory');
-    Route::get('/depot/maintenance', fn () => Inertia::render('Depot.Maintenance'))->name('depot-maintenance');
-    Route::get('/terminal', fn () => Inertia::render('Terminal'))->name('terminal');
-    Route::get('/terminal/request', fn () => Inertia::render('Terminal.Request'))->name('terminal-request');
-    Route::get('/audits', action: fn () => Inertia::render('Audits'))->name('audits');
-    Route::get('/auditors', fn () => Inertia::render('Auditors'))->name('auditors');
-    Route::get('/module', fn () => Inertia::render('Module'))->name('module');
-    Route::get('/infrastructure', fn () => Inertia::render('Infrastructure'))->name('infrastructure');
-    //Route::get('/infrastructure/view', fn () => Inertia::render('Infrastructure.View'))->name('infrastructure-view');
+    Route::get('/dashboard', fn() => Inertia::render('Dashboard'))->name('dashboard');
+    Route::get('/category', fn() => Inertia::render('Category'))->name('category');
+    Route::get('/user', fn() => Inertia::render('User'))->name('user');
+    Route::get('/report', fn() => Inertia::render('Report'))->name('report');
+    Route::get('/product', fn() => Inertia::render('Product'))->name('product');
+    Route::get('/receipt', fn() => Inertia::render('Receipt'))->name('receipt');
+    Route::get('/receipt/history', fn() => Inertia::render('Receipt.History'))->name('receipt-history');
+    Route::get('/dispatch', fn() => Inertia::render('Dispatch'))->name('dispatch');
+    Route::get('/dispatch/history', fn() => Inertia::render('Dispatch.History'))->name('dispatch-history');
+    Route::get('/warehouse', fn() => Inertia::render('Warehouse'))->name('warehouse');
+    Route::get('/depot', fn() => Inertia::render('Depot'))->name('depot');
+    Route::get('/depot/inventory', fn() => Inertia::render('Depot.Inventory'))->name('depot-inventory');
+    Route::get('/depot/maintenance', fn() => Inertia::render('Depot.Maintenance'))->name('depot-maintenance');
+    Route::get('/terminal', fn() => Inertia::render('Terminal'))->name('terminal');
+    Route::get('/terminal/request', fn() => Inertia::render('Terminal.Request'))->name('terminal-request');
+    Route::get('/tasks', action: fn() => Inertia::render('Tasks'))->name('tasks');
+    Route::get('/reports', fn() => Inertia::render('Reports'))->name('reports');
+    Route::get('/assignments', fn() => Inertia::render('Assignments'))->name('assignments');
+    Route::get('/module', fn() => Inertia::render('Module'))->name('module');
+    Route::get('/infrastructure', fn() => Inertia::render('Infrastructure'))->name('infrastructure');
     Route::get('/infrastructure/view', function (\Illuminate\Http\Request $request) {
         return Inertia::render('Infrastructure.View', [
             'id' => $request->query('id'), // Extract 'name' from the query string
         ]);
-    })->name('infrastructure-view');
-    
+    })->name('assignments-view');
+    Route::get('/assignments/view', function (\Illuminate\Http\Request $request) {
+        return Inertia::render('Assignments.View', [
+            'id' => $request->query('id'), // Extract 'name' from the query string
+        ]);
+    })->name('assignments-view');
 });
 
 //! END: PAGES ROUTES //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -57,7 +63,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     //? START: PRODUCT REQUEST /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     Route::get('/product/get', [ProductController::class, 'index'])->name('product.index');
-    
+
     Route::post('/product/store', [ProductController::class, 'store'])->name('product.store');
     Route::patch('/product/update/{id}', [ProductController::class, 'update'])->name('product.update');
     Route::delete('/product/delete/{id}', [ProductController::class, 'destroy'])->name('product.destroy');
@@ -73,7 +79,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::delete('/category/delete/{id}', [CategoryController::class, 'destroy'])->name('category.destroy');
     Route::patch('category/update/{id}', [CategoryController::class, 'update'])->name('category.update');
     Route::get('/category/get/count', [CategoryController::class, 'get_count'])->name('category.get_count');
-    
+
     Route::get('/position', [PositionController::class, 'index'])->name('position.index');
     Route::post('/position/create', [PositionController::class, 'store'])->name('position.store');
     Route::delete('/position/delete/{id}', [PositionController::class, 'destroy'])->name('position.destroy');
@@ -95,13 +101,13 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/inventory/stats', [InventoryController::class, 'stats'])->name('inventory.stats');
     Route::patch('/inventory/stock/update/{id}', [InventoryController::class, 'updateStock'])->name('inventory.updateStock');
 
-    
+
     Route::get('/receipt/get', [ReceiptController::class, 'index'])->name('receipt.index');
     Route::get('/receipt/get/{id}', [ReceiptController::class, 'show'])->name('receipt.show');
     Route::post('/receipt/create', [ReceiptController::class, 'store'])->name('receipt.store');
     Route::patch('/receipt/update/{id}', [ReceiptController::class, 'update'])->name('receipt.update');
     Route::delete('/receipt/delete/{id}', [ReceiptController::class, 'destroy'])->name('receipt.destroy');
-    
+
     Route::get('/infrastructure/get', [InfrastructureController::class, 'index'])->name('infrastructure.index');
     Route::get('/infrastructure/get/{id}', [InfrastructureController::class, 'show'])->name('infrastructure.show');
     Route::post('/infrastructure/create', [InfrastructureController::class, 'store'])->name('infrastructure.store');
@@ -124,9 +130,23 @@ Route::middleware(["auth", "verified"])->group(function () {
 
     Route::get('/audit/task/get', [AuditTaskController::class, 'index'])->name('auditTask.index');
     Route::get('/audit/task/get/{id}', [AuditTaskController::class, 'show'])->name('auditTask.show');
+    Route::get('/audit/user/task/get/{id}', [AuditTaskController::class, 'showUserTasks'])->name('auditTask.showUserTasks');
     Route::post('/audit/task/create', [AuditTaskController::class, 'store'])->name('auditTask.store');
     Route::patch('/audit/task/update/{id}', [AuditTaskController::class, 'update'])->name('auditTask.update');
     Route::delete('/audit/task/delete/{id}', [AuditTaskController::class, 'destroy'])->name('auditTask.destroy');
+    
+    Route::get('/audit/report/get', [AuditReportController::class, 'index'])->name('auditReport.index');
+    Route::get('/audit/report/get/{id}', [AuditReportController::class, 'show'])->name('auditReport.show');
+    Route::get('/audit/report/get/by/task/{id}', [AuditReportController::class, 'showByTask'])->name('auditReport.showByTask');
+    //Route::get('/audit/user/report/get/{id}', [AuditReportController::class, 'showUserTasks'])->name('auditReport.showUserTasks');
+    Route::post('/audit/report/create', [AuditReportController::class, 'store'])->name('auditReport.store');
+    Route::patch('/audit/report/update/{id}', [AuditReportController::class, 'update'])->name('auditReport.update');
+    Route::delete('/audit/report/delete/{id}', [AuditReportController::class, 'destroy'])->name('auditReport.destroy');
+
+    Route::get('/file/get', [FileController::class, 'index']);
+    Route::get('/file/get/{id}', [FileController::class, 'show']);
+    Route::post('file/store', [FileController::class, 'store']);
+    Route::delete('/file/delete/{id}', [FileController::class, 'destroy']);
 });
 
 Route::middleware('auth')->group(function () {
@@ -135,4 +155,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

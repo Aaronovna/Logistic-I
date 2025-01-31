@@ -71,7 +71,7 @@ class AuthenticatedSessionController extends Controller
         }
 
         if ($permissions['2054'] === true) {
-            return route('audits'); // Auditor layout
+            return route('tasks'); // Auditor layout
         }
 
         // Add more conditions based on your application's needs

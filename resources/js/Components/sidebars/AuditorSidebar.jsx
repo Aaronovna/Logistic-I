@@ -30,13 +30,14 @@ const AuditorSidebar = () => {
         onMouseLeave={handleSidebarMouseLeave}
       >
 
-        <NavLinkCategory routes={auditLinks} Icon={TbClipboardCheck} href='audits' label='Auditing' className='mr-4' />
+        <NavLinkCategory routes={auditLinks} Icon={TbClipboardCheck} href='tasks' label='Auditing' className='mr-4' />
         {auditLinks.map((link, index) => {
           return (
-            <NavLink key={index} href={route(link.name)} active={route().current(link.name)}>
+            <NavLink key={index} href={route(Array.isArray(link.name) ? link.name[0] : link.name)} active={Array.isArray(link.name) ? link.name.some(name => route().current(name)) : route().current(link.name)}>
               <span className='flex items-center gap-1 px-1'>
                 <link.Icon className='mr-1' />
-                <p className=' capitalize'>{link.name}</p>
+                <p className=' capitalize'>{Array.isArray(link.name) ? link.name[0] : link.name}</p>
+                {/* <p className=' capitalize'>{link.name.replace(/-/g, ' ')}</p> */}
               </span>
             </NavLink>
           )

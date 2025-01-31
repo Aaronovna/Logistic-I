@@ -69,7 +69,7 @@ const SystemSidebar = () => {
           )
         })}
 
-        <NavLinkCategory routes={auditLinks} Icon={TbClipboardCheck} href='audits' label='Auditing' className='mr-4' />
+        <NavLinkCategory routes={auditLinks} Icon={TbClipboardCheck} href='tasks' label='Auditing' className='mr-4' />
         {auditLinks.map((link, index) => {
           return (
             <NavLink key={index} href={route(link.name)} active={route().current(link.name)}>

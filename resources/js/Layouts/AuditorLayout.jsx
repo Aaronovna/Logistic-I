@@ -10,7 +10,7 @@ import { TbMenu2 } from "react-icons/tb";
 import { TbX } from "react-icons/tb";
 
 const pages = [
-  'audits', 'auditors',
+  'tasks', 'reports','assignments',
 ]
 
 import AuditorSidebar from "@/Components/sidebars/AuditorSidebar";

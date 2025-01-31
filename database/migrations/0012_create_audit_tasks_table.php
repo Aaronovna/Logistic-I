@@ -15,10 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('type');
+            $table->string('scope');
             $table->string('description');
             $table->string('status')->default('Pending');
             $table->boolean('auto_gen')->default(false);
-            $table->foreignId('auditor_id')->nullable()->constrained('users')->onDelete('restrict');
+            $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('restrict');
+            $table->foreignId('assigned_by')->constrained('users')->onDelete('restrict');
             $table->timestamps();
         });
     }
@@ -28,6 +30,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('audit_reports');
         Schema::dropIfExists('audit_tasks');
     }
 };

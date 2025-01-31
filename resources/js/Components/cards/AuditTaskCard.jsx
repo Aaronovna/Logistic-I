@@ -17,7 +17,15 @@ const AuditTaskCard = ({ data = {}, onClick = () => { } }) => {
 
       <hr className="my-2" />
       <p className="my-2 font-semibold text-ellipsis overflow-hidden whitespace-nowrap">{data.title}</p>
-      <p className={`mt-auto ${data.auditor_id ? null : 'text-gray-500'}`}>{data.auditor_id ? data.auditor_id : 'No Auditor Assigned yet'}</p>
+      {data.assigned_to ?
+        <p className={`font-medium mt-auto`}>
+          <span className="font-medium text-gray-500">Assigned to </span>
+          {data.assigned_to_name}
+        </p>
+        :
+        <p className="mt-auto font-medium text-gray-500 ">No Auditor Assigned yet</p>
+      }
+
     </div>
   )
 }

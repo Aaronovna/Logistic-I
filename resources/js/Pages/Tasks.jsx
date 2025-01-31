@@ -11,27 +11,20 @@ import { auditTaskStatus } from '@/functions/status';
 import { TbPlus } from 'react-icons/tb';
 import { dateTimeFormatLong } from '@/Constants/options';
 import { TbUserEdit } from 'react-icons/tb';
+import { filterUsersByPermission } from '@/functions/filterArray';
 
-export default function Audits({ auth }) {
+export default function Tasks({ auth }) {
   const { theme } = useStateContext();
   const [openCreateTaskModal, setOpenCreateTaskModal] = useState(false);
 
   const [createTaskFormData, setCreateTaskFormData] = useState({
     title: '',
     type: '',
-    user_id: null,
+    assigned_to: null,
+    assigned_by: null,
+    scope: '',
     description: '',
   });
-
-  const [users, setUsers] = useState([]);
-  const fetchUsers = async () => {
-    try {
-      const response = await axios.get('/user/get');
-      setUsers(response.data);
-    } catch (error) {
-      toast.error(error);
-    }
-  }
 
   const [tasks, setTasks] = useState([]);
   const fetchTasks = async () => {
@@ -43,9 +36,19 @@ export default function Audits({ auth }) {
     }
   }
 
+  const [auditors, setAuditors] = useState([]);
+  const fetchAuditors = async () => {
+    try {
+      const response = await axios.get('/user/get');
+      setAuditors(filterUsersByPermission(response.data, ["2054"]));
+    } catch (error) {
+      toast.error(error);
+    }
+  }
+
   useEffect(() => {
-    fetchUsers();
     fetchTasks();
+    fetchAuditors();
   }, [])
 
   const handleCreateTaskSubmit = async (e) => {
@@ -55,6 +58,9 @@ export default function Audits({ auth }) {
       type: createTaskFormData.type,
       title: createTaskFormData.title === '' ? `${new Date().toLocaleString(undefined, dateFormatShort)} | ${createTaskFormData.type}` : createTaskFormData.title,
       description: createTaskFormData.description,
+      scope: createTaskFormData.scope,
+      assigned_to: '',
+      assigned_by: auth.user.id,
     };
 
     try {
@@ -70,25 +76,39 @@ export default function Audits({ auth }) {
     setSelectedTask(data);
     setOpenViewTaskModal(true);
   }
-  
+
   const handleDeleteTask = async (id) => {
     try {
       const response = axios.delete(`/audit/task/delete/${id}`)
     } catch (error) {
-      
+
     }
   }
 
   const handleCancelTask = async () => {
-    
+
+  }
+
+  const [addTaskAuditorFormData, setAddTaskAuditorFormData] = useState({
+    assigned_to: null,
+  });
+
+  const handleAddTaskAuditorSubmit = async (e, id) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.patch(`/audit/task/update/${id}`, addTaskAuditorFormData);
+    } catch (error) {
+
+    }
   }
 
   return (
     <AuthenticatedLayout
       user={auth.user}
     >
-      <Head title="Audits" />
-      <AuditorLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Audits</h2>}>
+      <Head title="Tasks" />
+      <AuditorLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Tasks</h2>}>
         <div className="content relative">
           <button className='hidden fixed z-10 rounded-full p-3 bg-white bottom-8 shadow-lg right-8 items-center'>
             <TbPlus size={28} />
@@ -147,13 +167,19 @@ export default function Audits({ auth }) {
                 </select>
 
                 <input type="text" name="title" id="title"
-                  className='border-card w-full mt-8'
+                  className='border-card w-full mt-2'
                   placeholder={createTaskFormData.type === '' ? 'Title' : `Title: ${new Date().toLocaleString(undefined, dateFormatShort)} | ${createTaskFormData.type}`}
                   value={createTaskFormData.title}
                   onChange={(e) => handleInputChange(e, setCreateTaskFormData)}
                 />
+                <input type="text" name="scope" id="scope"
+                  className='border-card w-full mt-8'
+                  placeholder="Scope"
+                  value={createTaskFormData.scope}
+                  onChange={(e) => handleInputChange(e, setCreateTaskFormData)}
+                />
 
-                <textarea name="description" id="description" className='resize-none w-full border-card mt-4' placeholder='Description' rows={6} value={createTaskFormData.description} onChange={(e) => handleInputChange(e, setCreateTaskFormData)} />
+                <textarea name="description" id="description" className='resize-none w-full border-card mt-2' placeholder='Description' rows={6} value={createTaskFormData.description} onChange={(e) => handleInputChange(e, setCreateTaskFormData)} />
                 <p className='italic text-sm my-4 mx-2'>
                   {createTaskFormData.type && auditTasks.find(task => task.name === createTaskFormData.type).desc || 'Please select task'}
                 </p>
@@ -164,7 +190,7 @@ export default function Audits({ auth }) {
           </Modal>
 
           <Modal show={openViewTaskModal} onClose={() => setOpenViewTaskModal(false)}>
-            <div className='p-4 h-96 flex flex-col'>
+            <div className='p-4 min-h-96 flex flex-col'>
               <p className='modal-header'>{selectedTask?.type}</p>
               <div className='flex justify-between'>
                 <p className='text-gray-500 font-medium mb-4'>{new Date(selectedTask?.created_at).toLocaleString(undefined, dateTimeFormatLong)}</p>
@@ -176,16 +202,46 @@ export default function Audits({ auth }) {
                 </p>
               </div>
               <p className='font-medium text-lg'>{selectedTask?.title}</p>
-              <p className='mt-4 text-gray-500 '>{selectedTask?.description}</p>
-              <div className='bg-gray-100 border-card p-2 mt-auto relative flex items-center mb-4'>
-                  <p>No Auditor Assigned yet</p>
-                  <button className='absolute right-4 text-blue-600'><TbUserEdit size={22}/></button>
+              <p className='font-medium'>Scope: {selectedTask?.scope}</p>
+              <p className='text-gray-500 mt-4'>{selectedTask?.description}</p>
+              <div className='bg-gray-100 border-card p-2 mt-20 relative flex items-center mb-4'>
+                {
+                  selectedTask?.assigned_to ?
+                    <div className='flex justify-between w-full'>
+                      <p className={`font-medium`}>
+                        <span className="font-medium">Assigned to </span>
+                        {selectedTask?.assigned_to_name}
+                      </p>
+                      <p className={`font-medium text-gray-500`}>
+                        <span className="font-medium">Assigned by </span>
+                        {selectedTask?.assigned_by_name}
+                      </p>
+                    </div>
+                    :
+                    <div className='flex items-center'>
+                      <select name="assigned_to" id="assigned_to" onChange={(e) => handleInputChange(e, setAddTaskAuditorFormData)}>
+                        <option value={null}>Assign an Auditor</option>
+                        {
+                          auditors && auditors.map((auditor, index) => {
+                            return (
+                              <option value={auditor.id} key={index}>{auditor.name}</option>
+                            )
+                          })
+                        }
+                      </select>
+                      {/* <button type='button' className='text-blue-600 px-2'><TbUserEdit size={22} /></button> */}
+                    </div>
+                }
               </div>
-
               {
-                selectedTask?.status === 'Pending' ? 
-                <button className='border-card font-medium bg-red-100 text-red-600' onClick={()=>handleDeleteTask(selectedTask?.id)}>Delete</button> :
+                selectedTask?.status === 'Pending' ?
+                <button className='border-card font-medium bg-red-100 text-red-600' onClick={() => handleDeleteTask(selectedTask?.id)}>Delete</button> :
                 <button className='border-card font-medium bg-red-100 text-red-600'>Cancel</button>
+              }
+              {
+                selectedTask?.assigned_to ?
+                null :
+                <button className='border-card font-medium bg-blue-100 text-blue-600 mt-2' onClick={(e) => handleAddTaskAuditorSubmit(e, selectedTask?.id)}>Save</button>
               }
             </div>
           </Modal>

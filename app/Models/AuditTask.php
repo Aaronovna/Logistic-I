@@ -13,11 +13,20 @@ class AuditTask extends Model
         'title',
         'type',
         'status',
+        'scope',
         'description',
-        'auditor_id'
+        'assigned_to',
+        'assigned_by'
     ];
 
-    public function user(){
-        return $this->belongsTo(User::class);
+    public function assignedToUser()
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    // Relationship for the user who assigned the task
+    public function assignedByUser()
+    {
+        return $this->belongsTo(User::class, 'assigned_by');
     }
 }
