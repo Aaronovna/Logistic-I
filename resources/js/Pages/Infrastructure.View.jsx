@@ -114,20 +114,17 @@ export default function Infrastructure_View({ auth }) {
   return (
     <AuthenticatedLayout
       user={auth.user}
-      header={<h2 style={{ color: theme.text }}>
-        <span className='header hover:underline cursor-pointer' onClick={handleClick1}>{`Infrastructure`}</span>
-        <span className='header'>{' > '}</span>
-        <span className='header hover:underline cursor-pointer' onClick={handleClick2}>{`View`}</span>
-      </h2>}
     >
       <Head title="View Infrastructure" />
 
-      <DefaultLayout user={auth.user} header={<h2 style={{ color: theme.text }}>
-        <span className='header hover:underline cursor-pointer' onClick={handleClick1}>{`Infrastructure`}</span>
-        <span className='header'>{' > '}</span>
-        <span className='header hover:underline cursor-pointer' onClick={handleClick2}>{`View`}</span>
-      </h2>}>
-      
+      <DefaultLayout user={auth.user}
+        header={<h2 style={{ color: theme.text }}>
+          <span className='header hover:underline cursor-pointer' onClick={handleClick1}>{`Infrastructure`}</span>
+          <span className='header'>{' > '}</span>
+          <span className='header hover:underline cursor-pointer' onClick={handleClick2}>{`View`}</span>
+        </h2>}
+      >
+
         <div className="content">
           <div className='w-full border-card h-56 bg-cover bg-center flex' style={{ backgroundImage: `url(${infrastructure?.image_url})` }}>
             <span onClick={() => setOpenEditInfrastructureModal(true)}
