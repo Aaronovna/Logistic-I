@@ -1,19 +1,19 @@
-import React from "react";
 import { useState } from "react";
 import { useStateContext } from "@/context/contextProvider";
+
+import InfrastructureSidebar from "@/Components/sidebars/InfrastructureSidebar";
+import AdminSidebar from "@/Components/sidebars/AdminSidebar";
 import Dropdown from '@/Components/Dropdown';
+import { getPages } from "@/functions/getPages";
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
+
 import { TbChevronDown } from "react-icons/tb";
 import { TbMenu2 } from "react-icons/tb";
 import { TbX } from "react-icons/tb";
 
-const pages = [
-  'depot', 'terminal',
-]
-
-import InfrastructureSidebar from "@/Components/sidebars/InfrastructureSidebar";
 
 const DefaultLayout = ({ user, header, children }) => {
+    const pages = getPages(user.type);
   const { theme } = useStateContext();
   const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
@@ -22,7 +22,8 @@ const DefaultLayout = ({ user, header, children }) => {
       <div className='w-full h-4 absolute z-30 -left-2' style={{ background: theme.background }}></div>
       <div className='w-full h-4 absolute z-30 bottom-0 -left-2' style={{ background: theme.background }}></div>
 
-      <InfrastructureSidebar />
+      { user.type === 2053 ? <InfrastructureSidebar /> : null }
+      { user.type === 2051 ? <AdminSidebar /> : null }
 
       <div className='relative flex flex-col w-full h-screen overflow-y-scroll overflow-hidden'>
         <nav className='sticky w-auto top-4 z-20 backdrop-blur-sm border-card m-4 h-fit'
@@ -48,6 +49,8 @@ const DefaultLayout = ({ user, header, children }) => {
                       className="inline-flex items-center px-3 py-2 font-medium transition ease-in-out duration-150"
                     >
                       {user.name}
+                      { user.type === 2053 ? ' (Infrastructure)' : null }
+                      { user.type === 2051 ? ' (Admin)' : null }
                       <TbChevronDown size={22} />
                     </button>
                   </span>

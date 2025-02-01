@@ -110,3 +110,22 @@ export const managementLinks = [
 
 ////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////
+
+export const adminPages = [
+    'dashboard', /* 'report', */ 'receipt', 'dispatch', 'warehouse', 'product', 'category',
+    'depot', 'terminal',
+    'tasks', 'reports','assignments',
+    'user', 'infrastructure', 'module',
+]
+
+export const inventoryPages = [
+    'dashboard', /* 'report', */ 'receipt', 'dispatch', 'warehouse', 'product', 'category',
+]
+
+export const infrastructurePages = [
+    'depot', 'terminal',
+]
+
+export const auditPages = [
+    'tasks', 'reports','assignments',
+]
