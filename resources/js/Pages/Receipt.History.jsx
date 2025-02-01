@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
 
 import { useStateContext } from '@/context/contextProvider';
+import InventoryLayout from '@/Layouts/InventoryLayout';
 
 
 const filterOrdersByStatuses = (orders, statuses) => {
@@ -48,7 +49,7 @@ export default function Receipt_History({ auth }) {
       user={auth.user}
     >
       <Head title="Receipt History" />
-      <DefaultLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>{`Receipt > History`}</h2>}>
+      <InventoryLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>{`Receipt > History`}</h2>}>
         <div className="content">
           {
             history?.map((data, index) => {
@@ -58,7 +59,7 @@ export default function Receipt_History({ auth }) {
             })
           }
         </div>
-      </DefaultLayout>
+      </InventoryLayout>
     </AuthenticatedLayout>
   );
 }

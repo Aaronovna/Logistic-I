@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
 
 import { useStateContext } from '@/context/contextProvider';
-
+import InventoryLayout from '@/Layouts/InventoryLayout';
 
 const filterOrdersByStatuses = (orders, statuses) => {
   return orders.filter(order => statuses.includes(order?.status));
@@ -48,7 +48,7 @@ export default function Dispatch_History({ auth }) {
       user={auth.user}
     >
       <Head title="Dispatch History" />
-      <DefaultLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>{`Dispatch > History`}</h2>}>
+      <InventoryLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>{`Dispatch > History`}</h2>}>
         <div className="content">
           {
             history?.map((data, index) => {
@@ -58,7 +58,7 @@ export default function Dispatch_History({ auth }) {
             })
           }
         </div>
-      </DefaultLayout>
+      </InventoryLayout>
     </AuthenticatedLayout>
   );
 }

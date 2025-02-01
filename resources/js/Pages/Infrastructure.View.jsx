@@ -1,5 +1,5 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import DefaultLayout from '@/Layouts/DefaultLayout';
+import DefaultLayout from '@/Layouts/InventoryLayout';
 import { Head, usePage, router } from '@inertiajs/react';
 import { useStateContext } from '@/context/contextProvider';
 import { useState, useEffect } from 'react';

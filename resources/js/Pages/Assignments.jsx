@@ -1,4 +1,4 @@
-import AuditorLayout from "@/Layouts/AuditorLayout";
+import AuditLayout from "@/Layouts/AuditLayout";
 import { useStateContext } from "@/context/contextProvider";
 import { useState, useEffect } from "react";
 import { dateTimeFormatLong } from "@/Constants/options";
@@ -29,7 +29,7 @@ const Assignments = ({ auth }) => {
   return (
     <AuthenticatedLayout user={auth.user}>
       <Head title="My Tasks" />
-      <AuditorLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Assignments</h2>}>
+      <AuditLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Assignments</h2>}>
         <div className="content">
           <div className="flex items-end">
             <Card2 data={tasks?.length} name="Your Task"/>
@@ -53,7 +53,7 @@ const Assignments = ({ auth }) => {
             })}
           </div>
         </div>
-      </AuditorLayout>
+      </AuditLayout>
     </AuthenticatedLayout>
   )
 }

@@ -1,5 +1,5 @@
 import { usePage } from "@inertiajs/react";
-import AuditorLayout from "@/Layouts/AuditorLayout";
+import AuditLayout from "@/Layouts/AuditLayout";
 import { router } from "@inertiajs/react";
 import { useStateContext } from "@/context/contextProvider";
 import { useEffect, useState } from "react";
@@ -79,7 +79,7 @@ const Reports_View = ({ auth }) => {
   return (
     <AuthenticatedLayout user={auth.user}>
       <Head title="View Peport" />
-      <AuditorLayout user={auth.user}
+      <AuditLayout user={auth.user}
         header={<h2 style={{ color: theme.text }}>
           <span className='header hover:underline cursor-pointer' onClick={handleClick1}>{`Reports`}</span>
           <span className='header'>{' > '}</span>
@@ -146,7 +146,7 @@ const Reports_View = ({ auth }) => {
             </div>
           </div>
         </div>
-      </AuditorLayout>
+      </AuditLayout>
     </AuthenticatedLayout>
   )
 }

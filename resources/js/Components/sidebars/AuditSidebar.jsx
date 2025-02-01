@@ -10,7 +10,7 @@ import Logo from "../Logo";
 
 import { auditLinks } from '@/Constants/navlinks';
 
-const AuditorSidebar = () => {
+const AuditSidebar = () => {
   const { theme, setThemePreference } = useStateContext();
 
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
@@ -57,4 +57,4 @@ const AuditorSidebar = () => {
   )
 }
 
-export default AuditorSidebar;
+export default AuditSidebar;

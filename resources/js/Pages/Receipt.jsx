@@ -1,5 +1,4 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import DefaultLayout from '@/Layouts/DefaultLayout';
+import InventoryLayout from '@/Layouts/InventoryLayout';
 import { Head } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 
@@ -86,7 +85,7 @@ export default function Receipt({ auth }) {
       user={auth.user}
     >
       <Head title="Receipt" />
-      <DefaultLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Receipt</h2>}>
+      <InventoryLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Receipt</h2>}>
         <div className="content">
           <div
             className='relative rounded-xl p-4 flex h-44 overflow-hidden shadow-xl cursor-pointer hover:shadow-2xl duration-200'
@@ -191,7 +190,7 @@ export default function Receipt({ auth }) {
             </div>
           </Modal>
         </div>
-      </DefaultLayout>
+      </InventoryLayout>
     </AuthenticatedLayout>
   );
 }

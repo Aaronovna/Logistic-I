@@ -22,9 +22,9 @@ const defaultPages = [
   'receipt', 'dispatch', 'warehouse', 'product', 'category',
 ]
 
-import SystemSidebar from "@/Components/sidebars/SystemSidebar";
+import InventorySidebar from "@/Components/sidebars/InventorySidebar";
 
-const DefaultLayout = ({ user, header, children }) => {
+const InventoryLayout = ({ user, header, children }) => {
   const { theme } = useStateContext();
   const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
   const { hasAccess } = useAccessControl([2050]);
@@ -40,7 +40,7 @@ const DefaultLayout = ({ user, header, children }) => {
       <div className='w-full h-4 absolute z-30 -left-2' style={{ background: theme.background }}></div>
       <div className='w-full h-4 absolute z-30 bottom-0 -left-2' style={{ background: theme.background }}></div>
 
-      <SystemSidebar />
+      <InventorySidebar />
 
       <div className='relative flex flex-col w-full h-screen overflow-y-scroll overflow-hidden'>
         <nav className='sticky w-auto top-4 z-20 backdrop-blur-sm border-card m-4 h-fit'
@@ -125,4 +125,4 @@ const DefaultLayout = ({ user, header, children }) => {
   )
 }
 
-export default DefaultLayout;
+export default InventoryLayout;

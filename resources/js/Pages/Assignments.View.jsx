@@ -1,5 +1,5 @@
 import { dateFormatLong } from "@/Constants/options";
-import AuditorLayout from "@/Layouts/AuditorLayout";
+import AuditLayout from "@/Layouts/AuditLayout";
 import { useStateContext } from "@/context/contextProvider";
 import { usePage } from "@inertiajs/react";
 import { router } from "@inertiajs/react";
@@ -177,7 +177,7 @@ const Assignments_View = ({ auth }) => {
   return (
     <AuthenticatedLayout user={auth.user}>
       <Head title="My Tasks" />
-      <AuditorLayout user={auth.user}
+      <AuditLayout user={auth.user}
         header={<h2 style={{ color: theme.text }}>
           <span className='header hover:underline cursor-pointer' onClick={handleClick1}>{`Assignments`}</span>
           <span className='header'>{' > '}</span>
@@ -312,7 +312,7 @@ const Assignments_View = ({ auth }) => {
               </div>
           }
         </div>
-      </AuditorLayout>
+      </AuditLayout>
     </AuthenticatedLayout>
   )
 }

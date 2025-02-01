@@ -12,7 +12,7 @@ import { useStateContext } from '@/context/contextProvider';
 import Modal from '@/Components/Modal';
 import { Card } from '@/Components/Cards';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import DefaultLayout from '@/Layouts/DefaultLayout';
+import DefaultLayout from '@/Layouts/InventoryLayout';
 import { categoryToastMessages } from '@/Constants/toastMessages';
 
 import { TbCategory } from "react-icons/tb";

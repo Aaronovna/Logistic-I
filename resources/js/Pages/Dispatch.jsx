@@ -7,6 +7,7 @@ import { Card2 } from '@/Components/Cards';
 import RequestsFolder from '@/Components/cards/RequestsFolder';
 import RequestCard from '@/Components/cards/RequestCard';
 import { filterArray } from '@/functions/filterArray';
+import InventoryLayout from '@/Layouts/InventoryLayout';
 
 export default function Dispatch({ auth }) {
   const { theme } = useStateContext();
@@ -225,7 +226,7 @@ export default function Dispatch({ auth }) {
     >
       <Head title="Dispatch" />
 
-      <DefaultLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Dispatch</h2>}>
+      <InventoryLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Dispatch</h2>}>
         <div className="content">
           <div className='flex gap-4 mb-8'>
             <Card2 name='Total Requests' data={requests?.length} />
@@ -410,7 +411,7 @@ export default function Dispatch({ auth }) {
         </Modal>
 
 
-      </DefaultLayout>
+      </InventoryLayout>
     </AuthenticatedLayout>
   );
 }

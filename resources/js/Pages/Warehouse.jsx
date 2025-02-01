@@ -1,5 +1,4 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import DefaultLayout from '@/Layouts/DefaultLayout';
+import InventoryLayout from '@/Layouts/InventoryLayout';
 import { Head } from '@inertiajs/react';
 
 import { useStateContext } from '@/context/contextProvider';
@@ -284,7 +283,7 @@ export default function Warehouse({ auth }) {
     >
       <Head title="Receipt" />
 
-      <DefaultLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Warehouse</h2>}>
+      <InventoryLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Warehouse</h2>}>
         <div className="content">
           <div className='border-card p-4 shadow-sm mb-6 flex h-28' style={{ color: theme.text }}>
             <div>
@@ -367,7 +366,7 @@ export default function Warehouse({ auth }) {
             </div>
           </div>
         </div>
-      </DefaultLayout>
+      </InventoryLayout>
 
       <Modal show={openAddInventoryModal} onClose={() => setOpenAddInventoryModal(false)} maxWidth='lg'>
         <div className='p-4' style={{ color: theme.text }}>

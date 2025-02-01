@@ -5,8 +5,7 @@ import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 import AuditReportCard from '@/Components/cards/AuditReportCard';
 import { useStateContext } from '@/context/contextProvider';
-const cardStyle = 'mb-2 snap-center mx-2 md:min-w-64 inline-block min-w-[100%]';
-import AuditorLayout from '@/Layouts/AuditorLayout';
+import AuditLayout from '@/Layouts/AuditLayout';
 import { filterUsersByPermission } from '@/functions/filterArray';
 import { TbUserSearch } from 'react-icons/tb';
 import { TbClipboardList } from "react-icons/tb";
@@ -80,7 +79,7 @@ export default function Report({ auth }) {
       user={auth.user}
     >
       <Head title="Reports" />
-      <AuditorLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Reports</h2>}>
+      <AuditLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Reports</h2>}>
         <div className="content">
           <div className='flex gap-10'>
             <div className='border-card p-4 w-1/2 h-64 flex flex-col shadow-md hover:shadow-lg duration-200 cursor-pointer' onClick={()=>handleReportClick(reports[0]?.id)}>
@@ -111,7 +110,7 @@ export default function Report({ auth }) {
             }
           </div>
         </div>
-      </AuditorLayout>
+      </AuditLayout>
     </AuthenticatedLayout>
   );
 }

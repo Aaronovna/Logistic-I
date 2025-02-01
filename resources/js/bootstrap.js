@@ -8,9 +8,6 @@ window.Link = Link;
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 window.AuthenticatedLayout = AuthenticatedLayout;
 
-import DefaultLayout from '@/Layouts/DefaultLayout';
-window.DefaultLayout = DefaultLayout;
-
 import { Head } from '@inertiajs/react';
 window.Head = Head;
 

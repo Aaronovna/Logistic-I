@@ -5,7 +5,7 @@ import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 import { Head } from '@inertiajs/react';
 import { useStateContext } from '@/context/contextProvider';
-import DefaultLayout from '@/Layouts/DefaultLayout';
+import DefaultLayout from '@/Layouts/InventoryLayout';
 
 export default function Edit({ auth, mustVerifyEmail, status }) {
   const { theme, userType } = useStateContext();
