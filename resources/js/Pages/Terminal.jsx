@@ -1,19 +1,20 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import InfrastructureLayout from '@/Layouts/InfrastructureLayout';
 import { useEffect, useState, useRef } from 'react';
-import { Head } from '@inertiajs/react';
-
 import { useStateContext } from '@/context/contextProvider';
-import { filterArray } from '@/functions/filterArray';
-import toast from 'react-hot-toast';
-
 import { AgGridReact } from 'ag-grid-react';
+
+import InfrastructureLayout from '@/Layouts/InfrastructureLayout';
+import { filterArray } from '@/functions/filterArray';
+
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 
-import Modal from '@/Components/Modal';
+const Terminal = ({ auth }) => {
+  if (!hasAccess(auth.user.type, [2050, 2051, 2053])) {
+    return (
+      <Unauthorized />
+    )
+  }
 
-export default function Terminal({ auth }) {
   const { theme, themePreference } = useStateContext();
 
   const [terminals, setTerminals] = useState();
@@ -366,3 +367,5 @@ export default function Terminal({ auth }) {
     </AuthenticatedLayout>
   );
 }
+
+export default Terminal;

@@ -1,19 +1,20 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import InfrastructureLayout from '@/Layouts/InfrastructureLayout';
 import { useEffect, useState, useRef } from 'react';
-import { Head } from '@inertiajs/react';
-
 import { useStateContext } from '@/context/contextProvider';
-import { filterArray } from '@/functions/filterArray';
-import toast from 'react-hot-toast';
-
 import { AgGridReact } from 'ag-grid-react';
+
+import InfrastructureLayout from '@/Layouts/InfrastructureLayout';
+import { filterArray } from '@/functions/filterArray';
+
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 
-import Modal from '@/Components/Modal';
+const Depot = ({ auth }) => {
+  if (!hasAccess(auth.user.type, [2050, 2051, 2053])) {
+    return (
+      <Unauthorized />
+    )
+  }
 
-export default function Depot({ auth }) {
   const { theme, themePreference } = useStateContext();
 
   const [depots, setDepots] = useState();
@@ -58,14 +59,15 @@ export default function Depot({ auth }) {
   const colDefs = [
     { field: "user_name", filter: true, flex: 1, minWidth: 120, headerName: 'User' },
     { field: "type", filter: true, flex: 1, minWidth: 120 },
-    { field: "items", filter: true, flex: 1, minWidth: 120, headerName: 'Requested Material', autoHeight: true,
+    {
+      field: "items", filter: true, flex: 1, minWidth: 120, headerName: 'Requested Material', autoHeight: true,
       cellRenderer: (params) => {
-        const items  = JSON.parse(params.data.items);
-        
+        const items = JSON.parse(params.data.items);
+
         return (
           <div>
             {
-              items.map((item, index)=>{
+              items.map((item, index) => {
                 return (
                   <p key={index}>{`${item.product_name ? item.product_name : `ID:${item.product_id}`} ${item.quantity}`}</p>
                 )
@@ -74,9 +76,10 @@ export default function Depot({ auth }) {
           </div>
         )
       }
-     },
+    },
     { field: "status", filter: true, flex: 1, minWidth: 120 },
-    { field: "Action", maxWidth: 100,
+    {
+      field: "Action", maxWidth: 100,
       cellRenderer: (params => {
         const handleDelete = async (id) => {
           try {
@@ -91,7 +94,7 @@ export default function Depot({ auth }) {
             alert('Failed to delete product');
           }
         };
-  
+
         return (
           <button
             onClick={() => handleDelete(params.data.id)}  // Assuming `product_id` is the ID to delete
@@ -101,7 +104,7 @@ export default function Depot({ auth }) {
           </button>
         );
       })
-     },
+    },
   ];
 
   const [openRequestModal, setOpenRequestModal] = useState(false);
@@ -191,11 +194,6 @@ export default function Depot({ auth }) {
       ),
     }));
   };
-
-  useEffect(() => {
-    //console.log(requestedItems);
-    console.log(requestMaterialFormData);
-  }, [requestedItems, requestMaterialFormData])
 
   const handleAddRequestSubmit = async (e) => {
     e.preventDefault();
@@ -371,3 +369,5 @@ export default function Depot({ auth }) {
     </AuthenticatedLayout>
   );
 }
+
+export default Depot;
