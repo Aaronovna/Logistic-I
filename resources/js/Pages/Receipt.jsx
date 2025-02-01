@@ -1,14 +1,10 @@
-import InventoryLayout from '@/Layouts/InventoryLayout';
-import { Head } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-
-import ReceiptCard from '@/Components/cards/ReceiptCard';
-
 import { useStateContext } from '@/context/contextProvider';
-import { gradients } from "@/Constants/themes";
-import { Link } from '@inertiajs/react';
-import Modal from '@/Components/Modal';
+
+import InventoryLayout from '@/Layouts/InventoryLayout';;
+import ReceiptCard from '@/Components/cards/ReceiptCard';
 import { UpcomingShipmentCard } from '@/Components/cards/ReceiptCard';
+import { gradients } from "@/Constants/themes";
 
 import { TbSearch } from "react-icons/tb";
 
@@ -16,7 +12,13 @@ const filterOrdersByStatuses = (orders, statuses) => {
   return orders.filter(order => statuses.includes(order?.status));
 };
 
-export default function Receipt({ auth }) {
+const Receipt = ({ auth }) => {
+  if (!hasAccess(auth.user.type, [2052])) {
+    return (
+      <Unauthorized />
+    )
+  }
+
   const { theme, ordersDummyData } = useStateContext();
   const [OFD, setOFD] = useState([]);
   const [RD, setRD] = useState([]);
@@ -194,3 +196,5 @@ export default function Receipt({ auth }) {
     </AuthenticatedLayout>
   );
 }
+
+export default Receipt;

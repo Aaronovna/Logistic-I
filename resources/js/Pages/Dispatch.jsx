@@ -1,15 +1,20 @@
 import { useState, useEffect } from 'react';
-import { dateTimeFormatLong } from '@/Constants/options';
 import { useStateContext } from '@/context/contextProvider';
-import Modal from '@/Components/Modal';
 
-import { Card2 } from '@/Components/Cards';
+import InventoryLayout from '@/Layouts/InventoryLayout';
 import RequestsFolder from '@/Components/cards/RequestsFolder';
 import RequestCard from '@/Components/cards/RequestCard';
+import { Card2 } from '@/Components/Cards';
 import { filterArray } from '@/functions/filterArray';
-import InventoryLayout from '@/Layouts/InventoryLayout';
+import { dateTimeFormatLong } from '@/Constants/options';
 
-export default function Dispatch({ auth }) {
+const Dispatch = ({ auth }) => {
+  if (!hasAccess(auth.user.type, [2052])) {
+    return (
+      <Unauthorized />
+    )
+  }
+
   const { theme } = useStateContext();
 
   const [depotRequests, setDepotRequests] = useState();
@@ -415,3 +420,5 @@ export default function Dispatch({ auth }) {
     </AuthenticatedLayout>
   );
 }
+
+export default Dispatch;

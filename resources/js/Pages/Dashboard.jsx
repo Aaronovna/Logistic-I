@@ -1,12 +1,9 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { useState, useEffect } from 'react';
-import { Head } from '@inertiajs/react';
+import { useStateContext } from '@/context/contextProvider';
+
+import InventoryLayout from '@/Layouts/InventoryLayout';
 import Chart from '@/Components/Chart';
 import { generateRandomNumber } from '@/functions/numberGenerator';
-import DefaultLayout from '@/Layouts/InventoryLayout';
-import toast from 'react-hot-toast';
-
-import { useStateContext } from '@/context/contextProvider';
 
 function getTop5(data) {
   return data
@@ -15,8 +12,15 @@ function getTop5(data) {
 }
 
 export default function Dashboard({ auth }) {
+  if (!hasAccess(auth.user.type, [2052])) {
+    return (
+      <Unauthorized />
+    )
+  }
+  
   const { theme } = useStateContext();
   const [productStats, setProductStats] = useState({});
+
 
   const fetchProductStats = async () => {
     try {
@@ -94,7 +98,7 @@ export default function Dashboard({ auth }) {
     >
       <Head title="Dashboard" />
 
-      <DefaultLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Dashboard</h2>}>
+      <InventoryLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Dashboard</h2>}>
         <div className="content">
           <div className='flex gap-4'>
             <Chart data={productStats?.productsByCategory} series={pieSeries} legendPosition='right' title='Product Stock' className='border-card w-1/2 shadow-md' />
@@ -148,7 +152,7 @@ export default function Dashboard({ auth }) {
             </div>
           </div>
         </div>
-      </DefaultLayout>
+      </InventoryLayout>
 
     </AuthenticatedLayout>
   );

@@ -22,6 +22,7 @@ import { TbArrowBarUp } from "react-icons/tb";
 import { TbArrowBarToDown } from "react-icons/tb";
 import { TbBuildingWarehouse } from "react-icons/tb";
 import { TbPackage } from "react-icons/tb";
+import { TbBuildingCog } from "react-icons/tb";
 
 export const inventoryLinks = [
     {
@@ -39,6 +40,10 @@ export const inventoryLinks = [
     {
         name: 'product',
         Icon: TbPackage
+    },
+    {
+        name: 'category',
+        Icon: TbCategory
     },
 ];
 
@@ -86,17 +91,12 @@ export const infrastructureLinks = [
 
 import { TbUserCog } from "react-icons/tb";
 import { TbCategory } from "react-icons/tb";
-import { TbBuildingCog } from "react-icons/tb";
 import { TbPuzzle } from "react-icons/tb";
 
 export const managementLinks = [
     {
         name: 'user',
         Icon: TbUserCog
-    },
-    {
-        name: 'category',
-        Icon: TbCategory
     },
     {
         name: ['infrastructure', 'infrastructure-view'],

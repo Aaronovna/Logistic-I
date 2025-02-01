@@ -41,14 +41,8 @@ class UserFactory extends Factory
                     "201" => false,
                     "250" => false,
                     "251" => false,
-
-                    "2050" => true,
-                    "2051" => false,
-                    "2052" => false,
-                    "2053" => false,
-                    "2054" => false,
-                    "2055" => false,
-                ])
+                ]),
+                'type' => 2050,
             ],
             [
                 'name' => 'Ricardo Aron III',
@@ -65,14 +59,8 @@ class UserFactory extends Factory
                     "201" => false,
                     "250" => false,
                     "251" => false,
-
-                    "2050" => false,
-                    "2051" => true,
-                    "2052" => false,
-                    "2053" => false,
-                    "2054" => false,
-                    "2055" => false,
-                ])
+                ]),
+                'type' => 2051,
             ],
             [
                 'name' => 'Kent Mark Tejada',
@@ -89,14 +77,8 @@ class UserFactory extends Factory
                     "201" => false,
                     "250" => false,
                     "251" => false,
-
-                    "2050" => false,
-                    "2051" => false,
-                    "2052" => true,
-                    "2053" => false,
-                    "2054" => false,
-                    "2055" => false,
-                ])
+                ]),
+                'type' => 2052,
             ],
             [
                 'name' => 'Kristel Casinillo',
@@ -113,14 +95,8 @@ class UserFactory extends Factory
                     "201" => false,
                     "250" => false,
                     "251" => false,
-
-                    "2050" => false,
-                    "2051" => false,
-                    "2052" => false,
-                    "2053" => true,
-                    "2054" => false,
-                    "2055" => false,
-                ])
+                ]),
+                'type' => 2053,
             ],
             [
                 'name' => 'John Vincent Dizon',
@@ -137,14 +113,8 @@ class UserFactory extends Factory
                     "201" => false,
                     "250" => false,
                     "251" => false,
-
-                    "2050" => false,
-                    "2051" => false,
-                    "2052" => false,
-                    "2053" => false,
-                    "2054" => true,
-                    "2055" => false,
-                ])
+                ]),
+                'type' => 2054,
             ],
             [
                 'name' => 'Andy Barrantes',
@@ -161,14 +131,8 @@ class UserFactory extends Factory
                     "201" => false,
                     "250" => false,
                     "251" => false,
-
-                    "2050" => false,
-                    "2051" => false,
-                    "2052" => false,
-                    "2053" => false,
-                    "2054" => false,
-                    "2055" => true,
-                ])
+                ]),
+                'type' => 2055,
             ],
         ];
 

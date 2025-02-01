@@ -1,8 +1,6 @@
 import React from "react";
 import { useState } from "react";
 import { useStateContext } from "@/context/contextProvider";
-import { useAccessControl } from "@/hooks/useAccessControl";
-import Unauthorized from "@/Pages/Unauthorized";
 import Dropdown from '@/Components/Dropdown';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { TbChevronDown } from "react-icons/tb";
@@ -18,13 +16,6 @@ import InfrastructureSidebar from "@/Components/sidebars/InfrastructureSidebar";
 const DefaultLayout = ({ user, header, children }) => {
   const { theme } = useStateContext();
   const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
-  const { hasAccess } = useAccessControl([2053]);
-
-  if (!hasAccess()) {
-    return (
-      <Unauthorized />
-    )
-  }
 
   return (
     <div className="flex h-screen relative">

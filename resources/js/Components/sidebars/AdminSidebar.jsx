@@ -3,12 +3,13 @@ import { useStateContext } from "@/context/contextProvider";
 import NavLink from '@/Components/NavLink';
 import NavLinkCategory from '@/Components/NavLinkCategory';
 import Logo from "../Logo";
-import { analyticsLinks, inventoryLinks } from '@/Constants/navlinks';
+import { analyticsLinks, inventoryLinks, managementLinks } from '@/Constants/navlinks';
 
 import { TbChartHistogram } from "react-icons/tb";
 import { TbPackages } from "react-icons/tb";
+import { TbSettingsCog } from "react-icons/tb";
 
-const InventorySidebar = () => {
+const AdminSidebar = () => {
   const { theme, setThemePreference } = useStateContext();
 
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
@@ -51,7 +52,7 @@ const InventorySidebar = () => {
           )
         })}
 
-        {/* <NavLinkCategory routes={managementLinks} Icon={TbSettingsCog} href='user' label='Management' className='mr-4' />
+        <NavLinkCategory routes={managementLinks} Icon={TbSettingsCog} href='user' label='Management' className='mr-4' />
         {managementLinks.map((link, index) => {
           return (
             <NavLink key={index} href={route(Array.isArray(link.name) ? link.name[0] : link.name)} active={Array.isArray(link.name) ? link.name.some(name => route().current(name)) : route().current(link.name)}>
@@ -61,7 +62,7 @@ const InventorySidebar = () => {
               </span>
             </NavLink>
           )
-        })} */}
+        })}
       </div>
 
       <button
@@ -76,4 +77,4 @@ const InventorySidebar = () => {
   )
 }
 
-export default InventorySidebar;
+export default AdminSidebar;

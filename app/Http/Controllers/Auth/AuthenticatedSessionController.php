@@ -60,22 +60,18 @@ class AuthenticatedSessionController extends Controller
 
     protected function determineRedirection($user): ?string
     {
-        $permissions = json_decode($user->permissions, true);
+        if ($user->type === 2052) {
+            return route('dashboard');
+        } //inventory
 
-        if ($permissions['2050'] === true) {
-            return route('dashboard'); // Admin layout
-        }
+        if ($user->type === 2053) {
+            return route('depot');
+        }  //infrastructure
 
-        if ($permissions['2053'] === true) {
-            return route('depot'); // Staff layout
-        }
+        if ($user->type === 2054) {
+            return route('tasks');
+        } //audit
 
-        if ($permissions['2054'] === true) {
-            return route('tasks'); // Auditor layout
-        }
-
-        // Add more conditions based on your application's needs
-
-        return null; // Null if no valid redirection route
+        return null;
     }
 }

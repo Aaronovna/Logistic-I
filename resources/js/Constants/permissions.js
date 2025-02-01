@@ -31,7 +31,9 @@ export const permissions = [
         code: 251,
         alias: 'edit_product',
     },
+]
 
+export const userType = [
     {
         code: 2050,
         alias: 'superadmin',
@@ -42,18 +44,22 @@ export const permissions = [
     },
     {
         code: 2052,
-        alias: 'system',
+        alias: 'inventory',
     },
     {
         code: 2053,
-        alias: 'staff',
+        alias: 'infrastructure',
     },
     {
         code: 2054,
-        alias: 'auditor',
+        alias: 'audit',
     },
     {
         code: 2055,
+        alias: 'auditor',
+    },
+    {
+        code: 2056,
         alias: 'none',
     },
 ]

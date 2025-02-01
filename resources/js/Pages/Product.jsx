@@ -1,32 +1,29 @@
-import InventoryLayout from '@/Layouts/InventoryLayout';
-import { Head } from '@inertiajs/react';
-
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-import toast from 'react-hot-toast';
+import { useStateContext } from '@/context/contextProvider';
+
+import InventoryLayout from '@/Layouts/InventoryLayout';
+import Pagination from '@/Components/Pagination';
+import { Card2 } from '@/Components/Cards';
+import { ProductCard } from '@/Components/cards/ProductCard';
+import { feedbackVibrant } from "@/Constants/themes";
+import { productToastMessages } from '@/Constants/toastMessages';
 
 import { TbPlus } from "react-icons/tb";
 import { TbSearch } from "react-icons/tb";
-
 import { TbPackage } from "react-icons/tb";
 import { TbPackages } from "react-icons/tb";
 import { TbCaretDownFilled } from "react-icons/tb";
 import { TbPackageOff } from "react-icons/tb";
 
-
-import { useStateContext } from '@/context/contextProvider';
-
-import { Card2 } from '@/Components/Cards';
-import { ProductCard } from '@/Components/cards/ProductCard';
-
-import Modal from '@/Components/Modal';
-import Pagination from '@/Components/Pagination';
-import { feedbackVibrant } from "@/Constants/themes";
-import { productToastMessages } from '@/Constants/toastMessages';
-
 const cardStyle = 'mb-2 snap-center mx-2 md:min-w-64 inline-block min-w-[100%]';
 
-export default function Product({ auth }) {
+const Product = ({ auth }) => {
+  if (!hasAccess(auth.user.type, [2052])) {
+    return (
+      <Unauthorized />
+    )
+  }
+
   const [products, setProducts] = useState([]);
   const [totalProductValue, setTotalProductValue] = useState(0);
   const [openAddProductModal, setOpenAddProductModal] = useState(false);
@@ -337,3 +334,5 @@ export default function Product({ auth }) {
     </AuthenticatedLayout>
   );
 }
+
+export default Product;

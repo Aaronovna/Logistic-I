@@ -1,46 +1,31 @@
-import React from "react";
 import { useState } from "react";
 import { useStateContext } from "@/context/contextProvider";
-import { useAccessControl } from "@/hooks/useAccessControl";
-import Unauthorized from "@/Pages/Unauthorized";
+import InventorySidebar from "@/Components/sidebars/InventorySidebar";
+import AdminSidebar from "@/Components/sidebars/AdminSidebar";
 import Dropdown from '@/Components/Dropdown';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
+
 import { TbChevronDown } from "react-icons/tb";
 import { TbMenu2 } from "react-icons/tb";
 import { TbX } from "react-icons/tb";
 
-const pages = [
-  'dashboard', /* 'report', */
-  'receipt', 'dispatch', 'warehouse', 'product', 'category',
-  'depot', 'terminal',
-  'tasks', 'reports',
-  'user',
+const inventoryPages = [
+  'dashboard', /* 'report', */ 'receipt', 'dispatch', 'warehouse', 'product', 'category',
 ]
-
-const defaultPages = [
-  'dashboard', /* 'report', */
-  'receipt', 'dispatch', 'warehouse', 'product', 'category',
-]
-
-import InventorySidebar from "@/Components/sidebars/InventorySidebar";
 
 const InventoryLayout = ({ user, header, children }) => {
+  
   const { theme } = useStateContext();
-  const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
-  const { hasAccess } = useAccessControl([2050]);
 
-  if (!hasAccess()) {
-    return (
-      <Unauthorized />
-    )
-  }
+  const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
   return (
     <div className="flex h-screen relative">
       <div className='w-full h-4 absolute z-30 -left-2' style={{ background: theme.background }}></div>
       <div className='w-full h-4 absolute z-30 bottom-0 -left-2' style={{ background: theme.background }}></div>
 
-      <InventorySidebar />
+      { user.type === 2052 ? <InventorySidebar /> : null }
+      { user.type === 2051 ? <AdminSidebar /> : null }
 
       <div className='relative flex flex-col w-full h-screen overflow-y-scroll overflow-hidden'>
         <nav className='sticky w-auto top-4 z-20 backdrop-blur-sm border-card m-4 h-fit'
@@ -66,6 +51,8 @@ const InventoryLayout = ({ user, header, children }) => {
                       className="inline-flex items-center px-3 py-2 font-medium transition ease-in-out duration-150"
                     >
                       {user.name}
+                      { user.type === 2052 ? ' (Inventory)' : null }
+                      { user.type === 2051 ? ' (Admin)' : null }
                       <TbChevronDown size={22} />
                     </button>
                   </span>
@@ -91,11 +78,11 @@ const InventoryLayout = ({ user, header, children }) => {
             className="inline-flex items-center justify-center p-2 m-2 rounded-md transition duration-150 ease-in-out w-fit my-2"
             style={{ color: theme.accent }}
           >
-            <TbX size={22}/>
+            <TbX size={22} />
           </button>
 
           <div className="overflow-y-auto">
-            {defaultPages && defaultPages.map((page, index) => {
+            {inventoryPages && inventoryPages.map((page, index) => {
               return (
                 <ResponsiveNavLink key={index} href={route(page)} active={route().current(page)} className='capitalize'>
                   {page}

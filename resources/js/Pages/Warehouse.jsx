@@ -1,21 +1,18 @@
-import InventoryLayout from '@/Layouts/InventoryLayout';
-import { Head } from '@inertiajs/react';
-
-import { useStateContext } from '@/context/contextProvider';
-import { Card2 } from '@/Components/Cards';
 import { useEffect, useState, useRef, useCallback } from 'react';
-import toast from 'react-hot-toast';
-import { inventoryToastMessages } from '@/Constants/toastMessages';
-import { filterArray } from '@/functions/filterArray';
+import { useStateContext } from '@/context/contextProvider';
+import { AgGridReact } from 'ag-grid-react';
 
-import Modal from '@/Components/Modal';
+import InventoryLayout from '@/Layouts/InventoryLayout';
+import { Card2 } from '@/Components/Cards';
+import { filterArray } from '@/functions/filterArray';
+import { inventoryToastMessages } from '@/Constants/toastMessages';
 
 import { TbBox } from "react-icons/tb";
 import { TbCurrencyPeso } from "react-icons/tb";
 
-import { AgGridReact } from 'ag-grid-react';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
+
 const cardStyle = 'mb-2 snap-center mx-2 md:min-w-64 inline-block min-w-[100%]';
 
 const formatValue = (value) => {
@@ -53,7 +50,13 @@ const colDefs = [
   }
 ];
 
-export default function Warehouse({ auth }) {
+const Warehouse = ({ auth }) => {
+  if (!hasAccess(auth.user.type, [2052])) {
+    return (
+      <Unauthorized />
+    )
+  }
+
   const { theme, themePreference } = useStateContext();
 
   const [openAddInventoryModal, setOpenAddInventoryModal] = useState(false);
@@ -448,3 +451,5 @@ export default function Warehouse({ auth }) {
     </AuthenticatedLayout>
   );
 }
+
+export default Warehouse;

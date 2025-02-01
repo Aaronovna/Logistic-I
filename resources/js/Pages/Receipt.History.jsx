@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Head } from '@inertiajs/react';
-
 import { useStateContext } from '@/context/contextProvider';
-import InventoryLayout from '@/Layouts/InventoryLayout';
 
+import InventoryLayout from '@/Layouts/InventoryLayout';
 
 const filterOrdersByStatuses = (orders, statuses) => {
   return orders.filter(order => statuses.includes(order?.status));
@@ -20,7 +18,13 @@ const options = {
   timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // User's local timezone
 };
 
-export default function Receipt_History({ auth }) {
+const ReceiptHistory = ({ auth }) => {
+  if (!hasAccess(auth.user.type, [2052])) {
+    return (
+      <Unauthorized />
+    )
+  }
+
   const { theme } = useStateContext();
   const [history, setHistory] = useState([]);
 
@@ -63,3 +67,5 @@ export default function Receipt_History({ auth }) {
     </AuthenticatedLayout>
   );
 }
+
+export default ReceiptHistory;

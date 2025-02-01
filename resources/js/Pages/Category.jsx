@@ -1,26 +1,26 @@
-import { Head } from '@inertiajs/react';
 import { useState, useCallback, useEffect } from 'react';
-import axios from 'axios';
-import toast from 'react-hot-toast';
-
+import { useStateContext } from '@/context/contextProvider';
 import { AgGridReact } from 'ag-grid-react';
+
+import InventoryLayout from '@/Layouts/InventoryLayout';
+import { Card } from '@/Components/Cards';
+import { categoryToastMessages } from '@/Constants/toastMessages';
+
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
-
-import { useStateContext } from '@/context/contextProvider';
-
-import Modal from '@/Components/Modal';
-import { Card } from '@/Components/Cards';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import DefaultLayout from '@/Layouts/InventoryLayout';
-import { categoryToastMessages } from '@/Constants/toastMessages';
 
 import { TbCategory } from "react-icons/tb";
 import { TbPlus } from "react-icons/tb";
 import { TbEdit } from "react-icons/tb";
 import { TbX } from "react-icons/tb";
 
-export default function Category({ auth }) {
+const Category = ({ auth }) => {
+  if (!hasAccess(auth.user.type, [2052])) {
+    return (
+      <Unauthorized />
+    )
+  }
+
   const { theme, themePreference } = useStateContext();
 
   const [categories, setCategories] = useState(null);
@@ -153,7 +153,7 @@ export default function Category({ auth }) {
     >
       <Head title="Category" />
 
-      <DefaultLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Manage Categories</h2>}>
+      <InventoryLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Manage Categories</h2>}>
         <div className="content">
           <div className='flex flex-col gap-4'>
             <div className='flex items-end'>
@@ -192,7 +192,7 @@ export default function Category({ auth }) {
               : null}
           </div>
         </div>
-      </DefaultLayout>
+      </InventoryLayout>
 
       {/* MODAL FOR CREATING NEW CATEGORY */}
       <Modal show={openAddModal} onClose={() => setOpenAddModal(false)} maxWidth='lg'>
@@ -254,3 +254,5 @@ export default function Category({ auth }) {
     </AuthenticatedLayout>
   );
 }
+
+export default Category;

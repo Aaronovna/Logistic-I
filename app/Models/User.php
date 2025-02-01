@@ -22,6 +22,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'permissions',
+        'type'
     ];
 
     /**
@@ -59,13 +60,6 @@ class User extends Authenticatable implements MustVerifyEmail
                     "201" => false,
                     "250" => false,
                     "251" => false,
-
-                    "2050" => false,
-                    "2051" => false,
-                    "2052" => false,
-                    "2053" => false,
-                    "2054" => false,
-                    "2055" => false,
                 ]);
             }
         });

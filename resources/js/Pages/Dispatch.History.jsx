@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Head } from '@inertiajs/react';
-
 import { useStateContext } from '@/context/contextProvider';
+
 import InventoryLayout from '@/Layouts/InventoryLayout';
 
 const filterOrdersByStatuses = (orders, statuses) => {
@@ -19,7 +18,13 @@ const options = {
   timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // User's local timezone
 };
 
-export default function Dispatch_History({ auth }) {
+const DispatchHistory = ({ auth }) => {
+  if (!hasAccess(auth.user.type, [2052])) {
+    return (
+      <Unauthorized />
+    )
+  }
+
   const { theme } = useStateContext();
   const [history, setHistory] = useState([]);
 
@@ -62,3 +67,5 @@ export default function Dispatch_History({ auth }) {
     </AuthenticatedLayout>
   );
 }
+
+export default DispatchHistory;
