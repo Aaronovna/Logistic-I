@@ -3,11 +3,13 @@ import { useStateContext } from "@/context/contextProvider";
 import NavLink from '@/Components/NavLink';
 import NavLinkCategory from '@/Components/NavLinkCategory';
 import Logo from "../Logo";
-import { analyticsLinks, inventoryLinks, managementLinks } from '@/Constants/navlinks';
+import { analyticsLinks, inventoryLinks, infrastructureLinks, auditLinks, managementLinks } from '@/Constants/navlinks';
 
 import { TbChartHistogram } from "react-icons/tb";
 import { TbPackages } from "react-icons/tb";
 import { TbSettingsCog } from "react-icons/tb";
+import { TbBuildingCommunity } from "react-icons/tb";
+import { TbClipboardCheck } from "react-icons/tb";
 
 const AdminSidebar = () => {
   const { theme, setThemePreference } = useStateContext();
@@ -47,6 +49,31 @@ const AdminSidebar = () => {
               <span className='flex items-center gap-1 px-1'>
                 <link.Icon className='mr-1' />
                 <p className=' capitalize'>{Array.isArray(link.name) ? link.name[0] : link.name}</p>
+              </span>
+            </NavLink>
+          )
+        })}
+
+        <NavLinkCategory routes={infrastructureLinks} Icon={TbBuildingCommunity} href='depot' label='Infrastructure' className='mr-4' />
+        {infrastructureLinks.map((link, index) => {
+          return (
+            <NavLink key={index} href={route(Array.isArray(link.name) ? link.name[0] : link.name)} active={Array.isArray(link.name) ? link.name.some(name => route().current(name)) : route().current(link.name)}>
+              <span className='flex items-center gap-1 px-1'>
+                <link.Icon className='mr-1' />
+                <p className=' capitalize'>{Array.isArray(link.name) ? link.name[0] : link.name}</p>
+              </span>
+            </NavLink>
+          )
+        })}
+
+        <NavLinkCategory routes={auditLinks} Icon={TbClipboardCheck} href='tasks' label='Auditing' className='mr-4' />
+        {auditLinks.map((link, index) => {
+          return (
+            <NavLink key={index} href={route(Array.isArray(link.name) ? link.name[0] : link.name)} active={Array.isArray(link.name) ? link.name.some(name => route().current(name)) : route().current(link.name)}>
+              <span className='flex items-center gap-1 px-1'>
+                <link.Icon className='mr-1' />
+                <p className=' capitalize'>{Array.isArray(link.name) ? link.name[0] : link.name}</p>
+                {/* <p className=' capitalize'>{link.name.replace(/-/g, ' ')}</p> */}
               </span>
             </NavLink>
           )

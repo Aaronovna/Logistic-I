@@ -21,8 +21,9 @@ const AuditLayout = ({ user, header, children }) => {
       <div className='w-full h-4 absolute z-30 -left-2' style={{ background: theme.background }}></div>
       <div className='w-full h-4 absolute z-30 bottom-0 -left-2' style={{ background: theme.background }}></div>
 
-      { user.type === 2054 ? <AuditSidebar /> : null }
+      { user.type === 2050 ? <AdminSidebar /> : null }
       { user.type === 2051 ? <AdminSidebar /> : null }
+      { user.type === 2054 ? <AuditSidebar /> : null }
 
       <div className='relative flex flex-col w-full h-screen overflow-y-scroll overflow-hidden'>
         <nav className='sticky w-auto top-4 z-20 backdrop-blur-sm border-card m-4 h-fit'
@@ -48,8 +49,9 @@ const AuditLayout = ({ user, header, children }) => {
                       className="inline-flex items-center px-3 py-2 font-medium transition ease-in-out duration-150"
                     >
                       {user.name}
-                      { user.type === 2054 ? ' (Audit)' : null }
+                      { user.type === 2050 ? ' (Super Admin)' : null }
                       { user.type === 2051 ? ' (Admin)' : null }
+                      { user.type === 2054 ? ' (Audit)' : null }
                       <TbChevronDown size={22} />
                     </button>
                   </span>
