@@ -1,12 +1,19 @@
-import AuditLayout from "@/Layouts/AuditLayout";
-import { useStateContext } from "@/context/contextProvider";
 import { useState, useEffect } from "react";
-import { dateTimeFormatLong } from "@/Constants/options";
 import { router } from "@inertiajs/react";
-import { auditTaskStatus } from "@/functions/status";
+import { useStateContext } from "@/context/contextProvider";
+
+import AuditLayout from "@/Layouts/AuditLayout";
 import { Card2 } from "@/Components/Cards";
+import { auditTaskStatus } from "@/functions/status";
+import { dateTimeFormatLong } from "@/Constants/options";
 
 const Assignments = ({ auth }) => {
+  if (!hasAccess(auth.user.type, [2050, 2051, 2054])) {
+    return (
+      <Unauthorized />
+    )
+  }
+  
   const { theme } = useStateContext();
 
   const [tasks, setTasks] = useState([]);

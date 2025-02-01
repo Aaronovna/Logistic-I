@@ -1,17 +1,16 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
-import AuditReportCard from '@/Components/cards/AuditReportCard';
 import { useStateContext } from '@/context/contextProvider';
+
 import AuditLayout from '@/Layouts/AuditLayout';
+import AuditReportCard from '@/Components/cards/AuditReportCard';
 import { filterUsersByPermission } from '@/functions/filterArray';
+
 import { TbUserSearch } from 'react-icons/tb';
 import { TbClipboardList } from "react-icons/tb";
 import { TbReport } from 'react-icons/tb';
-import { router } from '@inertiajs/react';
 
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-quartz.css";
 
 const Card = ({ name = "name", data = 0, Icon }) => {
   return (
@@ -25,7 +24,13 @@ const Card = ({ name = "name", data = 0, Icon }) => {
   )
 }
 
-export default function Report({ auth }) {
+const Reports = ({ auth }) => {
+  if (!hasAccess(auth.user.type, [2050, 2051, 2054])) {
+    return (
+      <Unauthorized />
+    )
+  }
+
   const { theme } = useStateContext();
 
   const [users, setUsers] = useState([]);
@@ -114,6 +119,8 @@ export default function Report({ auth }) {
     </AuthenticatedLayout>
   );
 }
+
+export default Reports;
 
 /* const auditorColDefs = [
   { field: "id", filter: true, flex: 1, minWidth: 70, maxWidth: 90, },

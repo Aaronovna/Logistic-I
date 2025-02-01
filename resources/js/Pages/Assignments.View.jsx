@@ -1,15 +1,23 @@
-import { dateFormatLong } from "@/Constants/options";
-import AuditLayout from "@/Layouts/AuditLayout";
-import { useStateContext } from "@/context/contextProvider";
+import { useState, useEffect } from "react";
 import { usePage } from "@inertiajs/react";
 import { router } from "@inertiajs/react";
-import { useState, useEffect } from "react";
+import { useStateContext } from "@/context/contextProvider";
+
+import AuditLayout from "@/Layouts/AuditLayout";
 import { auditTaskStatus } from "@/functions/status";
+import { handleInputChange } from "@/functions/handleInputChange";
+import { dateFormatLong } from "@/Constants/options";
+
 import { TbCloudUpload } from "react-icons/tb";
 import { TbX } from "react-icons/tb";
-import { handleInputChange } from "@/functions/handleInputChange";
 
-const Assignments_View = ({ auth }) => {
+const AssignmentsView = ({ auth }) => {
+  if (!hasAccess(auth.user.type, [2050, 2051, 2054])) {
+    return (
+      <Unauthorized />
+    )
+  }
+
   const { theme } = useStateContext();
   const { props } = usePage();
 
@@ -317,7 +325,7 @@ const Assignments_View = ({ auth }) => {
   )
 }
 
-export default Assignments_View;
+export default AssignmentsView;
 
 /* const [uploadedFiles, setUploadedFiles] = useState([]); // Store uploaded files
 

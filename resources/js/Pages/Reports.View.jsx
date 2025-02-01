@@ -1,11 +1,18 @@
+import { useEffect, useState } from "react";
 import { usePage } from "@inertiajs/react";
-import AuditLayout from "@/Layouts/AuditLayout";
 import { router } from "@inertiajs/react";
 import { useStateContext } from "@/context/contextProvider";
-import { useEffect, useState } from "react";
+
+import AuditLayout from "@/Layouts/AuditLayout";
 import { dateTimeFormatShort } from "@/Constants/options";
 
-const Reports_View = ({ auth }) => {
+const ReportsView = ({ auth }) => {
+  if (!hasAccess(auth.user.type, [2050, 2051, 2054])) {
+    return (
+      <Unauthorized />
+    )
+  }
+
   const { props } = usePage();
   const { theme } = useStateContext();
   const { id } = props;
@@ -151,4 +158,4 @@ const Reports_View = ({ auth }) => {
   )
 }
 
-export default Reports_View;
+export default ReportsView;

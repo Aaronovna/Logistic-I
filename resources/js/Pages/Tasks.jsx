@@ -1,19 +1,25 @@
-import { useStateContext } from '@/context/contextProvider';
-import { gradients } from "@/Constants/themes";
-import AuditTaskCard from '@/Components/cards/AuditTaskCard';
-import AuditLayout from '@/Layouts/AuditLayout';
 import { useState, useEffect } from 'react';
-import Modal from '@/Components/Modal';
-import { handleInputChange } from '@/functions/handleInputChange';
-import { dateFormatShort } from '@/Constants/options';
-import { auditTasks } from '@/Constants/auditTasks';
-import { auditTaskStatus } from '@/functions/status';
-import { TbPlus } from 'react-icons/tb';
-import { dateTimeFormatLong } from '@/Constants/options';
-import { TbUserEdit } from 'react-icons/tb';
-import { filterUsersByPermission } from '@/functions/filterArray';
+import { useStateContext } from '@/context/contextProvider';
 
-export default function Tasks({ auth }) {
+import AuditLayout from '@/Layouts/AuditLayout';
+import AuditTaskCard from '@/Components/cards/AuditTaskCard';
+import { handleInputChange } from '@/functions/handleInputChange';
+import { filterUsersByPermission } from '@/functions/filterArray';
+import { auditTaskStatus } from '@/functions/status';
+import { auditTasks } from '@/Constants/auditTasks';
+import { dateFormatShort } from '@/Constants/options';
+import { gradients } from "@/Constants/themes";
+import { dateTimeFormatLong } from '@/Constants/options';
+
+import { TbPlus } from 'react-icons/tb';
+
+const Tasks = ({ auth }) => {
+  if (!hasAccess(auth.user.type, [2050, 2051, 2054])) {
+    return (
+      <Unauthorized />
+    )
+  }
+
   const { theme } = useStateContext();
   const [openCreateTaskModal, setOpenCreateTaskModal] = useState(false);
 
@@ -250,3 +256,5 @@ export default function Tasks({ auth }) {
     </AuthenticatedLayout>
   );
 }
+
+export default Tasks;
