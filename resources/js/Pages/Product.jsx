@@ -18,7 +18,7 @@ import { TbPackageOff } from "react-icons/tb";
 const cardStyle = 'mb-2 snap-center mx-2 md:min-w-64 inline-block min-w-[100%]';
 
 const Product = ({ auth }) => {
-  if (!hasAccess(auth.user.type, [2052])) {
+  if (!hasAccess(auth.user.type, [2050, 2051, 2052])) {
     return (
       <Unauthorized />
     )

@@ -20,10 +20,10 @@ window.Modal = Modal;
 import Unauthorized from './Pages/Unauthorized';
 window.Unauthorized = Unauthorized;
 
-const hasAccess = (userType, requiredUserTypes) => {
-  if (Array.isArray(requiredUserTypes)) {
-      return requiredUserTypes.some(type => userType === type);
-  }
-  return userType === requiredUserTypes;
+const hasAccess = (value, allowedValues) => {
+  if (allowedValues == null) return false;
+
+  const valuesArray = Array.isArray(allowedValues) ? allowedValues : [allowedValues];
+  return valuesArray.includes(value);
 };
 window.hasAccess = hasAccess;

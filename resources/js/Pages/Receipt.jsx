@@ -13,7 +13,7 @@ const filterOrdersByStatuses = (orders, statuses) => {
 };
 
 const Receipt = ({ auth }) => {
-  if (!hasAccess(auth.user.type, [2052])) {
+  if (!hasAccess(auth.user.type, [2050, 2051, 2052])) {
     return (
       <Unauthorized />
     )
