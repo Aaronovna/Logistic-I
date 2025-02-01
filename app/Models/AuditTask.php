@@ -19,6 +19,11 @@ class AuditTask extends Model
         'assigned_by'
     ];
 
+    public function auditReport()
+    {
+        return $this->hasOne(AuditReport::class, 'task_id');
+    }
+
     public function assignedToUser()
     {
         return $this->belongsTo(User::class, 'assigned_to');

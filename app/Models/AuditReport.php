@@ -21,6 +21,6 @@ class AuditReport extends Model
     ];
 
     public function audit_task(){
-        return $this->belongsTo(AuditTask::class);
+        return $this->belongsTo(AuditTask::class, 'task_id');
     }
 }

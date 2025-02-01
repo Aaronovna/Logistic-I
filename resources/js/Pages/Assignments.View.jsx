@@ -9,7 +9,7 @@ import { TbCloudUpload } from "react-icons/tb";
 import { TbX } from "react-icons/tb";
 import { handleInputChange } from "@/functions/handleInputChange";
 
-const Assignments = ({ auth }) => {
+const Assignments_View = ({ auth }) => {
   const { theme } = useStateContext();
   const { props } = usePage();
 
@@ -110,7 +110,7 @@ const Assignments = ({ auth }) => {
         details: reportFormData.details,
         final_comment: reportFormData.final_comment,
         task_id: reportFormData.task_id,
-        review_status: 'Reviewing',
+        review_status: 'Pending Review',
         files: JSON.stringify(fileIds),
       }
 
@@ -246,15 +246,38 @@ const Assignments = ({ auth }) => {
                   {
                     task?.status === "Pending Review" ?
                       <div className="mt-2">
-                        {evidences.map((file, index) => (
-                          <div className="w-fit mb-2 text-sm group">
-                            <a key={index} href={file.url} target="_blank" rel="noopener noreferrer" className="">
-                              <img src={file.url} alt={file.url} className="border-card p-0 w-72" />
-                            </a>
-                            <p className="text-nowrap italic group-hover:underline">{file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)</p>
-                          </div>
-                        ))}
-                      </div> :
+                        {evidences.map((file, index) => {
+                          return (
+                            <div key={index} className="w-fit mb-2 text-sm group">
+                              {/* Handle Image Files */}
+                              {file.type === "image/png" || file.type === "image/jpeg" ? (
+                                <div>
+                                  <a href={file.url} target="_blank" rel="noopener noreferrer">
+                                    <img src={file.url} alt={file.name} className="border-card p-0 w-72" />
+                                  </a>
+                                  <p className="text-nowrap italic group-hover:underline">
+                                    {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                                  </p>
+                                </div>
+                              ) : null}
+
+                              {/* Handle Video Files */}
+                              {file.type === "video/mp4" ? (
+                                <div>
+                                  <video controls className="w-72 border-card">
+                                    <source src={file.url} type="video/mp4" />
+                                    Your browser does not support the video tag.
+                                  </video>
+                                  <p className="text-nowrap italic group-hover:underline">
+                                    {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                                  </p>
+                                </div>
+                              ) : null}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      :
                       <div className="mb-4">
                         <input
                           type="file"
@@ -294,7 +317,7 @@ const Assignments = ({ auth }) => {
   )
 }
 
-export default Assignments;
+export default Assignments_View;
 
 /* const [uploadedFiles, setUploadedFiles] = useState([]); // Store uploaded files
 

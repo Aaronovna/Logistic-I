@@ -12,28 +12,19 @@ class AuditReportController extends Controller
      */
     public function index()
     {
-        $reports = AuditReport::with('audit_task')->get();
+        $reports = AuditReport::with(['audit_task', 'audit_task.assignedToUser', 'audit_task.assignedByUser'])->orderBy('created_at', 'desc')->get();
 
-        // Map the data to include the total stock per product across all warehouses
-        $reports = $reports->map(function ($report) {
-
-            return [
-                'id' => $report->id,
-                'location' => $report->location,
-                'details' => $report->details,
-                'final_comment' => $report->final_comment,
-                'review_status' => $report->review_status,
-                'reviewed_by' => $report->reviewed_by,
-                'review_notes' => $report->review_notes,
-                'files' => $report->files,
-
-                'task_id' => $report->task_id,
-                'task_title' => $report->audit_task->title ?? 'N/A',
-                'task_type' => $report->audit_task->type ?? 'N/A',
-                'task_description' => $report->audit_task->description ?? 'N/A',
-                'task_assigned_to' => $report->audit_task->assigned_to ?? 'N/A',
-                'task_assigned_by' => $report->audit_task->assigned_by ?? 'N/A',
-            ];
+        // Append the assigned user names to each task
+        $reports->each(function ($report) {
+            $report->task_title = $report->audit_task->title ?? 'N/A';
+            $report->task_scope = $report->audit_task->scope ?? 'N/A';
+            $report->task_type = $report->audit_task->type ?? 'N/A';
+            $report->task_status = $report->audit_task->status ?? 'N/A';
+            $report->task_description = $report->audit_task->description ?? 'N/A';
+            $report->task_assigned_to = $report->audit_task->assigned_to ?? 'N/A';
+            $report->task_assigned_by = $report->audit_task->assigned_by ?? 'N/A';
+            $report->task_assigned_to_name = $report->audit_task->assignedToUser->name ?? 'N/A';
+            $report->task_assigned_by_name = $report->audit_task->assignedByUser->name ?? 'N/A';
         });
 
         return response()->json($reports);
@@ -67,7 +58,24 @@ class AuditReportController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $report = AuditReport::with(['audit_task', 'audit_task.assignedToUser', 'audit_task.assignedByUser'])->find($id);
+
+        if (!$report) {
+            return response()->json(['error' => 'Report not found'], 404);
+        }
+
+        $report->task_title = $report->audit_task->title ?? 'N/A';
+        $report->task_scope = $report->audit_task->scope ?? 'N/A';
+        $report->task_type = $report->audit_task->type ?? 'N/A';
+        $report->task_status = $report->audit_task->status ?? 'N/A';
+        $report->task_description = $report->audit_task->description ?? 'N/A';
+        $report->task_assigned_to = $report->audit_task->assigned_to ?? 'N/A';
+        $report->task_assigned_by = $report->audit_task->assigned_by ?? 'N/A';
+        $report->task_assigned_to_name = $report->audit_task->assignedToUser->name ?? 'N/A';
+        $report->task_assigned_by_name = $report->audit_task->assignedByUser->name ?? 'N/A';
+        $report->task_created_at = $report->audit_task->created_at ?? 'N/A';
+
+        return response()->json($report);
     }
 
     public function showByTask($taskId)
@@ -82,7 +90,22 @@ class AuditReportController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validatedData = $request->validate([
+            'review_status' => 'sometimes|string',
+            'reviewed_by' => 'sometimes|exists:users,id',
+        ]);
+
+        // Find the category by its ID
+        $report = AuditReport::findOrFail($id);
+
+        $report->fill($validatedData);
+        $report->save();
+
+        // Return a success response
+        return response()->json([
+            'message' => 'Updated successfully',
+            'task' => $report
+        ], 200);
     }
 
     /**

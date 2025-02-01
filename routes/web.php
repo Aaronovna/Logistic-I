@@ -47,12 +47,19 @@ Route::middleware(["auth", "verified"])->group(function () {
         return Inertia::render('Infrastructure.View', [
             'id' => $request->query('id'), // Extract 'name' from the query string
         ]);
-    })->name('assignments-view');
+    })->name('infrastructure-view');
+
     Route::get('/assignments/view', function (\Illuminate\Http\Request $request) {
         return Inertia::render('Assignments.View', [
-            'id' => $request->query('id'), // Extract 'name' from the query string
+            'id' => $request->query('id'),
         ]);
     })->name('assignments-view');
+
+    Route::get('/reports/view', function (\Illuminate\Http\Request $request) {
+        return Inertia::render('Reports.View', [
+            'id' => $request->query('id'),
+        ]);
+    })->name('reports-view');
 });
 
 //! END: PAGES ROUTES //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

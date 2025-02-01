@@ -46,16 +46,16 @@ export const inventoryLinks = [
 ////////////////////////////////////////////////////////
 
 import { TbPinned } from "react-icons/tb";
-import { TbClipboardList } from "react-icons/tb";
+import { TbCheckbox } from "react-icons/tb";
 import { TbClipboardData } from "react-icons/tb";
 
 export const auditLinks = [
     {
         name: 'tasks',
-        Icon: TbClipboardList
+        Icon: TbCheckbox
     },
     {
-        name: 'reports',
+        name: ['reports','reports-view'],
         Icon: TbClipboardData
     },
     {

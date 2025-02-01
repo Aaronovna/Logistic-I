@@ -7,7 +7,7 @@ const AuditTaskCard = ({ data = {}, onClick = () => { } }) => {
   return (
     <div onClick={onClick} className='border-card p-4 hover:shadow-lg shadow-sm duration-200 h-48 flex flex-col overflow-hidden cursor-pointer'>
       <div className="flex justify-between">
-        <div>
+        <div className="w-4/6">
           <p className="text-gray-600 font-semibold text-ellipsis overflow-hidden whitespace-nowrap">{data.type}</p>
           <p className="text-gray-600 text-sm">{new Date(data.created_at).toLocaleString(undefined, dateTimeFormatShort)}</p>
         </div>

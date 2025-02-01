@@ -13,7 +13,9 @@ class AuditTaskController extends Controller
      */
     public function index()
     {
-        $tasks = AuditTask::with(['assignedToUser', 'assignedByUser'])->get();
+        $tasks = AuditTask::with(['assignedToUser', 'assignedByUser'])
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         // Append the assigned user names to each task
         $tasks->each(function ($task) {
