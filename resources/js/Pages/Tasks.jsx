@@ -4,8 +4,8 @@ import { useStateContext } from '@/context/contextProvider';
 import AuditLayout from '@/Layouts/AuditLayout';
 import AuditTaskCard from '@/Components/cards/AuditTaskCard';
 import { handleInputChange } from '@/functions/handleInputChange';
-import { filterUsersByPermission } from '@/functions/filterArray';
-import { auditTaskStatus } from '@/functions/status';
+import { filterArray } from '@/functions/filterArray';
+import { auditTaskStatus } from '@/Constants/status';
 import { auditTasks } from '@/Constants/auditTasks';
 import { dateFormatShort } from '@/Constants/options';
 import { gradients } from "@/Constants/themes";
@@ -46,7 +46,7 @@ const Tasks = ({ auth }) => {
   const fetchAuditors = async () => {
     try {
       const response = await axios.get('/user/get');
-      setAuditors(filterUsersByPermission(response.data, ["2054"]));
+      setAuditors(filterArray(response.data, 'type', [2054,2055]));
     } catch (error) {
       toast.error(error);
     }
