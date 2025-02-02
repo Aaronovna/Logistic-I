@@ -1,4 +1,3 @@
-import React from "react";
 import { useStateContext } from "@/context/contextProvider";
 import { feedbackLight } from "@/Constants/themes";
 
@@ -8,10 +7,6 @@ import { TbClipboardList } from "react-icons/tb";
 import { TbCircleCheck } from "react-icons/tb";
 import { TbCircleX } from "react-icons/tb";
 import { TbClipboardCheck } from "react-icons/tb";
-
-import { useState } from "react";
-
-import Modal from "../Modal";
 
 const options = {
   year: 'numeric',
@@ -32,20 +27,21 @@ const I = ({ Icon, color }) => {
   )
 }
 
-const ReceiptCard = ({ data = {} }) => {
+const ReceiptCard = ({ data = {}, onClick = () => {} }) => {
   const { theme } = useStateContext();
 
   return (
     <div
-      className="relative w-full border-card p-4 cursor-pointer hover:shadow-lg shadow-none shadow-gray-300 duration-200 overflow-hidden h-48"
+      className="relative min-w-60 border-card p-4 cursor-pointer hover:shadow-lg shadow-none shadow-gray-300 duration-200 overflow-hidden"
       style={{ borderColor: theme.border, color: theme.text }}
+      onClick={onClick}
     >
       <div className="relative z-10">
         <p className="font-semibold">{new Date(data.order_date + 'Z').toLocaleString('en-PH', options)}</p>
         <p className="font-semibold">{data.status}</p>
         <p className="font-semibold">{data.id}</p>
         <p className="text-lg">{data.supplier_id}</p>
-        <p>{data.fleet}</p>
+        <p>{`${JSON.parse(data.fleet).name} ${JSON.parse(data.fleet).plate}`}</p>
         <p>{data.destination}</p>
       </div>
 
@@ -62,9 +58,6 @@ const ReceiptCard = ({ data = {} }) => {
 
 export default ReceiptCard;
 
-import axios from "axios";
-import toast from "react-hot-toast";
-
 export const UpcomingShipmentCard = ({ data }) => {
   const { theme } = useStateContext();
 
@@ -72,8 +65,8 @@ export const UpcomingShipmentCard = ({ data }) => {
     order_id: data.id || '',
     status: data.status || '',
     products: data.orders ? JSON.stringify(data.orders) : '[]',
-    supplier_id: data.supplier.id || '',
-    fleet: `${data.fleet.name} ${data.fleet.plate}` || '',
+    supplier: JSON.stringify(data.supplier) || '',
+    fleet: data.fleet ? JSON.stringify(data.fleet) : {},
     order_date: data.date,
     destination: data.destination || '',
     accepted: false,

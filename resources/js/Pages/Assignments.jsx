@@ -4,7 +4,7 @@ import { useStateContext } from "@/context/contextProvider";
 
 import AuditLayout from "@/Layouts/AuditLayout";
 import { Card2 } from "@/Components/Cards";
-import { auditTaskStatus } from "@/functions/status";
+import { auditTaskStatus } from "@/Constants/status";
 import { dateTimeFormatLong } from "@/Constants/options";
 
 const Assignments = ({ auth }) => {

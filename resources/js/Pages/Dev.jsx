@@ -1,6 +1,6 @@
 import { useStateContext } from '@/context/contextProvider';
 import { generateRandomNumber } from '@/functions/numberGenerator';
-import { generateRandomItem } from '@/functions/itemGenerator';
+import { generateRandomItem,generateRandomItems } from '@/functions/itemGenerator';
 
 import { useEffect, useState } from 'react';
 
@@ -10,18 +10,6 @@ const status = [
   'Checking',
   'Checked',
   'Success', 'Return'
-];
-
-//const orders = ['item1', 'item2', 'item3', 'item4'];
-const orders = [
-  {
-    name: 'abc',
-    quantity: 5,
-  },
-  {
-    name: 'xyz',
-    quantity: 10,
-  }
 ];
 
 export default function Dev() {
@@ -36,20 +24,39 @@ export default function Dev() {
       console.error('Error fetching suppliers:', error);
     }
   };
+  const [products, setProducts] = useState([]);
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get('/product/get');
+      setProducts(response.data);
+    } catch (error) {
+      console.error('Error fetching suppliers:', error);
+    }
+  };
+
+  const processProducts = (products) => {
+    const allowedQuantities = Array.from({ length: 20 }, (_, i) => (i + 1) * 50); // [50, 100, ..., 1000]
+  
+    return products.map(product => ({
+      id: product.id,
+      name: product.name,
+      model: product.model,
+      brand: product.brand,
+      quantity: allowedQuantities[Math.floor(Math.random() * allowedQuantities.length)], // Pick random quantity
+    }));
+  };
 
   const generateData = (count) => {
     
     const date = new Date();
-    console.log(date);
     const formattedDate = date.toISOString().slice(0, 19).replace('T', ' ')
-    console.log(formattedDate);
 
     return Array.from({ length: count }, (_, index) => ({
       id: generateRandomNumber(8),
       fleet: generateRandomItem(fleet),
       supplier: generateRandomItem(suppliers),
-      status: generateRandomItem(status),
-      orders: [...orders],
+      status: 'Upcoming',
+      orders: processProducts(generateRandomItems(10,products)),
       date: formattedDate,
       destination: generateRandomItem(['Warehouse 1', 'Warehouse 2']),
     }));
@@ -58,23 +65,23 @@ export default function Dev() {
   const generateOrder = () => {
 
     const date = new Date();
-    console.log(date);
     const formattedDate = date.toISOString().slice(0, 19).replace('T', ' ')
-    console.log(formattedDate);
     
-    return [{
+    const order = [{
       id: generateRandomNumber(8),
       fleet: generateRandomItem(fleet),
       supplier: generateRandomItem(suppliers),
       status: 'Upcoming',
-      orders: [...orders],
+      orders: processProducts(generateRandomItems(10,products)),
       date: formattedDate,
       destination: generateRandomItem(['Warehouse 1', 'Warehouse 2']),
     }];
+    return order;
   };
 
   useEffect(()=>{
     fetchSuppliers();
+    fetchProducts();
   },[])
 
   return (
@@ -87,7 +94,7 @@ export default function Dev() {
           <p className='text-2xl my-2'>Receipt</p>
           <hr className='mb-4' />
           <button className='border-card mr-2' onClick={() => setOrdersDummyData(generateOrder())}>Generate Order</button>
-          <button className='border-card mr-2' onClick={() => setOrdersDummyData(generateData(100))}>Generate Data</button>
+          <button className='border-card mr-2' onClick={() => setOrdersDummyData(generateData(20))}>Generate Data</button>
         </div>
       </div>
     </div>

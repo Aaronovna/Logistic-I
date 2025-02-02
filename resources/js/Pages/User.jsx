@@ -1,4 +1,3 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import DefaultLayout from '@/Layouts/InventoryLayout';
 import { Head } from '@inertiajs/react';
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -17,7 +16,6 @@ import { TbX } from "react-icons/tb";
 
 import { Card } from '@/Components/Cards';
 import Modal from '@/Components/Modal';
-
 import { permissions } from '@/Constants/permissions';
 
 import { useStateContext } from '@/context/contextProvider';
@@ -49,7 +47,6 @@ const dummyEmployeesData = [
 ]
 
 export default function User({ auth }) {
-
   const { theme, themePreference, userPermissions } = useStateContext();
 
   const [users, setUsers] = useState(null);

@@ -30,6 +30,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('receipts');
         Schema::dropIfExists('audit_reports');
         Schema::dropIfExists('audit_tasks');
     }

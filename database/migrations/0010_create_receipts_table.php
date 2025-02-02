@@ -14,11 +14,12 @@ return new class extends Migration
     {
         Schema::create('receipts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('task_id')->nullable()->constrained('audit_tasks')->onDelete('restrict');
             $table->integer('order_id')->unique();
             $table->string('status');
             $table->json('products')->nullable();
-            $table->integer('supplier_id');
-            $table->string('fleet');
+            $table->json('supplier')->nullable();
+            $table->json('fleet')->nullable();
             $table->datetime('order_date');
             $table->string('destination');
             $table->boolean('accepted')->default(false);

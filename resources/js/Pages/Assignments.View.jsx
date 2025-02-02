@@ -4,7 +4,7 @@ import { router } from "@inertiajs/react";
 import { useStateContext } from "@/context/contextProvider";
 
 import AuditLayout from "@/Layouts/AuditLayout";
-import { auditTaskStatus } from "@/functions/status";
+import { auditTaskStatus } from "@/Constants/status";
 import { handleInputChange } from "@/functions/handleInputChange";
 import { dateFormatLong } from "@/Constants/options";
 

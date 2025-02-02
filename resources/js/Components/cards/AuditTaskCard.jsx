@@ -1,6 +1,6 @@
 import { useStateContext } from "@/context/contextProvider";
 import { dateTimeFormatShort } from "@/Constants/options";
-import { auditTaskStatus } from "@/functions/status";
+import { auditTaskStatus } from "@/Constants/status";
 
 const AuditTaskCard = ({ data = {}, onClick = () => { } }) => {
   const { theme } = useStateContext();

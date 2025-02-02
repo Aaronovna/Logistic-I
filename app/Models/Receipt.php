@@ -11,12 +11,18 @@ class Receipt extends Model
 
     protected $fillable = [
         'order_id',
+        'task_id',
         'status',
         'products',
-        'supplier_id',
+        'supplier',
         'fleet',
         'order_date',
         'destination',
         'accepted',
     ];
+
+    public function audit_task()
+    {
+        return $this->belongsTo(AuditTask::class, 'task_id');
+    }
 }

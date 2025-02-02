@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useStateContext } from '@/context/contextProvider';
 
+import updateStatus from '@/api/updateStatus';
+
 import InventoryLayout from '@/Layouts/InventoryLayout';;
 import ReceiptCard from '@/Components/cards/ReceiptCard';
 import { UpcomingShipmentCard } from '@/Components/cards/ReceiptCard';
@@ -82,6 +84,57 @@ const Receipt = ({ auth }) => {
     }
   };
 
+  const onReceived = (id) => {
+    const url = `/receipt/update/${id}`;
+    updateStatus(url, { status: 'Delivered' })
+  }
+
+  const onDelivered = (id) => {
+    const url = `/receipt/update/${id}`;
+    updateStatus(url, { status: 'Checked' })
+  }
+
+  const onAccept = (id, data) => {
+    const url = `/receipt/update/${id}`;
+    updateStatus(url, { status: 'Success' })
+  }
+
+  const onReturn = (id) => {
+    const url = `/receipt/update/${id}`;
+    updateStatus(url, { status: 'Return' })
+  }
+
+  const onCreateTaskSubmit = async (e, data) => {
+    e.preventDefault();
+
+    const payload = {
+      type: 'Goods Receipt Note (GRN) Review and Quantity Check',
+      title: `Auto GRN Review and Check: (${data.order_id} | ${data.destination})`,
+      description:
+        `
+        Auto Generated Task by Receipt module
+        Compare the Goods Receipt Notes with the corresponding POs and verify that all received items are accurately recorded.
+        `,
+      scope: `Order: ${data.order_id} Fleet: ${JSON.parse(data.fleet).name} | ${JSON.parse(data.fleet).plate}`,
+      auto_gen: true,
+      assigned_by: auth.user.id,
+    };
+
+    try {
+      const response = await axios.post('audit/task/create', payload)
+      if (response.status === 201) {
+        const url = `/receipt/update/${data.id}`;
+        updateStatus(url, { task_id: response.data.data.id })
+      }
+    } catch (error) {
+
+    }
+  }
+
+  useEffect(() => {
+    console.log(shipmentData)
+  }, [shipmentData])
+
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -130,12 +183,10 @@ const Receipt = ({ auth }) => {
                 className='pl-8 bg-transparent border-none tracking-wide w-full' style={{ color: theme.text }}
               />
             </div>
-            <div className='grid grid-cols-2 gap-4 overflow-y-scroll pr-2' style={{ height: '528px' }}>
+            <div className='grid grid-cols-2 gap-4 overflow-y-scroll pr-2'>
               {RD?.map((data, index) => {
                 return (
-                  <div key={index} onClick={() => { handleShipmentClick(data) }}>
-                    <ReceiptCard data={data} />
-                  </div>
+                  <ReceiptCard data={data} key={index} onClick={() => handleShipmentClick(data)} />
                 )
               })}
             </div>
@@ -144,7 +195,7 @@ const Receipt = ({ auth }) => {
 
           <Modal show={openShipmentDataModal} onClose={() => setOpenShipmentDataModal(false)}>
             <div className="p-4">
-              <p className='font-semibold text-xl mt-2 mb-4'>Shipment Details</p>
+              <p className='modal-header'>Shipment Details</p>
               <p className='font-semibold text-gray-500'>Order ID: <span className='font-semibold' style={{ color: theme.text }}>{shipmentData?.order_id}</span></p>
 
               <p className='font-semibold text-lg mt-4'>Product List</p>
@@ -156,21 +207,22 @@ const Receipt = ({ auth }) => {
                 )}
               </div>
 
-              {shipmentData?.status === 'Checked' &&
+              {shipmentData?.task_status === "Completed" &&
                 <div className='p-2'>
-                  <p>Checked By: --</p>
-                  <p>Comment: Approved</p>
+                  <p>Checked By: {shipmentData.task_assigned_to_name}</p>
+                  <p>Final Comment: {shipmentData.task_report_final_comment}</p>
+                  <p>Status: {shipmentData.task_status}</p>
                 </div>
               }
 
-              {shipmentData?.status === 'Upcoming' && <button className='border-card'>Shipment Received</button>}
-              {shipmentData?.status === 'Delivered' && <p className='border-card w-fit cursor-not-allowed'>Waiting to be checked</p>}
-              {shipmentData?.status === 'Checking' && <p className='border-card w-fit cursor-not-allowed'>Waiting to be checked</p>}
+              {shipmentData?.status === 'Upcoming' && <button className='border-card' onClick={() => onReceived(shipmentData.id)}>Shipment Received</button>}
+              {shipmentData?.status === 'Delivered' && !shipmentData?.task_id && <button className='border-card w-fit' onClick={(e) => onCreateTaskSubmit(e, shipmentData)}>Create Task</button>}
+              {shipmentData?.status !== 'Checked'  && shipmentData?.task_status === "Completed" && <button className='border-card w-fit' onClick={() => onDelivered(shipmentData.id)}>Product Checked</button>}
 
               {shipmentData?.status === 'Checked' &&
                 <div>
-                  <button className='border-card mr-2'>Return</button>
-                  <button className='border-card'>Accept</button>
+                  <button className='border-card mr-2' onClick={() => onReturn(shipmentData.id)}>Return</button>
+                  <button className='border-card' onClick={() => onAccept(shipmentData.id, shipmentData.products)}>Accept</button>
                 </div>
               }
 
@@ -178,8 +230,8 @@ const Receipt = ({ auth }) => {
           </Modal>
 
           <Modal show={openUpcomingShipmentModal} onClose={() => setOpenUpcomingShipmentModal(false)} maxWidth='4xl'>
-            <div className='md:h-[38rem] h-[32rem] overflow-hidden'>
-              <p className='font-semibold text-xl mt-2 mb-4'>Upcoming Shipment</p>
+            <div className='p-4 md:h-[38rem] h-[32rem] overflow-hidden'>
+              <p className='modal-header'>Upcoming Shipment</p>
               <div className='h-[90%] overflow-y-auto pr-1'>
                 {
                   ordersDummyData?.map((data, index) => {

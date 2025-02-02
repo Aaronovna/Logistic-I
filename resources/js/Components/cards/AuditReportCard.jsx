@@ -1,5 +1,3 @@
-
-
 const AuditReportCard = ({ data = {}, onClick = () => { } }) => {
   return (
     <div className='border-card p-4 hover:shadow-md hover:cursor-pointer' onClick={onClick}>

@@ -68,7 +68,7 @@ const ReportsView = ({ auth }) => {
       // If the report creation is successful, update the task status
       if (reportResponse.status === 200) {
         const payload = {
-          status: 'completed'
+          status: 'Completed'
         };
 
         try {

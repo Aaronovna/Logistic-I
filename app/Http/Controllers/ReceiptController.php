@@ -12,7 +12,15 @@ class ReceiptController extends Controller
      */
     public function index()
     {
-        $orders = Receipt::all();
+        $orders = Receipt::with(['audit_task', 'audit_task.assignedToUser','audit_task.auditReport'])->orderBy('created_at', 'desc')->get();
+
+        // Append the assigned user names to each task
+        $orders->each(function ($order) {
+            $order->task_status = $order->audit_task->status ?? 'N/A';
+            $order->task_report_final_comment = $order->audit_task->auditReport->final_comment ?? 'N/A';
+            $order->task_assigned_to_name = $order->audit_task->assignedToUser->name ?? 'N/A';
+        });
+
         return response()->json($orders);
     }
 
@@ -25,7 +33,7 @@ class ReceiptController extends Controller
             'order_id' => 'required|integer',
             'status' => 'required|string|max:255',
             'products' => 'required|json',
-            'supplier_id' => 'required|integer',
+            'supplier' => 'required|json',
             'fleet' => 'required|string|max:255',
             'order_date' => 'required|date_format:Y-m-d H:i:s',
             'destination' => 'required|string|max:255',
@@ -60,7 +68,22 @@ class ReceiptController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validatedData = $request->validate([
+            'status' => 'sometimes|string',
+            'task_id' => 'sometimes|exists:audit_tasks,id'
+        ]);
+
+        // Find the category by its ID
+        $receipt = Receipt::findOrFail($id);
+
+        $receipt->fill($validatedData);
+        $receipt->save();
+
+        // Return a success response
+        return response()->json([
+            'message' => 'Updated successfully',
+            'task' => $receipt
+        ], 200);
     }
 
     /**
