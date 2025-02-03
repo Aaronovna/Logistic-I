@@ -12,13 +12,14 @@ class ReceiptController extends Controller
      */
     public function index()
     {
-        $orders = Receipt::with(['audit_task', 'audit_task.assignedToUser','audit_task.auditReport'])->orderBy('created_at', 'desc')->get();
+        $orders = Receipt::with(['audit_task', 'audit_task.assignedToUser','audit_task.auditReport','warehouse'])->orderBy('created_at', 'desc')->get();
 
         // Append the assigned user names to each task
         $orders->each(function ($order) {
             $order->task_status = $order->audit_task->status ?? 'N/A';
             $order->task_report_final_comment = $order->audit_task->auditReport->final_comment ?? 'N/A';
             $order->task_assigned_to_name = $order->audit_task->assignedToUser->name ?? 'N/A';
+            $order->order_warehouse = $order->warehouse->name ?? 'N/A';
         });
 
         return response()->json($orders);
@@ -36,7 +37,7 @@ class ReceiptController extends Controller
             'supplier' => 'required|json',
             'fleet' => 'required|string|max:255',
             'order_date' => 'required|date_format:Y-m-d H:i:s',
-            'destination' => 'required|string|max:255',
+            'warehouse_id' => 'required|exists:infrastructures,id',
             'accepted' => 'required|boolean',
         ]);
         try {

@@ -17,12 +17,16 @@ class Receipt extends Model
         'supplier',
         'fleet',
         'order_date',
-        'destination',
+        'warehouse_id',
         'accepted',
     ];
 
     public function audit_task()
     {
         return $this->belongsTo(AuditTask::class, 'task_id');
+    }
+    public function warehouse()
+    {
+        return $this->belongsTo(Infrastructure::class, 'warehouse_id');
     }
 }

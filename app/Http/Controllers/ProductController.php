@@ -7,7 +7,6 @@ use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use App\Models\Category;
 use App\Models\Supplier;
-use App\Models\Inventory;
 
 class ProductController extends Controller
 {
@@ -53,14 +52,14 @@ class ProductController extends Controller
         // Validate the incoming request data
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'brand' => 'required|string|max:255',
-            'model' => 'required|string|max:255',
-            'description' => 'required|string',
-            'image_url' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'restock_point' => 'required|integer|min:0',
-            'category_id' => 'required|exists:categories,id',
-            'supplier_id' => 'required|exists:suppliers,id',
+            'brand' => 'sometimes|string|max:255',
+            'model' => 'sometimes|string|max:255',
+            'description' => 'sometimes|string',
+            'image_url' => 'sometimes|string',
+            'price' => 'sometimes|numeric|min:0',
+            'restock_point' => 'sometimes|integer|min:0',
+            'category_id' => 'sometimes|exists:categories,id',
+            'supplier_id' => 'sometimes|exists:suppliers,id',
         ]);
 
         $product = Product::create($validatedData);

@@ -7,6 +7,7 @@ import { TbClipboardList } from "react-icons/tb";
 import { TbCircleCheck } from "react-icons/tb";
 import { TbCircleX } from "react-icons/tb";
 import { TbClipboardCheck } from "react-icons/tb";
+import Warehouse from "@/Pages/Warehouse";
 
 const options = {
   year: 'numeric',
@@ -68,7 +69,7 @@ export const UpcomingShipmentCard = ({ data }) => {
     supplier: JSON.stringify(data.supplier) || '',
     fleet: data.fleet ? JSON.stringify(data.fleet) : {},
     order_date: data.date,
-    destination: data.destination || '',
+    warehouse_id: data.destination.id || '',
     accepted: false,
   };
 
@@ -102,7 +103,7 @@ export const UpcomingShipmentCard = ({ data }) => {
         <p>{data.id}</p>
         <p>{`${data.fleet.name} ${data.fleet.plate}`}</p>
         <p>{data.supplier.name}</p>
-        <p>{data.destination}</p>
+        <p>{data.destination.name}</p>
       </div>
       <div className='w-fit h-fit mt-auto ml-auto'>
         <button

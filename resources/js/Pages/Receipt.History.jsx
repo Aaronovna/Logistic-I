@@ -58,7 +58,7 @@ const ReceiptHistory = ({ auth }) => {
           {
             history?.map((data, index) => {
               return (
-                <p key={index}>{`${data.id} ${new Date(data.order_date + 'Z').toLocaleString('en-PH', options)} ${data.supplier_id} ${data.status}`}</p>
+                <p key={index}>{`${data.id} ${new Date(data.order_date + 'Z').toLocaleString('en-PH', options)} ${data.order_warehouse} ${data.status}`}</p>
               )
             })
           }

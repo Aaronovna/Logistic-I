@@ -3,6 +3,7 @@ import { generateRandomNumber } from '@/functions/numberGenerator';
 import { generateRandomItem,generateRandomItems } from '@/functions/itemGenerator';
 
 import { useEffect, useState } from 'react';
+import { filterArray } from '@/functions/filterArray';
 
 const status = [
   'Upcoming',
@@ -34,6 +35,16 @@ export default function Dev() {
     }
   };
 
+  const [warehouses, setWarehouses] = useState([]);
+  const fetchWarehouses = async () => {
+    try {
+      const response = await axios.get('/infrastructure/get');
+      setWarehouses(filterArray(response.data, 'type', [100] ));
+    } catch (error) {
+      console.error('Error fetching suppliers:', error);
+    }
+  };
+
   const processProducts = (products) => {
     const allowedQuantities = Array.from({ length: 20 }, (_, i) => (i + 1) * 50); // [50, 100, ..., 1000]
   
@@ -58,7 +69,7 @@ export default function Dev() {
       status: 'Upcoming',
       orders: processProducts(generateRandomItems(10,products)),
       date: formattedDate,
-      destination: generateRandomItem(['Warehouse 1', 'Warehouse 2']),
+      destination: generateRandomItem(warehouses),
     }));
   };
 
@@ -74,7 +85,7 @@ export default function Dev() {
       status: 'Upcoming',
       orders: processProducts(generateRandomItems(10,products)),
       date: formattedDate,
-      destination: generateRandomItem(['Warehouse 1', 'Warehouse 2']),
+      destination: generateRandomItem(warehouses),
     }];
     return order;
   };
@@ -82,6 +93,7 @@ export default function Dev() {
   useEffect(()=>{
     fetchSuppliers();
     fetchProducts();
+    fetchWarehouses();
   },[])
 
   return (

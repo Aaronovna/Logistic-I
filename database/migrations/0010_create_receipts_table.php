@@ -21,7 +21,7 @@ return new class extends Migration
             $table->json('supplier')->nullable();
             $table->json('fleet')->nullable();
             $table->datetime('order_date');
-            $table->string('destination');
+            $table->foreignId('warehouse_id')->nullable()->constrained('infrastructures')->onDelete('restrict');
             $table->boolean('accepted')->default(false);
             $table->timestamps();
         });

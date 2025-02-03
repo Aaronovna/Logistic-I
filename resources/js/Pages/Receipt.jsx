@@ -9,6 +9,8 @@ import { UpcomingShipmentCard } from '@/Components/cards/ReceiptCard';
 import { gradients } from "@/Constants/themes";
 
 import { TbSearch } from "react-icons/tb";
+import Warehouse from './Warehouse';
+import toast from 'react-hot-toast';
 
 const filterOrdersByStatuses = (orders, statuses) => {
   return orders.filter(order => statuses.includes(order?.status));
@@ -94,7 +96,23 @@ const Receipt = ({ auth }) => {
     updateStatus(url, { status: 'Checked' })
   }
 
-  const onAccept = (id, data) => {
+  const onAccept = async (id, data) => {
+    const inventoryPromises = data.products.map(async (product) => {
+      const payload = {
+        quantity: product.quantity,
+        product_id: product.id,
+        warehouse_id: data.warehouse_id,
+      }
+      try {
+        const response = await axios.post(`/inventory/create`,payload)
+        toast.success('success');
+      } catch (error) {
+        toast.error('error');
+      }
+    })
+
+    const results = await Promise.all(inventoryPromises);
+    
     const url = `/receipt/update/${id}`;
     updateStatus(url, { status: 'Success' })
   }
@@ -222,7 +240,7 @@ const Receipt = ({ auth }) => {
               {shipmentData?.status === 'Checked' &&
                 <div>
                   <button className='border-card mr-2' onClick={() => onReturn(shipmentData.id)}>Return</button>
-                  <button className='border-card' onClick={() => onAccept(shipmentData.id, shipmentData.products)}>Accept</button>
+                  <button className='border-card' onClick={() => onAccept(shipmentData.id, shipmentData)}>Accept</button>
                 </div>
               }
 
