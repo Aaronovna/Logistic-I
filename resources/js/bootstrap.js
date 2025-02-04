@@ -8,6 +8,12 @@ window.Link = Link;
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 window.AuthenticatedLayout = AuthenticatedLayout;
 
+import Header from './Components/Header';
+window.NavHeader = Header;
+
+import { BreadCrumbsHeader } from './Components/Header';
+window.BreadCrumbsHeader = BreadCrumbsHeader;
+
 import { Head } from '@inertiajs/react';
 window.Head = Head;
 

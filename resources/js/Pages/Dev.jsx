@@ -99,16 +99,22 @@ export default function Dev() {
 
   return (
     <div style={{ color: theme.text }}>
-      <div className='bg-white/10 backdrop-blur-lg'>
+      <div className=''>
         <div className='p-4' style={{ background: theme.background }}>
-          <p className='text-2xl'>{`Dummy Data Generator [Pre Integration]`}</p>
+          <p className='text-2xl'>{`Developer Tools`}</p>
         </div>
+
         <div className='p-4 w-full'>
-          <p className='text-2xl my-2'>Receipt</p>
+          <p className='text-2xl my-2'>{`Tools`}</p>
+          <hr className='mb-4' />
+          <button className='border-card mr-2' onClick={() => setDebugMode((debugMode)=>!debugMode)}>{`Debug Mode ${debugMode ? '[ON]':'[OFF]'}`}</button>
+        </div>
+        
+        <div className='p-4 w-full'>
+          <p className='text-2xl my-2'>{`Dummy Data Generator`}</p>
           <hr className='mb-4' />
           <button className='border-card mr-2' onClick={() => setOrdersDummyData(generateOrder())}>Generate Order Data</button>
           <button className='border-card mr-2' onClick={() => setOrdersDummyData(generateData(20))}>Generate 10 Order Data</button>
-          <button className='border-card mr-2' onClick={() => setDebugMode((debugMode)=>!debugMode)}>{`Debug Mode ${debugMode ? '[ON]':'[OFF]'}`}</button>
         </div>
       </div>
     </div>

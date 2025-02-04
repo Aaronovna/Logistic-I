@@ -1,0 +1,163 @@
+import { useState, useEffect } from "react";
+import { router } from "@inertiajs/react";
+import { AgGridReact } from 'ag-grid-react';
+import { useStateContext } from "@/context/contextProvider";
+
+import InfrastructureLayout from "@/Layouts/InfrastructureLayout";
+import Status from "@/Components/Status";
+import { filterArray } from "@/functions/filterArray";
+import { requestStatus } from "@/Constants/status";
+import { returnStatus } from "@/Constants/status";
+import { productToastMessages } from "@/Constants/toastMessages";
+
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-quartz.css";
+
+const DepotHistory = ({ auth }) => {
+  if (!hasAccess(auth.user.type, [2050, 2051, 2053])) {
+    return (
+      <Unauthorized />
+    )
+  }
+
+  const { themePreference } = useStateContext();
+
+  const [requests, setRequests] = useState([]);
+  const fetchRequest = async () => {
+    try {
+      const response = await axios.get('/request/get/infrastructure/depot');
+      setRequests(filterArray(response.data, 'status', ['Completed', 'Request Canceled', 'Request Rejected']));
+    } catch (error) {
+      toast.error(productToastMessages.show.error, error);
+    }
+  };
+
+  const [returns, setReturns] = useState([]);
+  const fetchReturns = async () => {
+    try {
+      const response = await axios.get('/return/get');
+      setReturns(filterArray(response.data, 'status', ['Completed', 'Canceled']));
+    } catch (error) {
+      toast.error(productToastMessages.show.error, error);
+    }
+  };
+
+
+  useEffect(() => {
+    fetchRequest();
+    fetchReturns();
+  }, []);
+
+  return (
+    <AuthenticatedLayout user={auth.user}>
+
+      <Head title="Depot History" />
+      <InfrastructureLayout
+        user={auth.user}
+        header={<BreadCrumbsHeader
+          headerNames={["Depot", "History"]}
+          onClickHandlers={[
+            () => router.get('/depot'),
+            () => router.get('/depot/history')
+          ]}
+        />
+        }
+      >
+        <div className="content">
+          <p className="font-medium text-xl mb-2" id="request-section">Request History</p>
+          <div className={`w-full h-96 ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`}>
+            <AgGridReact
+              rowData={requests}
+              columnDefs={colDefs}
+              rowSelection='single'
+              pagination={true}
+            />
+          </div>
+          
+          <p className="font-medium text-xl mb-2 mt-6" id="return-section">Return History</p>
+          <div className={`w-full h-96 ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`}>
+            <AgGridReact
+              rowData={returns}
+              columnDefs={returnColDef}
+              rowSelection='single'
+              pagination={true}
+            />
+          </div>
+        </div>
+      </InfrastructureLayout>
+    </AuthenticatedLayout>
+  )
+}
+
+export default DepotHistory;
+
+const colDefs = [
+  { field: "user_name", filter: true, flex: 1, minWidth: 120, headerName: 'Requested by' },
+  { field: "type", filter: true, flex: 1, minWidth: 120 },
+  {
+    field: "items", filter: true, flex: 1, minWidth: 120, headerName: 'Requested Material', autoHeight: true,
+    cellRenderer: (params) => {
+      const items = JSON.parse(params.data.items);
+
+      return (
+        <div>
+          {
+            items.map((item, index) => {
+              return (
+                <p key={index} className="w-full">{item.product_name} <span className="italic ml-4">qty. {item.quantity}</span></p>
+              )
+            })
+          }
+        </div>
+      )
+    }
+  },
+  {
+    field: "status", flex: 1, minWidth: 120,
+    cellRenderer: (params) => {
+      return (
+        <Status statusArray={requestStatus} status={params.data.status} className='leading-normal whitespace-nowrap p-1 px-3 rounded-full' />
+      )
+    }
+  }
+];
+
+const returnColDef = [
+  {
+    field: 'requested_by_name',
+    headerName: 'Requested by'
+  },
+  {
+    field: 'category',
+  },
+  {
+    field: 'comment', flex: 1,
+  },
+  {
+    field: 'assoc_products',
+    headerName: 'Associated Products',
+    cellRenderer: (params) => {
+      const assoc_products = JSON.parse(params.data.assoc_products);
+
+      return (
+        <div>
+          {
+            assoc_products.map((item, index) => {
+              return (
+                <p key={index} className="w-full flex justify-between">{item}</p>
+              )
+            })
+          }
+        </div>
+      )
+    }
+  },
+  {
+    field: 'status',
+    cellRenderer: (params) => {
+      return (
+        <Status statusArray={returnStatus} status={params.data.status} className='leading-normal whitespace-nowrap p-1 px-3 rounded-full' />
+      )
+    }
+  },
+];

@@ -17,6 +17,7 @@ use App\Http\Controllers\AuditTaskController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\AuditReportController;
+use App\Http\Controllers\ReturnMaterialController;
 
 Route::redirect('/', 'login');
 
@@ -34,8 +35,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/dispatch/history', fn() => Inertia::render('Dispatch.History'))->name('dispatch-history');
     Route::get('/warehouse', fn() => Inertia::render('Warehouse'))->name('warehouse');
     Route::get('/depot', fn() => Inertia::render('Depot'))->name('depot');
-    Route::get('/depot/inventory', fn() => Inertia::render('Depot.Inventory'))->name('depot-inventory');
-    Route::get('/depot/maintenance', fn() => Inertia::render('Depot.Maintenance'))->name('depot-maintenance');
+    Route::get('/depot/history', fn() => Inertia::render('Depot.History'))->name('depot-history');
     Route::get('/terminal', fn() => Inertia::render('Terminal'))->name('terminal');
     Route::get('/terminal/request', fn() => Inertia::render('Terminal.Request'))->name('terminal-request');
     Route::get('/tasks', action: fn() => Inertia::render('Tasks'))->name('tasks');
@@ -149,6 +149,12 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post('/audit/report/create', [AuditReportController::class, 'store'])->name('auditReport.store');
     Route::patch('/audit/report/update/{id}', [AuditReportController::class, 'update'])->name('auditReport.update');
     Route::delete('/audit/report/delete/{id}', [AuditReportController::class, 'destroy'])->name('auditReport.destroy');
+
+    Route::get('/return/get', [ReturnMaterialController::class, 'index'])->name('return.index');
+    Route::get('/return/get/{id}', [ReturnMaterialController::class, 'show'])->name('return.show');
+    Route::post('/return/create', [ReturnMaterialController::class, 'store'])->name('return.store');
+    Route::patch('/return/update/{id}', [ReturnMaterialController::class, 'update'])->name('return.update');
+    Route::delete('/return/delete/{id}', [ReturnMaterialController::class, 'destroy'])->name('return.destroy');
 
     Route::get('/file/get', [FileController::class, 'index']);
     Route::get('/file/get/{id}', [FileController::class, 'show']);

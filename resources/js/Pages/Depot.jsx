@@ -3,6 +3,7 @@ import { useStateContext } from '@/context/contextProvider';
 import { AgGridReact } from 'ag-grid-react';
 
 import InfrastructureLayout from '@/Layouts/InfrastructureLayout';
+import updateStatus from '@/api/updateStatus';
 import { filterArray } from '@/functions/filterArray';
 
 import "ag-grid-community/styles/ag-grid.css";
@@ -79,7 +80,7 @@ const Depot = ({ auth }) => {
     },
     { field: "status", filter: true, flex: 1, minWidth: 120 },
     {
-      field: "Action", maxWidth: 100,
+      field: "Action", minWidth: 100, flex: 1,
       cellRenderer: (params => {
         const handleDelete = async (id) => {
           try {
@@ -96,12 +97,24 @@ const Depot = ({ auth }) => {
         };
 
         return (
-          <button
-            onClick={() => handleDelete(params.data.id)}  // Assuming `product_id` is the ID to delete
-            className="px-2 py-1"
-          >
-            Delete
-          </button>
+          <div>
+            <button
+              onClick={() => handleDelete(params.data.id)}  // Assuming `product_id` is the ID to delete
+              className="px-2 py-1"
+            >
+              Delete
+            </button>
+            {
+              params.data.status === 'Delivered' ?
+                <button
+                  onClick={() => CompleteDeliver(params.data.id)}  // Assuming `product_id` is the ID to delete
+                  className="px-2 py-1"
+                >
+                  Complete
+                </button>
+                : null
+            }
+          </div>
         );
       })
     },
@@ -224,11 +237,16 @@ const Depot = ({ auth }) => {
   const fetchRequest = async () => {
     try {
       const response = await axios.get('request/get/infrastructure/depot');
-      setRequests(response.data);
+      setRequests(filterArray(response.data, 'status', ['Completed'], true));
     } catch (error) {
       toast.error(productToastMessages.show.error, error);
     }
   };
+
+  const CompleteDeliver = (id) => {
+    const url = `/request/update/${id}`;
+    updateStatus(url, { status: 'Completed' })
+  }
 
   return (
     <AuthenticatedLayout

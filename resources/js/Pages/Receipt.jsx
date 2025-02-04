@@ -9,7 +9,6 @@ import { UpcomingShipmentCard } from '@/Components/cards/ReceiptCard';
 import { gradients } from "@/Constants/themes";
 
 import { TbSearch } from "react-icons/tb";
-import Warehouse from './Warehouse';
 import toast from 'react-hot-toast';
 
 const filterOrdersByStatuses = (orders, statuses) => {
@@ -148,10 +147,6 @@ const Receipt = ({ auth }) => {
 
     }
   }
-
-  useEffect(() => {
-    console.log(shipmentData)
-  }, [shipmentData])
 
   return (
     <AuthenticatedLayout

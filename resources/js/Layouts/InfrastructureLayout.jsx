@@ -12,7 +12,7 @@ import { TbMenu2 } from "react-icons/tb";
 import { TbX } from "react-icons/tb";
 
 
-const DefaultLayout = ({ user, header, children }) => {
+const InfrastructureLayout = ({ user, header, children }) => {
     const pages = getPages(user.type);
   const { theme } = useStateContext();
   const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
@@ -112,4 +112,4 @@ const DefaultLayout = ({ user, header, children }) => {
   )
 }
 
-export default DefaultLayout;
+export default InfrastructureLayout;
