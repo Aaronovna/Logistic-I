@@ -11,10 +11,10 @@ const AuthenticatedLayout = ({ user, children }) => {
     setUserPermissions(JSON.parse(user.permissions));
   }, []);
 
-  const [openDDG, setOpenDDG] = useState(false);
+  const [openDev, setOpenDev] = useState(false);
 
   const closeModal = () => {
-    setOpenDDG(false);
+    setOpenDev(false);
   };
 
   return (
@@ -38,14 +38,14 @@ const AuthenticatedLayout = ({ user, children }) => {
         <div
           className="absolute border bottom-4 right-4 p-2 z-10 hover:opacity-100 opacity-30 duration-200 hover:cursor-pointer"
           style={{ background: theme.accent }}
-          onClick={() => setOpenDDG(true)}
+          onClick={() => setOpenDev(true)}
         >
-          <p style={{ color: theme.background }}>DDG</p>
+          <p style={{ color: theme.background }}>Dev</p>
         </div>
       }
 
-      <Modal show={openDDG} onClose={closeModal}>
-        <Dev></Dev>
+      <Modal show={openDev} onClose={closeModal}>
+        <Dev />
       </Modal>
 
       {children}
