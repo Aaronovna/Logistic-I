@@ -3,11 +3,13 @@ import { useStateContext } from '@/context/contextProvider';
 import { AgGridReact } from 'ag-grid-react';
 
 import InfrastructureLayout from '@/Layouts/InfrastructureLayout';
+import Status from '@/Components/Status';
 import updateStatus from '@/api/updateStatus';
+import { handleInputChange } from '@/functions/handleInputChange';
 import { filterArray } from '@/functions/filterArray';
-
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
+import { requestStatus } from '@/Constants/status';
+import { returnStatus } from '@/Constants/status';
+import { returnCategories } from '@/Constants/categories';
 
 const Depot = ({ auth }) => {
   if (!hasAccess(auth.user.type, [2050, 2051, 2053])) {
@@ -42,6 +44,7 @@ const Depot = ({ auth }) => {
     fetchRequest();
     fetchInfrastructures();
     fetchProducts();
+    fetchReturns();
   }, [])
 
   const handleDepotChange = (e) => {
@@ -56,69 +59,6 @@ const Depot = ({ auth }) => {
       setSelectedDepot(depots[0]);
     }
   }, [depots])
-
-  const colDefs = [
-    { field: "user_name", filter: true, flex: 1, minWidth: 120, headerName: 'User' },
-    { field: "type", filter: true, flex: 1, minWidth: 120 },
-    {
-      field: "items", filter: true, flex: 1, minWidth: 120, headerName: 'Requested Material', autoHeight: true,
-      cellRenderer: (params) => {
-        const items = JSON.parse(params.data.items);
-
-        return (
-          <div>
-            {
-              items.map((item, index) => {
-                return (
-                  <p key={index}>{`${item.product_name ? item.product_name : `ID:${item.product_id}`} ${item.quantity}`}</p>
-                )
-              })
-            }
-          </div>
-        )
-      }
-    },
-    { field: "status", filter: true, flex: 1, minWidth: 120 },
-    {
-      field: "Action", minWidth: 100, flex: 1,
-      cellRenderer: (params => {
-        const handleDelete = async (id) => {
-          try {
-            const response = await axios.delete(`/request/delete/${id}`);  // Replace with your actual delete endpoint
-            if (response.status === 200) {
-              alert('Product deleted successfully');
-            } else {
-              alert('Failed to delete product');
-            }
-          } catch (error) {
-            console.error('Error deleting product:', error);
-            alert('Failed to delete product');
-          }
-        };
-
-        return (
-          <div>
-            <button
-              onClick={() => handleDelete(params.data.id)}  // Assuming `product_id` is the ID to delete
-              className="px-2 py-1"
-            >
-              Delete
-            </button>
-            {
-              params.data.status === 'Delivered' ?
-                <button
-                  onClick={() => CompleteDeliver(params.data.id)}  // Assuming `product_id` is the ID to delete
-                  className="px-2 py-1"
-                >
-                  Complete
-                </button>
-                : null
-            }
-          </div>
-        );
-      })
-    },
-  ];
 
   const [openRequestModal, setOpenRequestModal] = useState(false);
 
@@ -236,26 +176,73 @@ const Depot = ({ auth }) => {
   const [requests, setRequests] = useState();
   const fetchRequest = async () => {
     try {
-      const response = await axios.get('request/get/infrastructure/depot');
-      setRequests(filterArray(response.data, 'status', ['Completed'], true));
+      const response = await axios.get('/request/get/infrastructure/depot');
+      setRequests(filterArray(response.data, 'status', ['Completed', 'Request Canceled'], true));
     } catch (error) {
       toast.error(productToastMessages.show.error, error);
     }
   };
 
-  const CompleteDeliver = (id) => {
-    const url = `/request/update/${id}`;
-    updateStatus(url, { status: 'Completed' })
+  const [returnModal, setReturnModal] = useState(false);
+
+  const [selectedDepotRequests, setSelectedDepotRequests] = useState([]);
+  useEffect(() => {
+    if (selectedDepot) {
+      setSelectedDepotRequests(filterArray(requests, 'infrastructure_id', [selectedDepot.id]))
+    }
+  }, [requests, selectedDepot])
+
+  const [returnRequestFormData, setReturnRequestFormData] = useState({
+    category: null,
+    assoc_products: [],
+    comment: ''
+  });
+
+  const returnRequestSubmit = async (e) => {
+    e.preventDefault();
+
+    const parsedArray = returnRequestFormData.assoc_products.split(/[\s,;\n]+/).filter(Boolean);
+
+    const payload = {
+      category: returnRequestFormData.category,
+      assoc_products: JSON.stringify(parsedArray),
+      comment: returnRequestFormData.comment,
+      requested_by_id: auth.user.id,
+      infrastructure_id: selectedDepot.id,
+    }
+
+    try {
+      const response = await axios.post('/return/create', payload)
+    } catch (error) {
+
+    }
   }
+
+  const [returns, setReturns] = useState();
+  const fetchReturns = async () => {
+    try {
+      const response = await axios.get('/return/get');
+      setReturns(filterArray(response.data, 'status', ['Canceled'], true));
+    } catch (error) {
+      toast.error(productToastMessages.show.error, error);
+    }
+  };
+
+  const [selectedReturnRequests, setSelectedReturnRequests] = useState([]);
+  useEffect(() => {
+    if (selectedDepot) {
+      setSelectedReturnRequests(filterArray(returns, 'infrastructure_id', [selectedDepot.id]))
+    }
+  }, [returns, selectedDepot])
 
   return (
     <AuthenticatedLayout
       user={auth.user}
     >
       <Head title="Depot" />
-      <InfrastructureLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Depot</h2>}>
+      <InfrastructureLayout user={auth.user} header={<NavHeader headerName="Depot" />}>
         <div className="content">
-          <div className='border-card p-4 shadow-sm mb-4 flex flex-col h-56 bg-cover'
+          <div className='border-card p-4 shadow-sm flex flex-col h-56 bg-cover bg-white'
             style={{
               backgroundImage: selectedDepot?.image_url ? `url(${selectedDepot.image_url})` : 'none',
             }}>
@@ -275,10 +262,13 @@ const Depot = ({ auth }) => {
             <p className=' mt-auto py-1 px-2 bg-white/40 backdrop-blur-sm rounded-full shadow-md w-fit'>{selectedDepot?.address}</p>
           </div>
 
-          <div className='w-full flex gap-2 mb-4'>
-            <button className='border-card font-semibold' style={{ background: theme.accent, color: theme.background }}>Return</button>
+          <div className='w-full flex mb-2 items-end mt-6'>
+            <div className='flex items-baseline ml-2'>
+              <p className='font-semibold text-2xl'>Requests</p>
+              <Link className='ml-2 text-sm hover:underline text-gray-600' href={route('depot-history')}>History</Link>
+            </div>
             <button
-              className='border-card font-semibold'
+              className='ml-auto border-card font-medium'
               style={{ background: theme.accent, color: theme.background }}
               onClick={() => setOpenRequestModal(true)}
             >
@@ -288,12 +278,26 @@ const Depot = ({ auth }) => {
 
           <div className={`w-full ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} style={{ height: '434px' }} >
             <AgGridReact
-              rowData={requests}
-              columnDefs={colDefs}
+              rowData={selectedDepotRequests}
+              columnDefs={requestColDef}
               rowSelection='single'
               pagination={true}
-            /* onGridReady={onGridReady}
-            onSelectionChanged={onSelectionChanged} */
+            />
+          </div>
+
+          <div className='w-full flex mb-2 items-end mt-6'>
+            <div className='flex items-baseline ml-2'>
+              <p className='font-semibold text-2xl'>Returns</p>
+              <Link className='ml-2 text-sm hover:underline text-gray-600' href={route('depot-history') + '#return-section' }>History</Link>
+            </div>
+            <button className='ml-auto border-card font-medium mr-2' style={{ background: theme.accent, color: theme.background }} onClick={() => setReturnModal(true)}>Return</button>
+          </div>
+          <div className={`w-full ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} style={{ height: '434px' }} >
+            <AgGridReact
+              rowData={selectedReturnRequests}
+              columnDefs={returnColDef}
+              rowSelection='single'
+              pagination={true}
             />
           </div>
         </div>
@@ -383,9 +387,169 @@ const Depot = ({ auth }) => {
             </form>
           </div>
         </Modal>
+
+        <Modal show={returnModal} onClose={() => setReturnModal(false)}>
+          <div className='p-4'>
+            <p className='modal-header'>Return Items</p>
+            <form onSubmit={returnRequestSubmit}>
+              <select name="category" id="category" className='border-card w-1/2' onChange={(e) => handleInputChange(e, setReturnRequestFormData)}>
+                <option value={null}>Select Category</option>
+                {
+                  returnCategories.map((cat, index) => {
+                    return (
+                      <option value={cat.name} key={index}>{cat.name}</option>
+                    )
+                  })
+                }
+              </select>
+              <textarea
+                name="assoc_products" id="assoc_products"
+                className='w-full resize-none mt-6 border-card' rows={2} placeholder='Associated Products'
+                value={returnRequestFormData.assoc_products}
+                onChange={(e) => handleInputChange(e, setReturnRequestFormData)}
+              />
+              <textarea
+                name="comment" id="comment"
+                className='w-full resize-none mt-2 border-card' rows={5} placeholder='Comment'
+                value={returnRequestFormData.comment}
+                onChange={(e) => handleInputChange(e, setReturnRequestFormData)}
+              />
+              <button className='border-card'>Submit</button>
+            </form>
+          </div>
+        </Modal>
       </InfrastructureLayout>
     </AuthenticatedLayout>
   );
 }
 
 export default Depot;
+
+const CompleteOrder = (id) => {
+  const url = `/request/update/${id}`;
+  updateStatus(url, { status: 'Completed' })
+}
+
+const CancelOrder = (id) => {
+  const url = `/request/update/${id}`;
+  updateStatus(url, { status: 'Request Canceled' })
+}
+
+const CancelReturn = (id) => {
+  const url = `/return/update/${id}`;
+  updateStatus(url, { status: 'Canceled' })
+}
+
+const requestColDef = [
+  { field: "user_name", filter: true, flex: 1, minWidth: 120, headerName: 'Requested by' },
+  { field: "type", filter: true, flex: 1, minWidth: 120, headerName: 'Purpose' },
+  {
+    field: "items", filter: true, flex: 1, minWidth: 120, headerName: 'Requested Materials', autoHeight: true,
+    cellRenderer: (params) => {
+      const items = JSON.parse(params.data.items);
+
+      return (
+        <div>
+          {
+            items.map((item, index) => {
+              return (
+                <p key={index} className="w-full flex justify-between">{item.product_name} <span className="italic">qty. {item.quantity}</span></p>
+              )
+            })
+          }
+        </div>
+      )
+    }
+  },
+  {
+    field: "status", flex: 1, minWidth: 120,
+    cellRenderer: (params) => {
+      return (
+        <Status statusArray={requestStatus} status={params.data.status} className='leading-normal whitespace-nowrap p-1 px-3 rounded-full' />
+      )
+    }
+  },
+  {
+    field: "Action", minWidth: 100, flex: 1,
+    cellRenderer: (params => {
+      return (
+        <div>
+          {
+            params.data.status !== 'Request Created' || params.data.status !== 'Request Approved' || params.data.status !== 'Material Procured' ?
+              <button
+                onClick={() => CancelOrder(params.data.id)}
+                className="leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-red-100 text-red-600 outline outline-1 outline-red-300"
+              >
+                Cancel
+              </button>
+              : null
+          }
+          {
+            params.data.status === 'Delivered' ?
+              <button
+                onClick={() => CompleteOrder(params.data.id)}
+                className="leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-green-100 text-green-600 outline outline-1 outline-green-300"
+              >
+                Complete
+              </button>
+              : null
+          }
+        </div>
+      );
+    })
+  },
+];
+
+const returnColDef = [
+  {
+    field: 'requested_by_name',
+    headerName: 'Requested by'
+  },
+  {
+    field: 'category',
+  },
+  {
+    field: 'comment', flex: 1,
+  },
+  {
+    field: 'assoc_products',
+    headerName: 'Associated Products',
+    cellRenderer: (params) => {
+      const assoc_products = JSON.parse(params.data.assoc_products);
+
+      return (
+        <div>
+          {
+            assoc_products.map((item, index) => {
+              return (
+                <p key={index} className="w-full flex justify-between">{item}</p>
+              )
+            })
+          }
+        </div>
+      )
+    }
+  },
+  {
+    field: 'status',
+    cellRenderer: (params) => {
+      return (
+        <Status statusArray={returnStatus} status={params.data.status} className='leading-normal whitespace-nowrap p-1 px-3 rounded-full' />
+      )
+    }
+  },
+  {
+    field: 'Action',
+    cellRenderer: (params) => {
+      if (params.data.status === 'Canceled') {
+        return null;
+      }
+
+      return (
+        <button onClick={() => CancelReturn(params.data.id)} className="leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-red-100 text-red-600 outline outline-1 outline-red-300" >
+          Cancel
+        </button>
+      )
+    }
+  }
+];
