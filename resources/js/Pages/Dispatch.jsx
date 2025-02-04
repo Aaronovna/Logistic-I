@@ -6,6 +6,7 @@ import RequestsFolder from '@/Components/cards/RequestsFolder';
 import RequestCard from '@/Components/cards/RequestCard';
 import { Card2 } from '@/Components/Cards';
 import { filterArray } from '@/functions/filterArray';
+import updateStatus from '@/api/updateStatus';
 import { dateTimeFormatLong } from '@/Constants/options';
 
 const Dispatch = ({ auth }) => {
@@ -15,7 +16,7 @@ const Dispatch = ({ auth }) => {
     )
   }
 
-  const { theme } = useStateContext();
+  const { theme, debugMode } = useStateContext();
 
   const [depotRequests, setDepotRequests] = useState();
   const [terminalRequests, setTerminalRequests] = useState();
@@ -224,6 +225,11 @@ const Dispatch = ({ auth }) => {
     }
   };
 
+  const CompleteDeliver = (id) => {
+    const url = `/request/update/${id}`;
+    updateStatus(url, { status: 'Delivered' })
+  }
+
 
   return (
     <AuthenticatedLayout
@@ -337,7 +343,7 @@ const Dispatch = ({ auth }) => {
                       <span className="text-sm text-gray-500 mr-2">{item.product_id}</span>
                       <span className="font-medium text-gray-700">{item.product_name}</span>
                     </span>
-                    {requestData?.status !== "Request Created" ? (
+                    {requestData?.status === "Request Approved" ? (
                       item.filled ? (
                         // Show "Cancel Fill" button if the item is already filled
                         <button
@@ -412,6 +418,13 @@ const Dispatch = ({ auth }) => {
                 Prepare for Delivery
               </button>
             </div>
+            
+            <div className={`justify-end gap-2 mt-4 ${requestData?.status === 'Materials Procured' ? 'flex' : 'hidden'}`}>
+              <p>Waiting for Transport</p>
+            </div>
+            {
+              debugMode ? <button className='border-card italic' onClick={()=>CompleteDeliver(requestData?.id)}>Make Delivered</button> : null
+            }
           </div>
         </Modal>
 

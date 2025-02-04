@@ -14,7 +14,7 @@ const status = [
 ];
 
 export default function Dev() {
-  const { theme, setOrdersDummyData } = useStateContext();
+  const { theme, setOrdersDummyData, setFleetsDummyData, debugMode, setDebugMode } = useStateContext();
 
   const [suppliers, setSuppliers] = useState([]);
   const fetchSuppliers = async () => {
@@ -94,6 +94,7 @@ export default function Dev() {
     fetchSuppliers();
     fetchProducts();
     fetchWarehouses();
+    setFleetsDummyData(fleet);
   },[])
 
   return (
@@ -105,8 +106,9 @@ export default function Dev() {
         <div className='p-4 w-full'>
           <p className='text-2xl my-2'>Receipt</p>
           <hr className='mb-4' />
-          <button className='border-card mr-2' onClick={() => setOrdersDummyData(generateOrder())}>Generate Order</button>
-          <button className='border-card mr-2' onClick={() => setOrdersDummyData(generateData(20))}>Generate Data</button>
+          <button className='border-card mr-2' onClick={() => setOrdersDummyData(generateOrder())}>Generate Order Data</button>
+          <button className='border-card mr-2' onClick={() => setOrdersDummyData(generateData(20))}>Generate 10 Order Data</button>
+          <button className='border-card mr-2' onClick={() => setDebugMode((debugMode)=>!debugMode)}>{`Debug Mode ${debugMode ? '[ON]':'[OFF]'}`}</button>
         </div>
       </div>
     </div>

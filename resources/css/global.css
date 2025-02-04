@@ -2,9 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* * {
-    outline: 1px solid rgba(0, 0, 0, 0.2);
-} */
+.debug-mode * {
+    outline: 1px solid rgba(0, 0, 0, 0.2) !important;
+}
 
 .poppins-regular {
     font-family: "Poppins", sans-serif;
