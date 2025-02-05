@@ -15,7 +15,7 @@ class ReturnMaterialController extends Controller
     {
         $returnMaterials = ReturnMaterial::with(['user', 'infrastructure'])->get();
 
-        $returnMaterials->each(function ($return) {
+        $returnMaterials->map(function ($return) {
             $return->requested_by_name = $return->user->name ?? 'N/A';
             $return->infrastructure_name = $return->infrastructure->name ?? 'N/A';
         });
@@ -29,7 +29,7 @@ class ReturnMaterialController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'assoc_products' => 'nullable|json',
+            'items' => 'nullable|json',
             'comment' => 'nullable|string',
             'status' => 'reqired|string',
             'requested_by_id' => 'required|exists:users,id',

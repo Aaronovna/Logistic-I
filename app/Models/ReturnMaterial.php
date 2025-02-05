@@ -10,7 +10,7 @@ class ReturnMaterial extends Model
     use HasFactory;
 
     protected $fillable = [
-        'assoc_products', 'comment', 'status','requested_by_id','infrastructure_id'
+        'items', 'comment', 'status','requested_by_id','infrastructure_id'
     ];
 
     public function user()

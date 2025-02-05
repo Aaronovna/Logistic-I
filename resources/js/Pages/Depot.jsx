@@ -158,8 +158,6 @@ const Depot = ({ auth }) => {
       items: JSON.stringify(requestMaterialFormData.items),
     }
 
-    console.log(data);
-
     try {
       const response = await axios.post('/request/create', data);
 
@@ -193,19 +191,30 @@ const Depot = ({ auth }) => {
   }, [requests, selectedDepot])
 
   const [returnRequestFormData, setReturnRequestFormData] = useState({
-    category: null,
-    assoc_products: [],
     comment: ''
   });
+
+  const [items, setItems] = useState([
+    { category: '', name: '', assoc_product: '', quantityType: 'qty', quantity: '' }
+  ]);
+
+  const handleAddItem = () => {
+    setItems([
+      ...items,
+      { category: '', name: '', assoc_product: '', quantityType: 'qty', quantity: '' }
+    ]); // Add a new empty item with quantityType defaulted to 'qty'
+  };
+
+  const handleRemoveItem = (index) => {
+    const newItems = items.filter((_, i) => i !== index); // Remove the item at the given index
+    setItems(newItems);
+  };
 
   const returnRequestSubmit = async (e) => {
     e.preventDefault();
 
-    const parsedArray = returnRequestFormData.assoc_products.split(/[\s,;\n]+/).filter(Boolean);
-
     const payload = {
-      category: returnRequestFormData.category,
-      assoc_products: JSON.stringify(parsedArray),
+      items: JSON.stringify(items),
       comment: returnRequestFormData.comment,
       requested_by_id: auth.user.id,
       infrastructure_id: selectedDepot.id,
@@ -288,7 +297,7 @@ const Depot = ({ auth }) => {
           <div className='w-full flex mb-2 items-end mt-6'>
             <div className='flex items-baseline ml-2'>
               <p className='font-semibold text-2xl'>Returns</p>
-              <Link className='ml-2 text-sm hover:underline text-gray-600' href={route('depot-history') + '#return-section' }>History</Link>
+              <Link className='ml-2 text-sm hover:underline text-gray-600' href={route('depot-history') + '#return-section'}>History</Link>
             </div>
             <button className='ml-auto border-card font-medium mr-2' style={{ background: theme.accent, color: theme.background }} onClick={() => setReturnModal(true)}>Return</button>
           </div>
@@ -388,33 +397,134 @@ const Depot = ({ auth }) => {
           </div>
         </Modal>
 
-        <Modal show={returnModal} onClose={() => setReturnModal(false)}>
+        <Modal show={returnModal} onClose={() => setReturnModal(false)} maxWidth='4xl'>
           <div className='p-4'>
             <p className='modal-header'>Return Items</p>
             <form onSubmit={returnRequestSubmit}>
-              <select name="category" id="category" className='border-card w-1/2' onChange={(e) => handleInputChange(e, setReturnRequestFormData)}>
-                <option value={null}>Select Category</option>
-                {
-                  returnCategories.map((cat, index) => {
-                    return (
-                      <option value={cat.name} key={index}>{cat.name}</option>
-                    )
-                  })
-                }
-              </select>
-              <textarea
-                name="assoc_products" id="assoc_products"
-                className='w-full resize-none mt-6 border-card' rows={2} placeholder='Associated Products'
-                value={returnRequestFormData.assoc_products}
-                onChange={(e) => handleInputChange(e, setReturnRequestFormData)}
-              />
+
+              <div className='h-52 overflow-y-auto pr-1 gutter-stable border-card'>
+                {items.map((item, index) => (
+                  <div key={index} className='border-b pb-2 mb-2'>
+                    <div className='flex gap-2'>
+                      {/* Category Selection */}
+                      <select
+                        name={`category-${index}`}
+                        className='border-card w-1/4'
+                        value={item.category}
+                        onChange={(e) => {
+                          const newItems = [...items];
+                          newItems[index].category = e.target.value;
+                          setItems(newItems);
+                        }}
+                      >
+                        <option value="">Select Category</option>
+                        {returnCategories.map((cat, catIndex) => (
+                          <option value={cat.name} key={catIndex}>
+                            {cat.name}
+                          </option>
+                        ))}
+                      </select>
+
+                      {/* Item / Material Name Input */}
+                      <input
+                        name={`name-${index}`}
+                        className='resize-none border-card w-1/4'
+                        placeholder='Item / Material'
+                        value={item.name}
+                        onChange={(e) => {
+                          const newItems = [...items];
+                          newItems[index].name = e.target.value;
+                          setItems(newItems);
+                        }}
+                      />
+
+                      {/* Associated Products Input */}
+                      <input
+                        name={`assoc_product-${index}`}
+                        className='resize-none border-card w-1/4'
+                        placeholder='Assoc. Products'
+                        value={item.assoc_product}
+                        onChange={(e) => {
+                          const newItems = [...items];
+                          newItems[index].assoc_product = e.target.value;
+                          setItems(newItems);
+                        }}
+                      />
+
+                      {/* Quantity Type Radio Buttons */}
+                      <div className='flex items-center gap-1'>
+                        <span className='flex items-center'>
+                          <input
+                            type="radio"
+                            name={`quantityType-${index}`}
+                            id={`qty-${index}`}
+                            value="qty"
+                            checked={item.quantityType === 'qty'}
+                            onChange={(e) => {
+                              const newItems = [...items];
+                              newItems[index].quantityType = e.target.value;
+                              setItems(newItems);
+                            }}
+                          />
+                          <label htmlFor={`qty-${index}`}>qty.</label>
+                        </span>
+                        <span className='flex items-center'>
+                          <input
+                            type="radio"
+                            name={`quantityType-${index}`}
+                            id={`wt-${index}`}
+                            value="wt"
+                            checked={item.quantityType === 'wt'}
+                            onChange={(e) => {
+                              const newItems = [...items];
+                              newItems[index].quantityType = e.target.value;
+                              setItems(newItems);
+                            }}
+                          />
+                          <label htmlFor={`wt-${index}`}>wt.</label>
+                        </span>
+                      </div>
+
+                      {/* Quantity/Weight Input */}
+                      <input
+                        name={`quantity-${index}`}
+                        type="text"
+                        className='resize-none border-card w-1/6'
+                        placeholder='2 / 5kg'
+                        value={item.quantity}
+                        onChange={(e) => {
+                          const newItems = [...items];
+                          newItems[index].quantity = e.target.value;
+                          setItems(newItems);
+                        }}
+                      />
+
+                      {/* Remove Button */}
+                      <button
+                        type='button'
+                        className='border-card text-red-500 px-2'
+                        onClick={() => handleRemoveItem(index)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Add Button Only After Last Row */}
+                <button type='button' className='border-card w-full mt-2' onClick={handleAddItem}>
+                  Add
+                </button>
+              </div>
+
+
               <textarea
                 name="comment" id="comment"
                 className='w-full resize-none mt-2 border-card' rows={5} placeholder='Comment'
                 value={returnRequestFormData.comment}
                 onChange={(e) => handleInputChange(e, setReturnRequestFormData)}
               />
-              <button className='border-card'>Submit</button>
+              <button type='submit' className='border-card'>Submit</button>
             </form>
           </div>
         </Modal>
@@ -506,23 +616,31 @@ const returnColDef = [
     headerName: 'Requested by'
   },
   {
-    field: 'category',
+    field: 'comment', flex: 2,
   },
   {
-    field: 'comment', flex: 1,
-  },
-  {
-    field: 'assoc_products',
-    headerName: 'Associated Products',
+    field: 'items', flex: 6, autoHeight: true,
     cellRenderer: (params) => {
-      const assoc_products = JSON.parse(params.data.assoc_products);
+      const items = JSON.parse(params.data.items);
 
       return (
         <div>
+          <span className="w-full flex">
+            <p className="w-2/6 font-medium text-gray-600">Category</p>
+            <p className="w-2/6 font-medium text-gray-600">Name</p>
+            <p className="w-2/6 font-medium text-gray-600">Assoc. Product</p>
+            <p className="w-1/6 font-medium text-gray-600 text-right">Qty.</p>
+          </span>
           {
-            assoc_products.map((item, index) => {
+            items.map((item, index) => {
               return (
-                <p key={index} className="w-full flex justify-between">{item}</p>
+                <span key={index} className="w-full flex">
+                  <p className="w-2/6 overflow-hidden text-ellipsis">{item.category}</p>
+                  <p className="w-2/6 overflow-hidden text-ellipsis">{item.name}</p>
+                  <p className="w-2/6 overflow-hidden text-ellipsis">{item.assoc_product ? item.assoc_product : 'N/A'}</p>
+                  <p className="w-1/6 text-right">{item.quantity}</p>
+                </span>
+
               )
             })
           }

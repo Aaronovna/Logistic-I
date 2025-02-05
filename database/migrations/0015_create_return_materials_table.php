@@ -13,10 +13,9 @@ return new class extends Migration
     {
         Schema::create('return_materials', function (Blueprint $table) {
             $table->id();
-            $table->string('category');
             $table->foreignId('requested_by_id')->constrained('users');
             $table->foreignId('infrastructure_id')->constrained('infrastructures');
-            $table->json('assoc_products')->nullable();
+            $table->json('items')->nullable();
             $table->string('comment')->nullable();
             $table->string('status')->default('Waiting for Approval');
             $table->timestamps();

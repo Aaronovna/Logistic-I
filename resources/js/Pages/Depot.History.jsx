@@ -128,23 +128,31 @@ const returnColDef = [
     headerName: 'Requested by'
   },
   {
-    field: 'category',
+    field: 'comment', flex: 2,
   },
   {
-    field: 'comment', flex: 1,
-  },
-  {
-    field: 'assoc_products',
-    headerName: 'Associated Products',
+    field: 'items', flex: 6, autoHeight: true,
     cellRenderer: (params) => {
-      const assoc_products = JSON.parse(params.data.assoc_products);
+      const items = JSON.parse(params.data.items);
 
       return (
         <div>
+          <span className="w-full flex">
+            <p className="w-2/6 font-medium text-gray-600">Category</p>
+            <p className="w-2/6 font-medium text-gray-600">Name</p>
+            <p className="w-2/6 font-medium text-gray-600">Assoc. Product</p>
+            <p className="w-1/6 font-medium text-gray-600 text-right">Qty.</p>
+          </span>
           {
-            assoc_products.map((item, index) => {
+            items.map((item, index) => {
               return (
-                <p key={index} className="w-full flex justify-between">{item}</p>
+                <span key={index} className="w-full flex">
+                  <p className="w-2/6 overflow-hidden text-ellipsis">{item.category}</p>
+                  <p className="w-2/6 overflow-hidden text-ellipsis">{item.name}</p>
+                  <p className="w-2/6 overflow-hidden text-ellipsis">{item.assoc_product ? item.assoc_product : 'N/A'}</p>
+                  <p className="w-1/6 text-right">{item.quantity}</p>
+                </span>
+
               )
             })
           }
