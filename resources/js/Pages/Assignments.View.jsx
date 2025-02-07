@@ -27,7 +27,7 @@ const AssignmentsView = ({ auth }) => {
     router.get('/assignments');
   };
 
-  const handleClick2 = () => {
+  const handleClick2 = (id) => {
     router.get('/assignments/view', { id: id });
   };
 
@@ -35,7 +35,7 @@ const AssignmentsView = ({ auth }) => {
 
   const [loading, setLoading] = useState(true); // Track loading state
 
-  const fetchInfrastructure = async () => {
+  const fetchAssignment = async (id) => {
     setLoading(true); // Start loading
     try {
       const response = await axios.get(`/audit/task/get/${id}`);
@@ -48,7 +48,7 @@ const AssignmentsView = ({ auth }) => {
   };
 
   useEffect(() => {
-    fetchInfrastructure(id);
+    fetchAssignment(id);
   }, []);
 
   const handleAccept = async (id) => {
@@ -135,9 +135,6 @@ const AssignmentsView = ({ auth }) => {
 
         try {
           const updateResponse = await axios.patch(`/audit/task/update/${id}`, payload);
-
-          // After updating the task status, refresh the infrastructure or task data
-          fetchInfrastructure();
         } catch (updateError) {
           console.error("Error updating task status:", updateError);
         }
@@ -151,11 +148,21 @@ const AssignmentsView = ({ auth }) => {
   const fetchReport = async (id) => {
     try {
       const response = await axios.get(`/audit/report/get/by/task/${id}`);
-      setReport(response.data);
-    } catch (error) {
 
+      // If report is found, set it
+      if (response.status === 200) {
+        setReport(response.data);
+      }
+    } catch (error) {
+      // If there's a 404 error (report not found), handle it gracefully
+      if (error.response && error.response.status === 404) {
+        setReport(null); // Optionally set report to null or handle however you want
+      } else {
+        console.error("Error fetching report:", error);
+      }
     }
-  }
+  };
+
 
   useEffect(() => {
     if (task) {
@@ -189,7 +196,7 @@ const AssignmentsView = ({ auth }) => {
         header={<h2 style={{ color: theme.text }}>
           <span className='header hover:underline cursor-pointer' onClick={handleClick1}>{`Assignments`}</span>
           <span className='header'>{' > '}</span>
-          <span className='header hover:underline cursor-pointer' onClick={handleClick2}>{`View`}</span>
+          <span className='header hover:underline cursor-pointer' onClick={() => handleClick2(id)}>{`View`}</span>
         </h2>}
       >
         <div className="content">
@@ -232,21 +239,21 @@ const AssignmentsView = ({ auth }) => {
                     type="text" name="location" id="location" placeholder="Location"
                     className="border-card mt-4"
                     disabled={task?.status === "In Progress" ? false : true}
-                    value={task?.status === "In Progress" ? reportFormData.location : report?.location}
+                    value={task?.status === "In Progress" ? reportFormData.location : report?.location || ''}
                     onChange={(e) => handleInputChange(e, setReportFormData)}
                   />
                   <textarea
                     name="details" id="details" rows="6" placeholder="Details"
                     className="border-card mt-2 resize-none"
                     disabled={task?.status === "In Progress" ? false : true}
-                    value={task?.status === "In Progress" ? reportFormData.details : report?.details}
+                    value={task?.status === "In Progress" ? reportFormData.details : report?.details || ''}
                     onChange={(e) => handleInputChange(e, setReportFormData)}
                   />
                   <textarea
                     name="final_comment" id="final_comment" rows="3" placeholder="Final Comment"
                     className="border-card mt-2 resize-none"
                     disabled={task?.status === "In Progress" ? false : true}
-                    value={task?.status === "In Progress" ? reportFormData.final_comment : report?.final_comment}
+                    value={task?.status === "In Progress" ? reportFormData.final_comment : report?.final_comment || ''}
                     onChange={(e) => handleInputChange(e, setReportFormData)}
                   />
 

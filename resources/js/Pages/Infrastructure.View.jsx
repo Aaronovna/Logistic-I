@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import DefaultLayout from '@/Layouts/InventoryLayout';
-import { Head, usePage, router } from '@inertiajs/react';
+import { usePage, router } from '@inertiajs/react';
 import { useStateContext } from '@/context/contextProvider';
 import { useState, useEffect } from 'react';
 import { TbEdit } from "react-icons/tb";
@@ -28,20 +28,19 @@ const options = [
 export default function Infrastructure_View({ auth }) {
   const { theme } = useStateContext();
   const { props } = usePage();
-
   const { id } = props;
 
   const handleClick1 = () => {
     router.get('/infrastructure');
   };
 
-  const handleClick2 = () => {
+  const handleClick2 = (id) => {
     router.get('/infrastructure/view', { id: id });
   };
 
   const [infrastructure, setInfrastructure] = useState();
 
-  const fetchInfrastructure = async () => {
+  const fetchInfrastructure = async (id) => {
     try {
       const response = await axios.get(`/infrastructure/get/${id}`);
       setInfrastructure(response.data);
@@ -51,7 +50,7 @@ export default function Infrastructure_View({ auth }) {
   };
 
   useEffect(() => {
-    fetchInfrastructure()
+    fetchInfrastructure(id);
   }, []);
 
 
@@ -61,7 +60,7 @@ export default function Infrastructure_View({ auth }) {
         type: infrastructure.type,
         name: infrastructure.name,
         address: infrastructure.address,
-        access: JSON.parse(infrastructure.access).join(", "),
+        access: infrastructure.access ? JSON.parse(infrastructure.access).join(", ") : [],
         image_url: infrastructure.image_url,
       })
     }
@@ -121,12 +120,13 @@ export default function Infrastructure_View({ auth }) {
         header={<h2 style={{ color: theme.text }}>
           <span className='header hover:underline cursor-pointer' onClick={handleClick1}>{`Infrastructure`}</span>
           <span className='header'>{' > '}</span>
-          <span className='header hover:underline cursor-pointer' onClick={handleClick2}>{`View`}</span>
+          <span className='header hover:underline cursor-pointer' onClick={()=>handleClick2(id)}>{`View`}</span>
         </h2>}
       >
 
         <div className="content">
-          <div className='w-full border-card h-56 bg-cover bg-center flex' style={{ backgroundImage: `url(${infrastructure?.image_url})` }}>
+
+          <div className='w-full border-card h-56 bg-cover bg-center flex' style={{ backgroundImage: `url(${infrastructure?.image_url ? infrastructure?.image_url : ''})` }}>
             <span onClick={() => setOpenEditInfrastructureModal(true)}
               className='mt-auto ml-auto p-3 rounded-full shadow-lg hover:scale-105 duration-200 cursor-pointer'
               style={{ background: theme.accent, color: theme.background }}
@@ -134,6 +134,7 @@ export default function Infrastructure_View({ auth }) {
               <TbEdit size={24} />
             </span>
           </div>
+          
           <div style={{ color: theme.text }}>
             <p className='text-2xl font-semibold mt-4'>{infrastructure?.name}</p>
             <p className='text-xl'>{infrastructure?.address}</p>

@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import DefaultLayout from '@/Layouts/InventoryLayout';
-import { Head } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { useStateContext } from '@/context/contextProvider';
 import { TbPlus } from "react-icons/tb";
 import { useState, useEffect } from 'react';
@@ -98,6 +98,10 @@ export default function Infrastructure({ auth }) {
     fetchInfrastructures();
   }, [])
 
+  const handleInfrastructureClick = (id) => {
+    router.get('/infrastructure/view', {id: id});
+  };
+
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -122,7 +126,7 @@ export default function Infrastructure({ auth }) {
           <div className="py-4 flex flex-wrap gap-4">
             {infrastructures && filterArray(infrastructures, 'type', [100]).length > 0 ? (
               filterArray(infrastructures, 'type', [100]).map((data, index) => (
-                <InfrastructureCard key={index} data={data} />
+                <InfrastructureCard key={index} data={data} onClick={()=>handleInfrastructureClick(data.id)}/>
               ))
             ) : (
               <p className='px-4' style={{ color: theme.text }}>No warehouses available</p>
@@ -133,7 +137,7 @@ export default function Infrastructure({ auth }) {
           <div className='py-4 flex flex-wrap gap-4'>
             {infrastructures && filterArray(infrastructures, 'type', [101]).length > 0 ? (
               filterArray(infrastructures, 'type', [101]).map((data, index) => (
-                <InfrastructureCard key={index} data={data} />
+                <InfrastructureCard key={index} data={data} onClick={()=>handleInfrastructureClick(data.id)}/>
               ))
             ) : (
               <p className='px-4' style={{ color: theme.text }}>No depots available</p>
@@ -144,7 +148,7 @@ export default function Infrastructure({ auth }) {
           <div className='py-4 flex flex-wrap gap-4'>
             {infrastructures && filterArray(infrastructures, 'type', [102]).length > 0 ? (
               filterArray(infrastructures, 'type', [102]).map((data, index) => (
-                <InfrastructureCard key={index} data={data} />
+                <InfrastructureCard key={index} data={data} onClick={()=>handleInfrastructureClick(data.id)}/>
               ))
             ) : (
               <p className='px-4' style={{ color: theme.text }}>No terminals available</p>

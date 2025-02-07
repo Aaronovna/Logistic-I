@@ -230,7 +230,6 @@ const Dispatch = ({ auth }) => {
     updateStatus(url, { status: 'Delivered' })
   }
 
-
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -241,7 +240,7 @@ const Dispatch = ({ auth }) => {
         <div className="content">
           <div className='flex gap-4 mb-8'>
             <Card2 name='Total Requests' data={requests?.length} />
-            <Card2 name='Total Deliveries' data={requests && filterArray(requests, 'status', ["In Transit", "Delivered"]).length}/>
+            <Card2 name='Total Deliveries' data={requests && filterArray(requests, 'status', ["In Transit", "Delivered"]).length} />
           </div>
 
           <div className='flex mt-8 mb-4 items-baseline justify-between'>
@@ -270,7 +269,6 @@ const Dispatch = ({ auth }) => {
                 })
               }
             </RequestsFolder>
-            <RequestsFolder data={terminalRequests} name='Return' />
             <RequestsFolder data={undefined} name='Other' />
           </div>
 
@@ -418,12 +416,12 @@ const Dispatch = ({ auth }) => {
                 Prepare for Delivery
               </button>
             </div>
-            
+
             <div className={`justify-end gap-2 mt-4 ${requestData?.status === 'Materials Procured' ? 'flex' : 'hidden'}`}>
               <p>Waiting for Transport</p>
             </div>
             {
-              debugMode ? <button className='border-card italic' onClick={()=>CompleteDeliver(requestData?.id)}>Make Delivered</button> : null
+              debugMode ? <button className='border-card italic' onClick={() => CompleteDeliver(requestData?.id)}>Make Delivered</button> : null
             }
           </div>
         </Modal>

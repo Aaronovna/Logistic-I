@@ -221,7 +221,7 @@ const Depot = ({ auth }) => {
     }
 
     try {
-      const response = await axios.post('/return/create', payload)
+      const response = await axios.post('/return/request/create', payload)
     } catch (error) {
 
     }
@@ -230,7 +230,7 @@ const Depot = ({ auth }) => {
   const [returns, setReturns] = useState();
   const fetchReturns = async () => {
     try {
-      const response = await axios.get('/return/get');
+      const response = await axios.get('/return/request/get');
       setReturns(filterArray(response.data, 'status', ['Canceled'], true));
     } catch (error) {
       toast.error(productToastMessages.show.error, error);

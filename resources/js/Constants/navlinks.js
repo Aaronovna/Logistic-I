@@ -22,6 +22,7 @@ import { TbArrowBarUp } from "react-icons/tb";
 import { TbArrowBarToDown } from "react-icons/tb";
 import { TbBuildingWarehouse } from "react-icons/tb";
 import { TbPackage } from "react-icons/tb";
+import { TbRecycle } from "react-icons/tb";
 import { TbBuildingCog } from "react-icons/tb";
 
 export const inventoryLinks = [
@@ -40,6 +41,10 @@ export const inventoryLinks = [
     {
         name: 'product',
         Icon: TbPackage
+    },
+    {
+        name: 'return',
+        Icon: TbRecycle
     },
     {
         name: 'category',
@@ -119,7 +124,7 @@ export const adminPages = [
 ]
 
 export const inventoryPages = [
-    'dashboard', /* 'report', */ 'receipt', 'dispatch', 'warehouse', 'product', 'category',
+    'dashboard', /* 'report', */ 'receipt', 'dispatch', 'warehouse', 'product', 'return', 'category',
 ]
 
 export const infrastructurePages = [

@@ -21,7 +21,7 @@ const ReportsView = ({ auth }) => {
     router.get('/reports');
   };
 
-  const handleClick2 = () => {
+  const handleClick2 = (id) => {
     router.get('/reports/view', { id: id });
   };
 
@@ -90,7 +90,7 @@ const ReportsView = ({ auth }) => {
         header={<h2 style={{ color: theme.text }}>
           <span className='header hover:underline cursor-pointer' onClick={handleClick1}>{`Reports`}</span>
           <span className='header'>{' > '}</span>
-          <span className='header hover:underline cursor-pointer' onClick={handleClick2}>{`View`}</span>
+          <span className='header hover:underline cursor-pointer' onClick={()=>handleClick2(id)}>{`View`}</span>
         </h2>}
       >
         <div className="content">

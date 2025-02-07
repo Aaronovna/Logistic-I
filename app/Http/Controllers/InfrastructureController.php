@@ -26,7 +26,7 @@ class InfrastructureController extends Controller
             'name' => 'required|string|max:500',
             'address' => 'required|string|max:500',
             'image_url' => 'required|string|max:500',
-            'access' => 'required|json',
+            'access' => 'nullable|json',
         ]);
         try {
             // Create the record
@@ -52,7 +52,7 @@ class InfrastructureController extends Controller
         $infrastructure = Infrastructure::findOrFail($id);
 
     if (!$infrastructure) {
-        return response()->json(['message' => 'Product not found.'], 404);
+        return response()->json(['message' => 'Infrastructure not found.'], 404);
     }
 
     return response()->json($infrastructure);
@@ -68,7 +68,7 @@ class InfrastructureController extends Controller
             'name' => 'required|string|max:500',
             'address' => 'required|string|max:500',
             'image_url' => 'required|string|max:500',
-            'access' => 'required|json',
+            'access' => 'nullable|json',
         ]);
 
         $infrastructure = Infrastructure::findOrFail($id);

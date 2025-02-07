@@ -18,6 +18,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\AuditReportController;
 use App\Http\Controllers\ReturnMaterialController;
+use App\Http\Controllers\ReturnRequestController;
 
 Route::redirect('/', 'login');
 
@@ -43,6 +44,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/assignments', fn() => Inertia::render('Assignments'))->name('assignments');
     Route::get('/module', fn() => Inertia::render('Module'))->name('module');
     Route::get('/infrastructure', fn() => Inertia::render('Infrastructure'))->name('infrastructure');
+    
     Route::get('/infrastructure/view', function (\Illuminate\Http\Request $request) {
         return Inertia::render('Infrastructure.View', [
             'id' => $request->query('id'), // Extract 'name' from the query string
@@ -60,6 +62,8 @@ Route::middleware(["auth", "verified"])->group(function () {
             'id' => $request->query('id'),
         ]);
     })->name('reports-view');
+
+    Route::get('/return', fn() => Inertia::render('Return'))->name('return');
 });
 
 //! END: PAGES ROUTES //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,6 +153,12 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post('/audit/report/create', [AuditReportController::class, 'store'])->name('auditReport.store');
     Route::patch('/audit/report/update/{id}', [AuditReportController::class, 'update'])->name('auditReport.update');
     Route::delete('/audit/report/delete/{id}', [AuditReportController::class, 'destroy'])->name('auditReport.destroy');
+
+    Route::get('/return/request/get', [ReturnRequestController::class, 'index'])->name('returnRequest.index');
+    Route::get('/return/request/get/{id}', [ReturnRequestController::class, 'show'])->name('returnRequest.show');
+    Route::post('/return/request/create', [ReturnRequestController::class, 'store'])->name('returnRequest.store');
+    Route::patch('/return/request/update/{id}', [ReturnRequestController::class, 'update'])->name('returnRequest.update');
+    Route::delete('/return/request/delete/{id}', [ReturnRequestController::class, 'destroy'])->name('returnRequest.destroy');
 
     Route::get('/return/get', [ReturnMaterialController::class, 'index'])->name('return.index');
     Route::get('/return/get/{id}', [ReturnMaterialController::class, 'show'])->name('return.show');

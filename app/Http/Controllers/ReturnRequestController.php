@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ReturnRequest;
 use Illuminate\Http\Request;
-use App\Models\ReturnMaterial;
-use Illuminate\Http\JsonResponse;
 
-class ReturnMaterialController extends Controller
+class ReturnRequestController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $returnMaterials = ReturnMaterial::with(['user', 'infrastructure'])->get();
+        $returnMaterials = ReturnRequest::with(['user', 'infrastructure'])->get();
 
         $returnMaterials->map(function ($return) {
             $return->requested_by_name = $return->user->name ?? 'N/A';
@@ -36,7 +35,7 @@ class ReturnMaterialController extends Controller
             'infrastructure_id' => 'required|exists:infrastructures,id',
         ]);
 
-        $returnMaterial = ReturnMaterial::create($validated);
+        $returnMaterial = ReturnRequest::create($validated);
 
         return response()->json([
             'message' => 'Return material request created successfully.',
@@ -49,7 +48,7 @@ class ReturnMaterialController extends Controller
      */
     public function show(string $id)
     {
-        $returnMaterial = ReturnMaterial::find($id);
+        $returnMaterial = ReturnRequest::find($id);
 
         if (!$returnMaterial) {
             return response()->json(['message' => 'Return material not found.'], 404);
@@ -63,7 +62,7 @@ class ReturnMaterialController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $returnMaterial = ReturnMaterial::find($id);
+        $returnMaterial = ReturnRequest::find($id);
 
         if (!$returnMaterial) {
             return response()->json(['message' => 'Return material not found.'], 404);
@@ -86,7 +85,7 @@ class ReturnMaterialController extends Controller
      */
     public function destroy(string $id)
     {
-        $returnMaterial = ReturnMaterial::find($id);
+        $returnMaterial = ReturnRequest::find($id);
 
         if (!$returnMaterial) {
             return response()->json(['message' => 'Return material not found.'], 404);

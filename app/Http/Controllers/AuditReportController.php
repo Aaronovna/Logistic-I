@@ -80,10 +80,16 @@ class AuditReportController extends Controller
 
     public function showByTask($taskId)
     {
-        $report = AuditReport::where('task_id', $taskId)->firstOrFail();
+        $report = AuditReport::where('task_id', $taskId)->first(); // This will return null if no report is found
+
+        // If no report is found, return a 404 response with a message
+        if (!$report) {
+            return response()->json(['message' => 'Report not found'], 404);
+        }
 
         return response()->json($report);
     }
+
 
     /**
      * Update the specified resource in storage.

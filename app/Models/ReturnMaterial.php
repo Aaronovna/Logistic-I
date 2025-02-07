@@ -10,17 +10,12 @@ class ReturnMaterial extends Model
     use HasFactory;
 
     protected $fillable = [
-        'items', 'comment', 'status','requested_by_id','infrastructure_id'
+        'return_id', 'name', 'quantity','weight','category'
     ];
-
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'requested_by_id');
-    }
     
-    public function infrastructure()
+    public function request()
     {
-        return $this->belongsTo(Infrastructure::class, 'infrastructure_id');
+        return $this->belongsTo(ReturnRequest::class, 'request_id');
     }
 }
 

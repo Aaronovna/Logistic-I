@@ -54,7 +54,7 @@ const Assignments = ({ auth }) => {
                     <p className="font-medium mr-4">Type <span className="font-medium text-gray-600">{task.type}</span></p>
                     <p className="font-medium">Assigned By <span className="font-medium text-gray-600">{task.assigned_by_name}</span></p>
                   </div>
-                  <p className={`mt-2 rounded-md py-1 px-2 h-fit w-fit ${auditTaskStatus.find(status => status.name === task?.status)?.color}`}>{task?.status}</p>
+                <p className={`mt-2 rounded-md py-1 px-2 h-fit w-fit ${auditTaskStatus.find(status => status.name === task?.status)?.color}`}>{task?.status}</p>
                 </div>
               )
             })}
