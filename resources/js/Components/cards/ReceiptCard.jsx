@@ -43,7 +43,7 @@ const ReceiptCard = ({ data = {}, onClick = () => {} }) => {
         <p className="font-semibold">{data.id}</p>
         <p className="text-lg">{data.supplier_id}</p>
         <p>{`${JSON.parse(data.fleet).name} ${JSON.parse(data.fleet).plate}`}</p>
-        <p>{data.destination}</p>
+        <p>{data.order_warehouse}</p>
       </div>
 
       {data.status === "Upcoming" && <I Icon={TbTruckDelivery} color={feedbackLight.warning} />}

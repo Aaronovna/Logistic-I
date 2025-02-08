@@ -126,7 +126,7 @@ const Receipt = ({ auth }) => {
 
     const payload = {
       type: 'Goods Receipt Note (GRN) Review and Quantity Check',
-      title: `Auto GRN Review and Check: (${data.order_id} | ${data.destination})`,
+      title: `Auto GRN Review and Check: (${data.order_id} | ${data.order_warehouse})`,
       description:
         `
         Auto Generated Task by Receipt module
