@@ -112,6 +112,10 @@ export const returnStatus = [
         color: 'bg-lime-100 text-lime-600',
     },
     {
+        name: 'Delivered',
+        color: 'bg-lime-100 text-lime-600',
+    },
+    {
         name: 'Completed',
         color: 'bg-green-100 text-green-600',
     },

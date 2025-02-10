@@ -6,7 +6,6 @@ use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\Infrastructure;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -24,8 +23,9 @@ class DatabaseSeeder extends Seeder
         Supplier::factory(10)->create();
         User::factory(6)->create();
         Product::factory(20)->create();
-        Infrastructure::factory()->ofType(100)->create();
-        Infrastructure::factory()->ofType(101)->create();
-        Infrastructure::factory()->ofType(102)->create();
+
+        Infrastructure::factory(2)->ofType(100)->create();
+        Infrastructure::factory(2)->ofType(101)->create();
+        Infrastructure::factory(2)->ofType(102)->create();
     }
 }
