@@ -1,7 +1,7 @@
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { useStateContext } from '@/context/contextProvider';
 
-export default function Modal({ children, show = false, maxWidth = '2xl', closeable = true, onClose = () => { } }) {
+export default function Modal({name = "Modal Name", children, show = false, maxWidth = '2xl', closeable = true, onClose = () => { } }) {
   const { theme } = useStateContext();
   const close = () => {
     if (closeable) {
@@ -47,10 +47,11 @@ export default function Modal({ children, show = false, maxWidth = '2xl', closea
           leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         >
           <DialogPanel
-            style={{ background: theme.background, borderColor: theme.border }}
+            style={{ background: theme.background, borderColor: theme.border, padding: '1rem' }}
             className={`mb-6 border-card backdrop-blur-sm rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:mx-auto ${maxWidthClass}`}
           >
-            {children}
+            <p className='modal-header mb-4'>{name}</p>
+              {children}
           </DialogPanel>
         </TransitionChild>
       </Dialog>

@@ -25,6 +25,7 @@ export default {
         'bg-purple-100', 'text-purple-600',
         'bg-red-100', 'text-red-600',
         'bg-lime-100', 'text-lime-600',
+        'bg-pink-100', 'text-pink-600',
     ],
 
     plugins: [],

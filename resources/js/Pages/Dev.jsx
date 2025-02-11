@@ -5,14 +5,6 @@ import { generateRandomItem,generateRandomItems } from '@/functions/itemGenerato
 import { useEffect, useState } from 'react';
 import { filterArray } from '@/functions/filterArray';
 
-const status = [
-  'Upcoming',
-  'Delivered',
-  'Checking',
-  'Checked',
-  'Success', 'Return'
-];
-
 export default function Dev() {
   const { theme, setOrdersDummyData, setFleetsDummyData, debugMode, setDebugMode } = useStateContext();
 
@@ -114,7 +106,7 @@ export default function Dev() {
           <p className='text-2xl my-2'>{`Dummy Data Generator`}</p>
           <hr className='mb-4' />
           <button className='border-card mr-2' onClick={() => setOrdersDummyData(generateOrder())}>Generate Order Data</button>
-          <button className='border-card mr-2' onClick={() => setOrdersDummyData(generateData(20))}>Generate 10 Order Data</button>
+          <button className='border-card mr-2' onClick={() => setOrdersDummyData(generateData(10))}>Generate 10 Order Data</button>
         </div>
       </div>
     </div>
