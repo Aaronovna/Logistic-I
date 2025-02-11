@@ -14,7 +14,7 @@ import { dateTimeFormatLong } from '@/Constants/options';
 import { TbPlus } from 'react-icons/tb';
 
 const Tasks = ({ auth }) => {
-  if (!hasAccess(auth.user.type, [2050, 2051, 2054])) {
+  if (!hasAccess(auth.user.type, [2050, 2051, 2054, 2055])) {
     return (
       <Unauthorized />
     )
@@ -46,7 +46,7 @@ const Tasks = ({ auth }) => {
   const fetchAuditors = async () => {
     try {
       const response = await axios.get('/user/get');
-      setAuditors(filterArray(response.data, 'type', [2054,2055]));
+      setAuditors(filterArray(response.data, 'type', [2054, 2055]));
     } catch (error) {
       toast.error(error);
     }
@@ -241,13 +241,13 @@ const Tasks = ({ auth }) => {
               </div>
               {
                 selectedTask?.status === 'Pending' ?
-                <button className='border-card font-medium bg-red-100 text-red-600' onClick={() => handleDeleteTask(selectedTask?.id)}>Delete</button> :
-                <button className='border-card font-medium bg-red-100 text-red-600'>Cancel</button>
+                  <button className='border-card font-medium bg-red-100 text-red-600' onClick={() => handleDeleteTask(selectedTask?.id)}>Delete</button> :
+                  <button className='border-card font-medium bg-red-100 text-red-600'>Cancel</button>
               }
               {
                 selectedTask?.assigned_to ?
-                null :
-                <button className='border-card font-medium bg-blue-100 text-blue-600 mt-2' onClick={(e) => handleAddTaskAuditorSubmit(e, selectedTask?.id)}>Save</button>
+                  null :
+                  <button className='border-card font-medium bg-blue-100 text-blue-600 mt-2' onClick={(e) => handleAddTaskAuditorSubmit(e, selectedTask?.id)}>Save</button>
               }
             </div>
           </Modal>

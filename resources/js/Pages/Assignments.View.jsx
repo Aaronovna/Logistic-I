@@ -12,7 +12,7 @@ import { TbCloudUpload } from "react-icons/tb";
 import { TbX } from "react-icons/tb";
 
 const AssignmentsView = ({ auth }) => {
-  if (!hasAccess(auth.user.type, [2050, 2051, 2054])) {
+  if (!hasAccess(auth.user.type, [2050, 2051, 2054, 2055])) {
     return (
       <Unauthorized />
     )

@@ -8,7 +8,7 @@ import { auditTaskStatus } from "@/Constants/status";
 import { dateTimeFormatLong } from "@/Constants/options";
 
 const Assignments = ({ auth }) => {
-  if (!hasAccess(auth.user.type, [2050, 2051, 2054])) {
+  if (!hasAccess(auth.user.type, [2050, 2051, 2054, 2055])) {
     return (
       <Unauthorized />
     )

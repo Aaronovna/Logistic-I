@@ -68,7 +68,7 @@ class AuthenticatedSessionController extends Controller
             return route('depot');
         }  //infrastructure
 
-        if ($user->type === 2054) {
+        if ($user->type === 2054 || $user->type === 2055) {
             return route('tasks');
         } //audit
 

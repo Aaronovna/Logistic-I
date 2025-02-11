@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useStateContext } from '@/context/contextProvider';
-
+import { auditTaskStatus, getStatusStep } from '@/Constants/status';
 import updateStatus from '@/api/updateStatus';
 
 import InventoryLayout from '@/Layouts/InventoryLayout';;
@@ -10,6 +10,12 @@ import { gradients } from "@/Constants/themes";
 
 import { TbSearch } from "react-icons/tb";
 import toast from 'react-hot-toast';
+import { TbUserFilled } from 'react-icons/tb';
+import { TbHash } from 'react-icons/tb';
+import { dateTimeFormatLong } from '@/Constants/options';
+import Status from '@/Components/Status';
+import { shipmentStatus } from '@/Constants/status';
+import { TbMapPin } from 'react-icons/tb';
 
 const filterOrdersByStatuses = (orders, statuses) => {
   return orders.filter(order => statuses.includes(order?.status));
@@ -55,9 +61,8 @@ const Receipt = ({ auth }) => {
       setRD(filterOrdersByStatuses(receivedShipment, [
         'Upcoming',
         'Delivered',
-        'Checking',
+        'Auditing on progress',
         'Checked',
-        //'Success', 'Return'
       ]));
     }
   }, [ordersDummyData, receivedShipment])
@@ -88,6 +93,7 @@ const Receipt = ({ auth }) => {
   const onReceived = (id) => {
     const url = `/receipt/update/${id}`;
     updateStatus(url, { status: 'Delivered' })
+    fetchReceivedShipment();
   }
 
   const onDelivered = (id) => {
@@ -103,7 +109,7 @@ const Receipt = ({ auth }) => {
         warehouse_id: data.warehouse_id,
       }
       try {
-        const response = await axios.post(`/inventory/create`,payload)
+        const response = await axios.post(`/inventory/create`, payload)
         toast.success('success');
       } catch (error) {
         toast.error('error');
@@ -111,7 +117,7 @@ const Receipt = ({ auth }) => {
     })
 
     const results = await Promise.all(inventoryPromises);
-    
+
     const url = `/receipt/update/${id}`;
     updateStatus(url, { status: 'Success' })
   }
@@ -141,7 +147,7 @@ const Receipt = ({ auth }) => {
       const response = await axios.post('audit/task/create', payload)
       if (response.status === 201) {
         const url = `/receipt/update/${data.id}`;
-        updateStatus(url, { task_id: response.data.data.id })
+        updateStatus(url, { task_id: response.data.data.id, status: 'Auditing on progress' })
       }
     } catch (error) {
 
@@ -160,10 +166,11 @@ const Receipt = ({ auth }) => {
             style={{ background: gradients.evening_night }}
             onClick={() => setOpenUpcomingShipmentModal(true)}
           >
-            <div className='absolute log w-44 scale-150 top-1 right-10 h-full bg-no-repeat'></div>
+            <div className='md:block hidden absolute log w-44 scale-150 top-1 right-10 h-full bg-no-repeat'></div>
             <div className='absolute w-full h-full top-0 left-0 hover-r-grd duration-150 hover:opacity-100 opacity-0 flex'>
               <p className='font-medium text-2xl text-white tracking-wide z-10 ml-auto mt-auto p-2 bg-black/50 rounded-tl-lg'>View Details</p>
             </div>
+
             <div className='flex flex-col'>
               <p className='font-semibold text-3xl text-white tracking-wider'>
                 {`${OFD.length === 0 ? `No Upcoming Shipment` : `Upcoming Shipment`}`}
@@ -196,7 +203,7 @@ const Receipt = ({ auth }) => {
                 className='pl-8 bg-transparent border-none tracking-wide w-full' style={{ color: theme.text }}
               />
             </div>
-            <div className='grid grid-cols-2 gap-4 overflow-y-scroll pr-2'>
+            <div className='grid md:grid-cols-2 grid-cols-1 gap-2 overflow-y-scroll pr-2'>
               {RD?.map((data, index) => {
                 return (
                   <ReceiptCard data={data} key={index} onClick={() => handleShipmentClick(data)} />
@@ -205,58 +212,98 @@ const Receipt = ({ auth }) => {
             </div>
 
           </div>
+        </div>
 
-          <Modal show={openShipmentDataModal} onClose={() => setOpenShipmentDataModal(false)}>
-            <div className="p-4">
-              <p className='modal-header'>Shipment Details</p>
-              <p className='font-semibold text-gray-500'>Order ID: <span className='font-semibold' style={{ color: theme.text }}>{shipmentData?.order_id}</span></p>
+        <Modal name="Shipment Details" show={openShipmentDataModal} onClose={() => setOpenShipmentDataModal(false)}>
+          <div>
+            <div className='flex justify-between mb-2'>
+              <p>{new Date(shipmentData?.created_at).toLocaleString(undefined, dateTimeFormatLong)}</p>
+              <Status statusArray={shipmentStatus} status={shipmentData?.status} />
+            </div>
 
-              <p className='font-semibold text-lg mt-4'>Product List</p>
-              <div className='p-2 mb-4'>
-                {shipmentData?.products?.length > 0 && (
-                  shipmentData?.products?.map((order, index) => (
-                    <p key={index}>{`${order.name} x${order.quantity}`}</p>
-                  ))
-                )}
+            <div className='flex justify-between'>
+              <p className='flex items-center text-lg'><TbUserFilled className='mr-' /><span className='font-semibold'>{shipmentData && JSON.parse(shipmentData?.supplier).name}</span></p>
+              <p className='flex items-center text-gray-500 mr-1'><TbHash className='ml-2' /><span>{shipmentData?.order_id}</span></p>
+            </div>
+
+            <p className='flex items-baseline'><TbMapPin className='mr-1' />{shipmentData?.order_warehouse}</p>
+
+            {shipmentData && getStatusStep(auditTaskStatus, shipmentData?.task_status) <= 3 &&
+              <div className='p-2 mt-2 bg-gray-100 rounded-md'>
+                <p>Assigned To: {shipmentData.task_assigned_to_name}</p>
               </div>
+            }
 
-              {shipmentData?.task_status === "Completed" &&
-                <div className='p-2'>
-                  <p>Checked By: {shipmentData.task_assigned_to_name}</p>
-                  <p>Final Comment: {shipmentData.task_report_final_comment}</p>
-                  <p>Status: {shipmentData.task_status}</p>
-                </div>
+            {shipmentData && getStatusStep(auditTaskStatus, shipmentData?.task_status) === 4 &&
+              <div className='p-2 mt-2 bg-gray-100 rounded-md'>
+                <p>Assigned To: {shipmentData.task_assigned_to_name}</p>
+                <p>Final Comment: {shipmentData.task_report_final_comment}</p>
+                <p>Status: {shipmentData.task_status}</p>
+              </div>
+            }
+
+            <p className='font-semibold text-lg mt-4'>Product List</p>
+            <div className='mt-2 mb-4 h-72 overflow-y-auto pr-1 '>
+              {shipmentData?.products?.length && (
+                shipmentData?.products?.map((order, index) => (
+                  <p className='flex p-2 bg-gray-100 rounded-md mb-2' key={index}>
+                    <span className='text-gray-600 mr-2 w-14'>{order.id}</span>
+                    <span className='font-semibold'>{order.name}</span>
+                    <span className='ml-auto text-gray-600'>Qty: {order.quantity}</span>
+                  </p>
+                ))
+              )}
+            </div>
+
+            <div className='flex'>
+              {
+                shipmentData && getStatusStep(shipmentStatus, shipmentData?.status) === 1 &&
+                <button className='border-card ml-auto' onClick={() => onReceived(shipmentData.id)}>Shipment Received</button>
               }
 
-              {shipmentData?.status === 'Upcoming' && <button className='border-card' onClick={() => onReceived(shipmentData.id)}>Shipment Received</button>}
-              {shipmentData?.status === 'Delivered' && !shipmentData?.task_id && <button className='border-card w-fit' onClick={(e) => onCreateTaskSubmit(e, shipmentData)}>Create Task</button>}
-              {shipmentData?.status !== 'Checked'  && shipmentData?.task_status === "Completed" && <button className='border-card w-fit' onClick={() => onDelivered(shipmentData.id)}>Product Checked</button>}
+              {
+                shipmentData && getStatusStep(shipmentStatus, shipmentData?.status) === 2 && !shipmentData?.task_id &&
+                <button className='border-card w-fit ml-auto' onClick={(e) => onCreateTaskSubmit(e, shipmentData)}>Generate Audit Task</button>
+              }
 
-              {shipmentData?.status === 'Checked' &&
-                <div>
+              {
+                shipmentData && getStatusStep(shipmentStatus, shipmentData?.status) !== 4 &&
+                getStatusStep(auditTaskStatus, shipmentData?.task_status) === 4 &&
+                <button className='border-card w-fit ml-auto' onClick={() => onDelivered(shipmentData.id)}>Product Checked</button>
+              }
+
+              {
+                shipmentData && getStatusStep(shipmentStatus, shipmentData?.status) === 4 &&
+                <div className='ml-auto'>
                   <button className='border-card mr-2' onClick={() => onReturn(shipmentData.id)}>Return</button>
                   <button className='border-card' onClick={() => onAccept(shipmentData.id, shipmentData)}>Accept</button>
                 </div>
               }
-
             </div>
-          </Modal>
 
-          <Modal show={openUpcomingShipmentModal} onClose={() => setOpenUpcomingShipmentModal(false)} maxWidth='4xl'>
-            <div className='p-4 md:h-[38rem] h-[32rem] overflow-hidden'>
-              <p className='modal-header'>Upcoming Shipment</p>
-              <div className='h-[90%] overflow-y-auto pr-1'>
-                {
-                  ordersDummyData?.map((data, index) => {
-                    return (
-                      <UpcomingShipmentCard data={data} key={index} />
-                    )
-                  })
-                }
-              </div>
-            </div>
-          </Modal>
-        </div>
+          </div>
+        </Modal>
+
+        <Modal name='Upcoming Shipments' show={openUpcomingShipmentModal} onClose={() => setOpenUpcomingShipmentModal(false)} maxWidth='4xl'>
+          <div className='h-[32rem]'>
+            {
+              !ordersDummyData?.length ?
+                <div className='w-full h-full flex justify-center items-center'>
+                  <p className='text-3xl font-medium'>No upcoming shipments</p>
+                </div>
+                :
+                <div className='h-full overflow-y-auto pr-1'>
+                  {
+                    ordersDummyData?.map((data, index) => {
+                      return (
+                        <UpcomingShipmentCard data={data} key={index} callback={fetchReceivedShipment} />
+                      )
+                    })
+                  }
+                </div>
+            }
+          </div>
+        </Modal>
       </InventoryLayout>
     </AuthenticatedLayout>
   );

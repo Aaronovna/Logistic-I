@@ -7,7 +7,7 @@ import AuditLayout from "@/Layouts/AuditLayout";
 import { dateTimeFormatShort } from "@/Constants/options";
 
 const ReportsView = ({ auth }) => {
-  if (!hasAccess(auth.user.type, [2050, 2051, 2054])) {
+  if (!hasAccess(auth.user.type, [2050, 2051, 2054, 2055])) {
     return (
       <Unauthorized />
     )

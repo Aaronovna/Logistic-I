@@ -23,7 +23,7 @@ const AuditLayout = ({ user, header, children }) => {
 
       { user.type === 2050 ? <AdminSidebar /> : null }
       { user.type === 2051 ? <AdminSidebar /> : null }
-      { user.type === 2054 ? <AuditSidebar /> : null }
+      { user.type === 2054 || user.type === 2055  ? <AuditSidebar /> : null }
 
       <div className='relative flex flex-col w-full h-screen overflow-y-scroll overflow-hidden'>
         <nav className='sticky w-auto top-4 z-20 backdrop-blur-sm border-card m-4 h-fit'
@@ -52,6 +52,7 @@ const AuditLayout = ({ user, header, children }) => {
                       { user.type === 2050 ? ' (Super Admin)' : null }
                       { user.type === 2051 ? ' (Admin)' : null }
                       { user.type === 2054 ? ' (Audit)' : null }
+                      { user.type === 2055 ? ' (Auditor)' : null }
                       <TbChevronDown size={22} />
                     </button>
                   </span>
