@@ -2,6 +2,11 @@ import { useState, useEffect } from 'react';
 import { useStateContext } from '@/context/contextProvider';
 
 import InventoryLayout from '@/Layouts/InventoryLayout';
+import { AgGridReact } from 'ag-grid-react';
+import { router } from '@inertiajs/react';
+import { dateTimeFormatShort } from '@/Constants/options';
+import Status from '@/Components/Status';
+import { shipmentStatus } from '@/Constants/status';
 
 const filterOrdersByStatuses = (orders, statuses) => {
   return orders.filter(order => statuses.includes(order?.status));
@@ -25,7 +30,8 @@ const ReceiptHistory = ({ auth }) => {
     )
   }
 
-  const { theme } = useStateContext();
+
+  const { theme, themePreference } = useStateContext();
   const [history, setHistory] = useState([]);
 
   const [receivedShipment, setReceivedShipment] = useState();
@@ -53,15 +59,26 @@ const ReceiptHistory = ({ auth }) => {
       user={auth.user}
     >
       <Head title="Receipt History" />
-      <InventoryLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>{`Receipt > History`}</h2>}>
-        <div className="content">
-          {
-            history?.map((data, index) => {
-              return (
-                <p key={index}>{`${data.id} ${new Date(data.order_date + 'Z').toLocaleString('en-PH', options)} ${data.order_warehouse} ${data.status}`}</p>
-              )
-            })
-          }
+      <InventoryLayout
+        user={auth.user}
+        header={<BreadCrumbsHeader
+          headerNames={["Receipt", "History"]}
+          onClickHandlers={[
+            () => router.get('/receipt'),
+            () => router.get('/receipt/history')
+          ]}
+        />
+        }
+      >
+        <div className="content flex-1">
+          <div className={`h-full ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} >
+            <AgGridReact
+              rowData={history}
+              columnDefs={colDefs}
+              rowSelection='single'
+              pagination={true}
+            />
+          </div>
         </div>
       </InventoryLayout>
     </AuthenticatedLayout>
@@ -69,3 +86,41 @@ const ReceiptHistory = ({ auth }) => {
 }
 
 export default ReceiptHistory;
+
+const colDefs = [
+  {
+    field: 'order_date', headerName: 'Date', flex: 1,
+    cellRenderer: (params) => {
+      return (
+        <span>{new Date(params.data.order_date).toLocaleString(undefined, dateTimeFormatShort)}</span>
+      )
+    }
+  },
+  {
+    field: 'order_warehouse', headerName: 'Warehouse'
+  },
+  {
+    field: 'supplier',
+    cellRenderer: (params) => {
+      return (
+        <span>{JSON.parse(params.data.supplier).name}</span>
+      )
+    }
+  },
+  {
+    field: 'fleet', flex: 1,
+    cellRenderer: (params) => {
+      return (
+        <span>{`${JSON.parse(params.data.fleet).plate} ${JSON.parse(params.data.fleet).name}`}</span>
+      )
+    }
+  },
+  {
+    field: 'status',
+    cellRenderer: (params) => {
+      return (
+        <Status statusArray={shipmentStatus} status={params.data.status} style={2} />
+      )
+    }
+  },
+]
