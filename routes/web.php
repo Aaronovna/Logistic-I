@@ -111,7 +111,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/inventory/get/warehouse/{id}', [InventoryController::class, 'indexByWarehouse'])->name('inventory.indexByWarehouse');
     Route::get('/inventory/stats', [InventoryController::class, 'stats'])->name('inventory.stats');
     Route::patch('/inventory/stock/update/{id}', [InventoryController::class, 'updateStock'])->name('inventory.updateStock');
-
+    Route::post('/inventory/create/bulk', [InventoryController::class, 'storeBulk'])->name('inventory.storeBulk');
 
     Route::get('/receipt/get', [ReceiptController::class, 'index'])->name('receipt.index');
     Route::get('/receipt/get/{id}', [ReceiptController::class, 'show'])->name('receipt.show');

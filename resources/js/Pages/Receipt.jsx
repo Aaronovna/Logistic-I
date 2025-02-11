@@ -30,7 +30,6 @@ const Receipt = ({ auth }) => {
 
   const { theme, ordersDummyData } = useStateContext();
   const [OFD, setOFD] = useState([]);
-  const [RD, setRD] = useState([]);
 
   const [openUpcomingShipmentModal, setOpenUpcomingShipmentModal] = useState(false);
 
@@ -38,14 +37,23 @@ const Receipt = ({ auth }) => {
   const fetchReceivedShipment = async () => {
     try {
       const response = await axios.get('/receipt/get');
-      setReceivedShipment(response.data.sort((a, b) => {
+
+      const data = response.data.sort((a, b) => {
         const dateA = a.order_date;
         const dateB = b.order_date;
 
-        if (dateA < dateB) return -1; // a comes before b
-        if (dateA > dateB) return 1;  // a comes after b
-        return 0; // a and b are equal
-      }));
+        if (dateA < dateB) return -1;
+        if (dateA > dateB) return 1;
+        return 0;
+      })
+
+      setReceivedShipment(filterOrdersByStatuses(data, [
+        'Upcoming',
+        'Delivered',
+        'Auditing on progress',
+        'Checked',
+      ]));
+
     } catch (error) {
       console.error('error');
     }
@@ -57,15 +65,8 @@ const Receipt = ({ auth }) => {
 
   useEffect(() => {
     setOFD(filterOrdersByStatuses(ordersDummyData, ['Upcoming']));
-    if (receivedShipment) {
-      setRD(filterOrdersByStatuses(receivedShipment, [
-        'Upcoming',
-        'Delivered',
-        'Auditing on progress',
-        'Checked',
-      ]));
-    }
-  }, [ordersDummyData, receivedShipment])
+
+  }, [ordersDummyData])
 
   const [openShipmentDataModal, setOpenShipmentDataModal] = useState(false);
   const [shipmentData, setShipmentData] = useState();
@@ -76,16 +77,11 @@ const Receipt = ({ auth }) => {
 
       setShipmentData({
         ...data,
-        products: parsedProducts, // Update the products property with the parsed array
+        products: parsedProducts,
       });
       setOpenShipmentDataModal(true);
     } catch (parseError) {
-      console.error("Error parsing products JSON:", parseError);
-      // Optionally set an error state or display an error message to the user
-      setModalData({
-        ...data,
-        products: []
-      });
+
       setOpenShipmentDataModal(true);
     }
   };
@@ -94,37 +90,39 @@ const Receipt = ({ auth }) => {
     const url = `/receipt/update/${id}`;
     updateStatus(url, { status: 'Delivered' })
     fetchReceivedShipment();
+    setOpenShipmentDataModal(false);
   }
 
   const onDelivered = (id) => {
     const url = `/receipt/update/${id}`;
     updateStatus(url, { status: 'Checked' })
+    fetchReceivedShipment();
+    setOpenShipmentDataModal(false);
   }
 
   const onAccept = async (id, data) => {
-    const inventoryPromises = data.products.map(async (product) => {
-      const payload = {
-        quantity: product.quantity,
-        product_id: product.id,
+    console.log(data);
+    try {
+      const response = await axios.post('/inventory/create/bulk', {
         warehouse_id: data.warehouse_id,
-      }
-      try {
-        const response = await axios.post(`/inventory/create`, payload)
-        toast.success('success');
-      } catch (error) {
-        toast.error('error');
-      }
-    })
-
-    const results = await Promise.all(inventoryPromises);
-
-    const url = `/receipt/update/${id}`;
-    updateStatus(url, { status: 'Success' })
-  }
+        products: data.products,
+      });
+      toast.success(response.data.message);
+  
+      const url = `/receipt/update/${id}`;
+      updateStatus(url, { status: 'Success' });
+      fetchReceivedShipment();
+      setOpenShipmentDataModal(false);
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'An error occurred');
+    }
+  };
 
   const onReturn = (id) => {
     const url = `/receipt/update/${id}`;
     updateStatus(url, { status: 'Return' })
+    fetchReceivedShipment();
+    setOpenShipmentDataModal(false);
   }
 
   const onCreateTaskSubmit = async (e, data) => {
@@ -152,6 +150,8 @@ const Receipt = ({ auth }) => {
     } catch (error) {
 
     }
+    fetchReceivedShipment();
+    setOpenShipmentDataModal(false);
   }
 
   return (
@@ -204,7 +204,7 @@ const Receipt = ({ auth }) => {
               />
             </div>
             <div className='grid md:grid-cols-2 grid-cols-1 gap-2 overflow-y-scroll pr-2'>
-              {RD?.map((data, index) => {
+              {receivedShipment?.map((data, index) => {
                 return (
                   <ReceiptCard data={data} key={index} onClick={() => handleShipmentClick(data)} />
                 )
@@ -296,7 +296,7 @@ const Receipt = ({ auth }) => {
                   {
                     ordersDummyData?.map((data, index) => {
                       return (
-                        <UpcomingShipmentCard data={data} key={index} callback={fetchReceivedShipment} />
+                        <UpcomingShipmentCard data={data} key={index} callback={()=>{setOpenUpcomingShipmentModal(false);fetchReceivedShipment();}} />
                       )
                     })
                   }

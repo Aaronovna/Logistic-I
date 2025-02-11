@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Inventory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Product;
 
 class InventoryController extends Controller
 {
@@ -297,5 +298,56 @@ class InventoryController extends Controller
             'lowStockProducts' => $lowStockProducts,
             'totalStockValue' => $totalStockValue,
         ]);
+    }
+
+    /**
+     * Store multiple products in the inventory.
+     */
+    public function storeBulk(Request $request)
+    {
+        $validated = $request->validate([
+            'products' => 'required|array',
+            'products.*.id' => 'nullable|integer|exists:products,id',
+            'products.*.quantity' => 'required|integer|min:1',
+            'warehouse_id' => 'required|integer|exists:infrastructures,id',
+        ]);
+
+        try {
+            DB::beginTransaction(); // Start a transaction
+
+            $warehouseId = $validated['warehouse_id'];
+            $products = $validated['products'];
+
+            foreach ($products as $productData) {
+                // Check if product exists
+                $product = Product::find($productData['id']);
+
+                // If the product doesn't exist, create it
+                if (!$product) {
+                    $product = Product::create([
+                        'name' => $productData['name'] ?? 'Unnamed Product', // Adjust based on your Product model
+                        'description' => $productData['description'] ?? '',
+                    ]);
+                }
+
+                // Create or update inventory record
+                Inventory::updateOrCreate(
+                    [
+                        'product_id' => $product->id,
+                        'warehouse_id' => $warehouseId,
+                    ],
+                    [
+                        'quantity' => DB::raw("quantity + {$productData['quantity']}"),
+                    ]
+                );
+            }
+
+            DB::commit(); // Commit the transaction
+
+            return response()->json(['message' => 'Products successfully added to inventory'], 200);
+        } catch (\Exception $e) {
+            DB::rollBack(); // Roll back the transaction on error
+            return response()->json(['error' => 'An error occurred', 'details' => $e->getMessage()], 500);
+        }
     }
 }

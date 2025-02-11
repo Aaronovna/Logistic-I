@@ -20,11 +20,11 @@ const ReceiptCard = ({ data = {}, onClick = () => { } }) => {
 
         <div className="flex justify-between">
           <p>{new Date(data.order_date + 'Z').toLocaleString(undefined, dateTimeFormatLong)}</p>
-          <Status statusArray={shipmentStatus} status={data.status}/>
+          <Status statusArray={shipmentStatus} status={data.status} />
         </div>
 
-        <p className="flex items-center text-lg"><TbMapPin  className="mr-1"/><span className="font-medium">{data.order_warehouse}</span></p>
-        <span className="flex items-center text-gray-600"><TbTruckDelivery  className="mr-1 text-lg"/><p>{`${JSON.parse(data.fleet).name} | ${JSON.parse(data.fleet).plate}`}</p></span>
+        <p className="flex items-center text-lg"><TbMapPin className="mr-1" /><span className="font-medium">{data.order_warehouse}</span></p>
+        <span className="flex items-center text-gray-600"><TbTruckDelivery className="mr-1 text-lg" /><p>{`${JSON.parse(data.fleet).name} | ${JSON.parse(data.fleet).plate}`}</p></span>
       </div>
 
     </div>
@@ -33,7 +33,7 @@ const ReceiptCard = ({ data = {}, onClick = () => { } }) => {
 
 export default ReceiptCard;
 
-export const UpcomingShipmentCard = ({ data = {}, callback = () => {} }) => {
+export const UpcomingShipmentCard = ({ data = {}, callback = () => { } }) => {
   const { theme } = useStateContext();
 
   let payload = {
@@ -69,11 +69,12 @@ export const UpcomingShipmentCard = ({ data = {}, callback = () => {} }) => {
     } catch (error) {
       toast.error('Failed to create receipt', response.error);
     }
+    callback();
   };
 
   return (
     <div className='border-card flex p-2 md:flex-row flex-col mb-2 hover:shadow-lg shadow-md hover:cursor-pointer duration-200'>
-      
+
       <div>
         <p className="text-xl font-medium">{data.supplier.name}</p>
         <p className="font-medium text-lg text-gray-600">{new Date(data.date).toLocaleString(undefined, dateTimeFormatLong)}</p>
