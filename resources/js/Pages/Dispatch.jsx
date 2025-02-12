@@ -140,7 +140,7 @@ const Dispatch = ({ auth }) => {
 
   const handleCancelFill = async (productId, quantity, index) => {
     try {
-      const payload = { quantity: -quantity }; // Pass negative quantity to add back to stock
+      const payload = { quantity: quantity, operation: 'subtract' }; // Pass negative quantity to add back to stock
       await axios.patch(`/inventory/stock/update/${productId}`, payload);
 
       // Update the local state to mark the item as not filled
@@ -168,7 +168,7 @@ const Dispatch = ({ auth }) => {
 
   const handleFillStock = async (productId, quantity, index) => {
     try {
-      const payload = { quantity }; // Only pass the quantity to be deducted
+      const payload = { quantity, operation: 'subtract' }; // Only pass the quantity to be deducted
       await axios.patch(`/inventory/stock/update/${productId}`, payload);
 
       // Update the local state to mark the item as filled
@@ -200,7 +200,7 @@ const Dispatch = ({ auth }) => {
       for (let i = 0; i < itemAvailability.length; i++) {
         const item = itemAvailability[i];
         if (item.filled) {
-          const payload = { quantity: -item.quantity }; // Revert stock
+          const payload = { quantity: item.quantity, operation: 'subtract' }; // Revert stock
           await axios.patch(`/inventory/stock/update/${item.product_id}`, payload);
 
           // Update the local state to mark the item as not filled

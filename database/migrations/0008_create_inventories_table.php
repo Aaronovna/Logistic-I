@@ -25,6 +25,7 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained('products')->onDelete('restrict');
             $table->integer('quantity')->default(0);
             $table->string('log')->default('');
+            $table->string('operation');
             $table->boolean('update')->default(false);
             $table->timestamps();
         });

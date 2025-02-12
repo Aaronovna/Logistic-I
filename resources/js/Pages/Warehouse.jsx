@@ -13,7 +13,7 @@ import { TbCurrencyPeso } from "react-icons/tb";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 
-const cardStyle = 'mb-2 snap-center mx-2 md:min-w-64 inline-block min-w-[100%]';
+const cardStyle = 'mb-2 snap-center mx-2 md:min-w-64 inline-block min-w-[100%] border-none bg-white/50 backdrop-blur-sm';
 
 const formatValue = (value) => {
   if (value) {
@@ -27,28 +27,6 @@ const formatValue = (value) => {
 
   return 0;
 }
-
-const colDefs = [
-  { field: "product_id", minWidth: 100, maxWidth: 120, flex: 1, headerName: 'ID' },
-  { field: "product_name", filter: true, flex: 1, minWidth: 120, headerName: 'Product' },
-  { field: "product_model", filter: true, flex: 1, minWidth: 120, headerName: 'Model' },
-  {
-    field: "quantity", filter: true, flex: 1, minWidth: 150,
-    cellRenderer: (params) => {
-      return (
-        <p>{`${formatValue(params.data.quantity)} (${params.data.warehouse_name})`}</p>
-      )
-    }
-  },
-  {
-    field: "product_price", filter: true, flex: 1, minWidth: 150, headerName: 'Price',
-    cellRenderer: (params) => {
-      return (
-        <p>{`${formatValue(params.data.product_price)} (${(formatValue(params.data.product_price * params.data.quantity.toFixed(2)))})`}</p>
-      )
-    }
-  }
-];
 
 const Warehouse = ({ auth }) => {
   if (!hasAccess(auth.user.type, [2050, 2051, 2052])) {
@@ -75,11 +53,13 @@ const Warehouse = ({ auth }) => {
     }
   };
 
-  const [warehouses, setWarehouses] = useState([]);
+  const [warehouses, setWarehouses] = useState([{ name: 'All Warehouses', id: 0, type: 100 }]);
   const fetchInfrastructures = async () => {
     try {
       const response = await axios.get('/infrastructure/get');
-      setWarehouses(filterArray(response.data, 'type', [100]));
+      setWarehouses(prevWarehouses => [
+        ...prevWarehouses,
+        ...filterArray(response.data, 'type', [100])]);
     } catch (error) {
       toast.error(productToastMessages.show.error, error);
     }
@@ -248,20 +228,23 @@ const Warehouse = ({ auth }) => {
   const [editInventoryFormData, setEditInventoryFormData] = useState({
     quantity: '',
     warehouse_id: 0,
+    operation: null,
   });
 
   const handleEditInventorySubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       const response = await axios.patch(`/inventory/update/${selectedData.id}`, {
         quantity: editInventoryFormData.quantity,
         warehouse_id: selectedData.warehouse_id,
+        operation: editInventoryFormData.operation,
       });
 
       setEditInventoryFormData({
         quantity: '',
         warehouse_id: 0,
+        operation: null,
       });
 
       toast.success(inventoryToastMessages.update.success);
@@ -279,6 +262,10 @@ const Warehouse = ({ auth }) => {
     setEditInventoryFormData({ ...editInventoryFormData, [name]: value });
   };
 
+  useEffect(() => {
+    setSelectedWarehouse({ name: 'All Warehouses', id: 0, type: 100 });
+  }, [])
+
 
   return (
     <AuthenticatedLayout
@@ -287,32 +274,32 @@ const Warehouse = ({ auth }) => {
       <Head title="Receipt" />
 
       <InventoryLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Warehouse</h2>}>
-        <div className="content">
-          <div className='border-card p-4 shadow-sm mb-6 flex h-28' style={{ color: theme.text }}>
-            <div>
-              <p className='text-2xl font-semibold tracking-wider'>{selectedWarehouse?.name}</p>
-              <p>{selectedWarehouse?.name}</p>
+        <div className="content bg-cover" >
+          <div className='border-card p-4 shadow-md mb-6 flex bg-cover bg-center' style={{ color: theme.text, backgroundImage: selectedWarehouse?.image_url ? `url(${selectedWarehouse.image_url})` : 'none', }}>
+            <div className='flex flex-col flex-1'>
+              <div className='flex'>
+
+                <select className='p-2 w-full border-none font-medium text-xl bg-white/10 backdrop-blur-sm rounded-full px-2' name="warehouse_id" id="warehouse_id" onChange={handleWarehouseChange}>
+                  {warehouses && warehouses.map((warehouse, index) => {
+                    return (
+                      <option key={index} value={warehouse.id} className='text-sm'>{warehouse.name}</option>
+                    )
+                  })
+                  }
+                </select>
+              </div>
+              <p className='mt-auto bg-white/10 backdrop-blur-sm rounded-full px-2'>{selectedWarehouse?.address}</p>
             </div>
-            <div className='ml-auto'>
-              <select className='p-2' name="warehouse_id" id="warehouse_id" style={{ background: theme.background }} onChange={handleWarehouseChange}>
-                {warehouses && warehouses.map((warehouse, index) => {
-                  return (
-                    <option key={index} value={warehouse.id} >{warehouse.name}</option>
-                  )
-                })
-                }
-                <option value={0}>All Warehouses</option>
-              </select>
+
+            <div className='ml-auto md:items-end mb-2 md:mb-0 md:gap-4 overflow-x-auto snap-mandatory snap-x pb-1 whitespace-nowrap'>
+              <Card2 data={totalProductValue} name="Total Asset Value" className={cardStyle} Icon={TbCurrencyPeso} iconColor={theme.text} />
+              <Card2 data={inventoryStats && inventoryStats?.totalStock} name="Total Stocks" className={cardStyle} Icon={TbBox} iconColor={theme.text} />
             </div>
           </div>
 
           <div className='flex gap-4 flex-col md:flex-row'>
             <div className='flex flex-col gap-4 md:w-2/3 w-full'>
-              <div className='md:items-end mb-2 md:mb-0 md:gap-4 overflow-x-auto snap-mandatory snap-x pb-1 whitespace-nowrap'>
-                <Card2 data={totalProductValue} name="Total Asset Value" className={cardStyle} Icon={TbCurrencyPeso} iconColor={theme.text} />
-                <Card2 data={inventoryStats && inventoryStats?.totalStock} name="Total Stocks" className={cardStyle} Icon={TbBox} iconColor={theme.text} />
-              </div>
-              <div className={`w-full ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} style={{ height: '434px' }} >
+              <div className={`w-full ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} style={{ height: '768px' }} >
                 <AgGridReact
                   rowData={inventory}
                   columnDefs={colDefs}
@@ -324,11 +311,11 @@ const Warehouse = ({ auth }) => {
               </div>
             </div>
 
-            <div className='md:w-1/3 w-full flex flex-col' style={{ color: theme.text }}>
+            <div className='md:w-1/3 w-full flex flex-col h-fit' style={{ color: theme.text }}>
               <div className='flex gap-2 mb-2'>
                 <button
                   onClick={() => setOpenAddInventoryModal(true)}
-                  disabled={!selectedWarehouse}
+                  disabled={selectedWarehouse?.id === 0}
                   className='border-card w-full font-medium if-disable'
                   style={{ background: theme.accent, borderColor: theme.border, color: theme.background }}
                 >
@@ -352,8 +339,7 @@ const Warehouse = ({ auth }) => {
                   <p>Brand <span className='font-semibold'>{product?.brand ? product?.brand : '--'}</span></p>
                   <p>Name <span className='font-semibold'>{product?.name ? product?.name : '--'}</span></p>
                   <p>Model <span className='font-semibold'>{product?.model ? product?.model : '--'}</span></p>
-                  <p className='py-4'>{product?.description}</p>
-                  <p className='text-lg text-gray-500'>{product?.supplier_name ? product?.supplier_name : '--'}</p>
+                  <p className='text-lg text-gray-500 mt-10'>{product?.supplier_name ? product?.supplier_name : '--'}</p>
                   <p className='text-sm text-gray-500'>{product?.category_name ? product?.category_name : '--'}</p>
                 </div>
                 <button
@@ -424,16 +410,37 @@ const Warehouse = ({ auth }) => {
         </div>
       </Modal>
 
-      <Modal show={openEditInventoryModal} onClose={() => setOpenEditInventoryModal(false)} maxWidth='lg'>
-        <div className='p-4' style={{ color: theme.text }}>
-          <p className='font-semibold text-xl mt-2 mb-4'>{`Edit Stock ${selectedData?.warehouse_name}(${selectedData?.warehouse_id})`}</p>
+      <Modal show={openEditInventoryModal} onClose={() => setOpenEditInventoryModal(false)} maxWidth='lg' name="Edit Product Stock">
+        <div style={{ color: theme.text }}>
+          <p className='text-lg mt-2 mb-4 text-gray-500'>Warehouse: <span className='font-semibold text-gray-700'>{`${selectedData?.warehouse_name}(${selectedData?.warehouse_id})`}</span></p>
           <form onSubmit={handleEditInventorySubmit} className="flex flex-col" style={{ color: theme.text }}>
             <div className='py-4'>
-              <p>{`Product ID: ${selectedData ? selectedData?.product_id : ''}`}</p>
+              <p>Product ID: <span>{`${selectedData ? selectedData?.product_id : ''}`}</span></p>
               <p>{`Product: ${selectedData ? selectedData?.product_name : ''}`}</p>
               <p>{`Model: ${selectedData ? selectedData?.product_model : ''}`}</p>
               <p>{`Current Stock: ${selectedData ? selectedData?.quantity : ''}`}</p>
             </div>
+
+            <span className="flex gap-8">
+              {/* Add Radio */}
+              <label htmlFor="add" className="flex items-center gap-2 cursor-pointer">
+                <div className="w-5 h-5 border rounded-md flex items-center justify-center">
+                  <input type="radio" name="operation" id="add" className="hidden peer" value="add" onChange={handleEditProductInputChange} />
+                  <div className="w-3 h-3 bg-transparent rounded-md peer-checked:bg-blue-400 transition-all"></div>
+                </div>
+                <p>Add</p>
+              </label>
+
+              {/* Subtract Radio */}
+              <label htmlFor="subtract" className="flex items-center gap-2 cursor-pointer">
+                <div className="w-5 h-5 border rounded-md flex items-center justify-center">
+                  <input type="radio" name="operation" id="subtract" className="hidden peer" value="subtract" onChange={handleEditProductInputChange} />
+                  <div className="w-3 h-3 bg-transparent rounded-md peer-checked:bg-red-400 transition-all"></div>
+                </div>
+                <p>Subtract</p>
+              </label>
+            </span>
+
 
             <div className='flex gap-2 mt-auto'>
               <input type="number" name="quantity" id="quantity" placeholder="Quantity"
@@ -453,3 +460,31 @@ const Warehouse = ({ auth }) => {
 }
 
 export default Warehouse;
+
+const colDefs = [
+  { field: "product_id", width: 100, headerName: 'ID' },
+  {
+    field: "product_name", filter: true, flex: 1, minWidth: 120, headerName: 'Product',
+    cellRenderer: (params) => {
+      return (
+        <span>{params.data.product_name} | {params.data.product_model}</span>
+      )
+    }
+  },
+  {
+    field: "quantity", filter: true, flex: 1, minWidth: 150,
+    cellRenderer: (params) => {
+      return (
+        <p>{`${formatValue(params.data.quantity)} (${params.data.warehouse_name})`}</p>
+      )
+    }
+  },
+  {
+    field: "product_price", filter: true, flex: 1, minWidth: 150, headerName: 'Price',
+    cellRenderer: (params) => {
+      return (
+        <p>{`${formatValue(params.data.product_price)} (${(formatValue(params.data.product_price * params.data.quantity.toFixed(2)))})`}</p>
+      )
+    }
+  }
+];

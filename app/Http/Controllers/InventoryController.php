@@ -107,6 +107,7 @@ class InventoryController extends Controller
                     'user_id' => auth('web')->id(),
                     'product_id' => $validatedData['product_id'],
                     'quantity' => $validatedData['quantity'],
+                    'operation' => 'add',
                     'log' => auth('web')->user()->name . " added {$validatedData['quantity']} units to inventory for product_id: {$validatedData['product_id']} in warehouse_id: {$validatedData['warehouse_id']}. Total is now: $newQuantity",
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -120,6 +121,7 @@ class InventoryController extends Controller
                     'user_id' => auth('web')->id(),
                     'product_id' => $validatedData['product_id'],
                     'quantity' => $validatedData['quantity'],
+                    'operation' => 'add',
                     'log' => auth('web')->user()->name . " created new inventory for product_id: {$validatedData['product_id']} in warehouse_id: {$validatedData['warehouse_id']} with {$validatedData['quantity']} units",
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -181,6 +183,7 @@ class InventoryController extends Controller
         $validatedData = $request->validate([
             'quantity' => 'required|integer|min:0',
             'warehouse_id' => 'required|exists:infrastructures,id',
+            'operation' => 'required|string|in:add,subtract', // Ensure operation is either 'add' or 'subtract'
         ]);
 
         DB::transaction(function () use ($validatedData, $id) {
@@ -192,15 +195,26 @@ class InventoryController extends Controller
                 throw new \Exception("The warehouse_id does not match the inventory's associated warehouse.");
             }
 
+            // Calculate the new quantity based on the operation
+            if ($validatedData['operation'] === 'add') {
+                $newQuantity = $inventory->quantity + $validatedData['quantity'];
+            } elseif ($validatedData['operation'] === 'subtract') {
+                $newQuantity = $inventory->quantity - $validatedData['quantity'];
+                if ($newQuantity < 0) {
+                    throw new \Exception("The resulting quantity cannot be less than zero.");
+                }
+            }
+
             // Update the inventory quantity
-            $inventory->update(['quantity' => $validatedData['quantity']]);
+            $inventory->update(['quantity' => $newQuantity]);
 
             // Log the update action in inventory_trails
             DB::table('inventory_trails')->insert([
                 'user_id' => auth('web')->id(),
                 'product_id' => $inventory->product_id,
                 'quantity' => $validatedData['quantity'],
-                'log' => auth('web')->user()->name . " set inventory for product_id: {$inventory->product_id} to {$validatedData['quantity']} units in warehouse_id: {$inventory->warehouse_id}",
+                'operation' => $validatedData['operation'],
+                'log' => auth('web')->user()->name . " {$validatedData['operation']}ed {$validatedData['quantity']} units for product_id: {$inventory->product_id} in warehouse_id: {$inventory->warehouse_id}. New quantity: {$newQuantity}",
                 'update' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -213,20 +227,25 @@ class InventoryController extends Controller
     public function updateStock(Request $request, string $id)
     {
         $validatedData = $request->validate([
-            'quantity' => 'required|integer',
+            'quantity' => 'required|integer|min:0',
+            'operation' => 'required|string|in:add,subtract', // Ensure operation is either 'add' or 'subtract'
         ]);
 
         DB::transaction(function () use ($validatedData, $id) {
             // Find the inventory record by product_id
             $inventory = Inventory::where('product_id', $id)->firstOrFail();
 
-            // Update the inventory quantity
-            $newQuantity = $inventory->quantity - $validatedData['quantity'];
-
-            if ($newQuantity < 0) {
-                throw new \Exception("Not enough stock available for product ID: {$id}");
+            // Calculate the new quantity based on the operation
+            if ($validatedData['operation'] === 'add') {
+                $newQuantity = $inventory->quantity + $validatedData['quantity'];
+            } elseif ($validatedData['operation'] === 'subtract') {
+                $newQuantity = $inventory->quantity - $validatedData['quantity'];
+                if ($newQuantity < 0) {
+                    throw new \Exception("Not enough stock available for product ID: {$id}");
+                }
             }
 
+            // Update the inventory quantity
             $inventory->update(['quantity' => $newQuantity]);
 
             // Log the update action in inventory_trails
@@ -234,7 +253,8 @@ class InventoryController extends Controller
                 'user_id' => auth('web')->id(),
                 'product_id' => $id,
                 'quantity' => $validatedData['quantity'],
-                'log' => auth('web')->user()->name . " deducted {$validatedData['quantity']} units for product_id: {$id}. Remaining stock: {$newQuantity}",
+                'operation' => $validatedData['operation'],
+                'log' => auth('web')->user()->name . " {$validatedData['operation']}ed {$validatedData['quantity']} units for product_id: {$id}. New stock: {$newQuantity}",
                 'update' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -243,7 +263,6 @@ class InventoryController extends Controller
 
         return response()->json(['message' => 'Stock updated successfully']);
     }
-
 
     /**
      * Remove the specified resource from storage.
