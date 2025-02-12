@@ -1,5 +1,7 @@
 import React from "react";
 import { dateTimeFormatLong } from "@/Constants/options";
+import Status from "../Status";
+import { requestStatus } from "@/Constants/status";
 
 export default function RequestCard({ data = {} }) {
   // Basic statuses for requesting materials
@@ -37,34 +39,21 @@ export default function RequestCard({ data = {} }) {
       </p>
 
       {/* User Name */}
-      <p className="text-sm text-gray-600">
-        Requested By: <span className="font-medium">{data.user_name || "Unknown"}</span>
+      <p className="text-sm text-gray-600 mb-4">
+        Request From: <span className="font-medium">{data.infrastructure_name || "Unknown"}</span>
       </p>
 
-      {/* Status */}
-      <p className="text-sm text-gray-600 mt-2">
-        Status: <span className="font-medium">{currentStatus}</span>
-      </p>
+      <Status statusArray={requestStatus} status={data.status} className={`leading-normal text-sm whitespace-nowrap p-1 px-2 rounded-lg w-fit h-fit`}/>
 
       {/* Status Steps Visualization */}
       <div className="mt-4">
-        <p className="text-sm font-medium text-gray-700 mb-2">Progress:</p>
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center w-full gap-1">
           {statusSteps.map((status, index) => (
-            <div key={status} className="flex items-center">
-              <div
-                className={`w-6 h-6 rounded-full text-xs flex items-center justify-center ${
-                  index <= currentStatusIndex
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-200 text-gray-500"
-                }`}
-              >
-                {index + 1}
-              </div>
-              {index < statusSteps.length - 1 && (
+            <div key={status} className="flex-1">
+              {index < statusSteps.length && (
                 <div
-                  className={`w-6 h-1 ${
-                    index < currentStatusIndex
+                  className={`w-full h-1 ${
+                    index  <= currentStatusIndex
                       ? "bg-green-500"
                       : "bg-gray-200"
                   }`}

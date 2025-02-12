@@ -58,7 +58,7 @@ const Request = ({ request, onClick = () => {} }) => {
   const { theme } = useStateContext();
 
   // Get the first letter of the request type
-  const initial = request?.type?.charAt(0)?.toUpperCase() || "N"; // Default to "N" for no type
+  const initial = request?.infrastructure_name?.charAt(0)?.toUpperCase() || "N"; // Default to "N" for no type
 
   return (
     <div
