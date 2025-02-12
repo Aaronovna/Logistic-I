@@ -118,9 +118,8 @@ export const ProductCard = ({ product, isFlip = false, className = '', categorie
           }} />
       </span>
 
-      <Modal show={openEditProductModal} onClose={() => setOpenEditProductModal(false)} maxWidth={'2xl'}>
-        <div className='p-4'>
-          <p className='font-semibold text-xl mt-2 mb-4' style={{ color: theme.text }}>Edit Product</p>
+      <Modal show={openEditProductModal} onClose={() => setOpenEditProductModal(false)} maxWidth={'2xl'} name="Edit Product">
+        <div>
           <form onSubmit={handleEditProductSubmit}>
             <div className='flex gap-2 mb-4'>
               <div className='w-52 aspect-square border-card overflow-hidden'

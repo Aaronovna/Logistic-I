@@ -240,18 +240,18 @@ const Product = ({ auth }) => {
             ))}
           </div> */}
 
-          <Modal show={openAddProductModal} onClose={() => setOpenAddProductModal(false)} maxWidth={'2xl'}>
-            <div className='p-4' style={{ color: theme.text }}>
-              <p className='font-semibold text-xl mt-2 mb-4'>Add Product</p>
+          <Modal show={openAddProductModal} onClose={() => setOpenAddProductModal(false)} maxWidth={'2xl'} name="Add new product">
+            <div style={{ color: theme.text }}>
               <form onSubmit={handleAddProductSubmit}>
                 <div className='flex gap-2 mb-4'>
-                  <div className='w-52 aspect-square border-card overflow-hidden product-placeholder bg-contain'
+                  <div className='w-48 border-card p-0 overflow-hidden product-placeholder bg-contain'
                     style={{ backgroundSize: '100%' }}>
                     {addProductFormData.image_url === ''
                       ? null
                       : <img className='w-full h-full' src={addProductFormData.image_url} alt="Can't load image :(" />
                     }
                   </div>
+
                   <div className='flex flex-col flex-1 gap-2'>
                     <select className='border-card bg-transparent' style={{ borderColor: theme.border }} name="category_id" id="category_id" onChange={handleAddProductInputChange}>
                       <option value={null} style={{ background: theme.background }}>Select Category</option>
@@ -269,20 +269,22 @@ const Product = ({ auth }) => {
                         )
                       })}
                     </select>
-                    <div className='flex gap-2'>
+
+                    <div className='flex gap-2 w-full'>
                       <input type="number" name="price" id="price" placeholder="Price"
-                        className='border-card bg-transparent'
+                        className='border-card bg-transparent w-1/2'
                         style={{ borderColor: theme.border }}
                         value={addProductFormData.price}
                         onChange={handleAddProductInputChange}
                       />
                       <input type="number" name="restock_point" id="restock_point" placeholder="Restock Point"
-                        className='border-card bg-transparent'
+                        className='border-card bg-transparent w-1/2'
                         style={{ borderColor: theme.border }}
                         value={addProductFormData.restock_point}
                         onChange={handleAddProductInputChange}
                       />
                     </div>
+
                     <input type="text" name="image_url" id="image_url" placeholder="Image URL"
                       className='border-card bg-transparent'
                       style={{ borderColor: theme.border }}
