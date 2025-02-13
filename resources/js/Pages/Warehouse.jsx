@@ -275,7 +275,11 @@ const Warehouse = ({ auth }) => {
 
       <InventoryLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Warehouse</h2>}>
         <div className="content bg-cover" >
-          <div className='border-card p-4 shadow-md mb-6 flex bg-cover bg-center' style={{ color: theme.text, backgroundImage: selectedWarehouse?.image_url ? `url(${selectedWarehouse.image_url})` : 'none', }}>
+          <div
+            className='border-card p-4 shadow-md mb-6 flex bg-cover bg-center'
+            style={{ color: theme.text, backgroundImage: selectedWarehouse?.image_url ? `url(${selectedWarehouse.image_url})` : 
+            `url(https://img.freepik.com/free-vector/warehouse-interior-logistics-cargo-delivery_107791-1777.jpg?semt=ais_hybrid)`, }}
+          >
             <div className='flex flex-col flex-1'>
               <div className='flex'>
 
