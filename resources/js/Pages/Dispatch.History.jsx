@@ -1,22 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useStateContext } from '@/context/contextProvider';
-
+import { router } from '@inertiajs/react';
+import { AgGridReact } from 'ag-grid-react';
 import InventoryLayout from '@/Layouts/InventoryLayout';
-
-const filterOrdersByStatuses = (orders, statuses) => {
-  return orders.filter(order => statuses.includes(order?.status));
-};
-
-const options = {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-  hour: 'numeric',
-  minute: 'numeric',
-  second: 'numeric',
-  hour12: true, // Use 12-hour format
-  timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // User's local timezone
-};
+import { filterArray } from '@/functions/filterArray';
+import { useStateContext } from '@/context/contextProvider';
+import { dateTimeFormatShort } from '@/Constants/options';
+import Status from '@/Components/Status';
+import { requestStatus } from '@/Constants/status';
 
 const DispatchHistory = ({ auth }) => {
   if (!hasAccess(auth.user.type, [2050, 2051, 2052])) {
@@ -25,43 +15,53 @@ const DispatchHistory = ({ auth }) => {
     )
   }
 
-  const { theme } = useStateContext();
+  const {themePreference} = useStateContext();
+
   const [history, setHistory] = useState([]);
 
-  const [receivedShipment, setReceivedShipment] = useState();
-  const fetchReceivedShipment = async () => {
+  const [requests, setRequests] = useState();
+  const fetchRequests = async () => {
     try {
-      const response = await axios.get('/receipt/get');
-      setReceivedShipment(response.data);
+      const response = await axios.get('/request/get');
+      setRequests(response.data);
     } catch (error) {
-      console.error('error');
     }
   };
 
   useEffect(() => {
-    fetchReceivedShipment();
+    fetchRequests();
   }, [])
 
   useEffect(() => {
-    if (receivedShipment) {
-      setHistory(filterOrdersByStatuses(receivedShipment, ['Success', 'Return']));
+    if (requests) {
+      setHistory(filterArray(requests, 'status', ['Completed', 'Request Rejected', 'Request Cancelled']));
     }
-  }, [receivedShipment])
+  }, [requests])
 
   return (
     <AuthenticatedLayout
       user={auth.user}
     >
       <Head title="Dispatch History" />
-      <InventoryLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>{`Dispatch > History`}</h2>}>
-        <div className="content">
-          {
-            history?.map((data, index) => {
-              return (
-                <p key={index}>{`${data.id} ${new Date(data.order_date + 'Z').toLocaleString('en-PH', options)} ${data.supplier_id} ${data.status}`}</p>
-              )
-            })
-          }
+      <InventoryLayout
+        user={auth.user}
+        header={<BreadCrumbsHeader
+          headerNames={["Dispatch", "History"]}
+          onClickHandlers={[
+            () => router.get('/dispatch'),
+            () => router.get('/dispatch/history')
+          ]}
+        />
+        }>
+        <div className="content flex-1">
+          <div className={`h-full ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} >
+            <AgGridReact
+              rowData={history}
+              columnDefs={colDefs}
+              rowSelection='single'
+              pagination={true}
+            />
+          </div>
         </div>
       </InventoryLayout>
     </AuthenticatedLayout>
@@ -69,3 +69,22 @@ const DispatchHistory = ({ auth }) => {
 }
 
 export default DispatchHistory;
+
+const colDefs = [
+  {
+    field: 'created_at', headerName: 'Date', flex: 1,
+    valueFormatter: (params) => new Date(params.value).toLocaleString(undefined, dateTimeFormatShort)
+  },
+  {
+    field: 'infrastructure_name' , headerName: 'Request From', flex: 1,
+  },
+  {
+    field: 'type', headerName: 'Purpose', flex: 1,
+  },
+  {
+    field: 'status', flex: 1,
+    cellRenderer: (params) => {
+      return <Status statusArray={requestStatus} status={params.value}/>
+    }
+  }
+]

@@ -26,8 +26,8 @@ const Dispatch = ({ auth }) => {
 
   const fetchRequests = async () => {
     try {
-      const response = await axios.get('request/get');
-      setRequests(response.data);
+      const response = await axios.get('/request/get');
+      setRequests(filterArray(response.data, 'status', ['Completed', 'Request Rejected', 'Request Cancelled'], true));
     } catch (error) {
       toast.error(productToastMessages.show.error, error);
     }
@@ -35,8 +35,8 @@ const Dispatch = ({ auth }) => {
 
   const fetchDepotRequests = async () => {
     try {
-      const response = await axios.get('request/get/infrastructure/depot');
-      setDepotRequests(response.data);
+      const response = await axios.get('/request/get/infrastructure/depot');
+      setDepotRequests(filterArray(response.data, 'status', ['Completed', 'Request Rejected', 'Request Cancelled'], true));
     } catch (error) {
       toast.error(productToastMessages.show.error, error);
     }
@@ -44,17 +44,21 @@ const Dispatch = ({ auth }) => {
 
   const fetchTerminalRequests = async () => {
     try {
-      const response = await axios.get('request/get/infrastructure/terminal');
-      setTerminalRequests(response.data);
+      const response = await axios.get('/request/get/infrastructure/terminal');
+      setTerminalRequests(filterArray(response.data, 'status', ['Completed', 'Request Rejected', 'Request Cancelled'], true));
     } catch (error) {
       toast.error(productToastMessages.show.error, error);
     }
   };
 
-  useEffect(() => {
+  const fetchAllRequests = () => {
     fetchRequests();
     fetchDepotRequests();
     fetchTerminalRequests();
+  };
+
+  useEffect(() => {
+    fetchAllRequests();
   }, [])
 
   const [openRequestModal, setOpenRequestModal] = useState(false);
@@ -101,9 +105,7 @@ const Dispatch = ({ auth }) => {
     }
     try {
       const response = await axios.patch(`/request/update/${id}`, payload)
-      fetchDepotRequests();
-      fetchTerminalRequests();
-      fetchRequests();
+      fetchAllRequests();
       setOpenRequestModal(false);
     } catch (error) {
 
@@ -119,9 +121,7 @@ const Dispatch = ({ auth }) => {
     } catch (error) {
 
     }
-    fetchDepotRequests();
-    fetchTerminalRequests();
-    fetchRequests();
+    fetchAllRequests();
     setOpenRequestModal(false);
   }
 
@@ -234,18 +234,14 @@ const Dispatch = ({ auth }) => {
       toast.error("Failed to mark materials as procured.");
     }
 
-    fetchDepotRequests();
-    fetchTerminalRequests();
-    fetchRequests();
+    fetchAllRequests();
     setOpenRequestModal(false);
   };
 
   const CompleteDeliver = (id) => {
     const url = `/request/update/${id}`;
     updateStatus(url, { status: 'Delivered' });
-    fetchDepotRequests();
-    fetchTerminalRequests();
-    fetchRequests();
+    fetchAllRequests();
     setOpenRequestModal(false);
   }
 
