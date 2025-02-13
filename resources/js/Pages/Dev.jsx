@@ -1,12 +1,12 @@
 import { useStateContext } from '@/context/contextProvider';
 import { generateRandomNumber } from '@/functions/numberGenerator';
-import { generateRandomItem,generateRandomItems } from '@/functions/itemGenerator';
+import { generateRandomItem, generateRandomItems } from '@/functions/itemGenerator';
 
 import { useEffect, useState } from 'react';
 import { filterArray } from '@/functions/filterArray';
 
 export default function Dev() {
-  const { theme, setOrdersDummyData, setFleetsDummyData, debugMode, setDebugMode } = useStateContext();
+  const { theme, setOrdersDummyData, setFleetsDummyData, debugMode, setDebugMode, showWireFrame, setShowWireFrame } = useStateContext();
 
   const [suppliers, setSuppliers] = useState([]);
   const fetchSuppliers = async () => {
@@ -31,7 +31,7 @@ export default function Dev() {
   const fetchWarehouses = async () => {
     try {
       const response = await axios.get('/infrastructure/get');
-      setWarehouses(filterArray(response.data, 'type', [100] ));
+      setWarehouses(filterArray(response.data, 'type', [100]));
     } catch (error) {
       console.error('Error fetching suppliers:', error);
     }
@@ -39,7 +39,7 @@ export default function Dev() {
 
   const processProducts = (products) => {
     const allowedQuantities = Array.from({ length: 20 }, (_, i) => (i + 1) * 50); // [50, 100, ..., 1000]
-  
+
     return products.map(product => ({
       id: product.id,
       name: product.name,
@@ -50,7 +50,7 @@ export default function Dev() {
   };
 
   const generateData = (count) => {
-    
+
     const date = new Date();
     const formattedDate = date.toISOString().slice(0, 19).replace('T', ' ')
 
@@ -59,7 +59,7 @@ export default function Dev() {
       fleet: generateRandomItem(fleet),
       supplier: generateRandomItem(suppliers),
       status: 'Upcoming',
-      orders: processProducts(generateRandomItems(10,products)),
+      orders: processProducts(generateRandomItems(10, products)),
       date: formattedDate,
       destination: generateRandomItem(warehouses),
     }));
@@ -69,45 +69,47 @@ export default function Dev() {
 
     const date = new Date();
     const formattedDate = date.toISOString().slice(0, 19).replace('T', ' ')
-    
+
     const order = [{
       id: generateRandomNumber(8),
       fleet: generateRandomItem(fleet),
       supplier: generateRandomItem(suppliers),
       status: 'Upcoming',
-      orders: processProducts(generateRandomItems(10,products)),
+      orders: processProducts(generateRandomItems(10, products)),
       date: formattedDate,
       destination: generateRandomItem(warehouses),
     }];
     return order;
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchSuppliers();
     fetchProducts();
     fetchWarehouses();
     setFleetsDummyData(fleet);
-  },[])
+  }, [])
 
   return (
     <div style={{ color: theme.text }}>
-      <div className=''>
-        <div className='p-4' style={{ background: theme.background }}>
-          <p className='text-2xl'>{`Developer Tools`}</p>
-        </div>
+      <div className='w-full mb-4'>
+        <p className='text-xl my-2 border-b'>{`Tools`}</p>
+        <button
+          className={`border-card mr-2 ${debugMode ? 'bg-green-100' : 'bg-red-100'}`}
+          onClick={() => setDebugMode((debugMode) => !debugMode)}>
+          {`Debug Mode ${debugMode ? '[ON]' : '[OFF]'}`}
+        </button>
 
-        <div className='p-4 w-full'>
-          <p className='text-2xl my-2'>{`Tools`}</p>
-          <hr className='mb-4' />
-          <button className='border-card mr-2' onClick={() => setDebugMode((debugMode)=>!debugMode)}>{`Debug Mode ${debugMode ? '[ON]':'[OFF]'}`}</button>
-        </div>
-        
-        <div className='p-4 w-full'>
-          <p className='text-2xl my-2'>{`Dummy Data Generator`}</p>
-          <hr className='mb-4' />
-          <button className='border-card mr-2' onClick={() => setOrdersDummyData(generateOrder())}>Generate Order Data</button>
-          <button className='border-card mr-2' onClick={() => setOrdersDummyData(generateData(10))}>Generate 10 Order Data</button>
-        </div>
+        <button
+          className={`border-card mr-2 ${showWireFrame ? 'bg-green-100' : 'bg-red-100'}`}
+          onClick={() => setShowWireFrame((showWireFrame) => !showWireFrame)}>
+          {`Wire Frame Mode ${showWireFrame ? '[ON]' : '[OFF]'}`}
+        </button>
+      </div>
+
+      <div className='w-full mb-4'>
+        <p className='text-xl my-2 border-b'>{`Dummy Data Generator`}</p>
+        <button className='border-card mr-2' onClick={() => setOrdersDummyData(generateOrder())}>Generate Order Data</button>
+        <button className='border-card mr-2' onClick={() => setOrdersDummyData(generateData(10))}>Generate 10 Order Data</button>
       </div>
     </div>
   );

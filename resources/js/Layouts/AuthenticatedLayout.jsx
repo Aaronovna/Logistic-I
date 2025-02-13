@@ -44,7 +44,7 @@ const AuthenticatedLayout = ({ user, children }) => {
         </div>
       }
 
-      <Modal show={openDev} onClose={closeModal}>
+      <Modal show={openDev} onClose={closeModal} name='Developer Tools'>
         <Dev />
       </Modal>
 

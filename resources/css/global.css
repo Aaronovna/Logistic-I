@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-.debug-mode * {
+.wire-frame-mode * {
     outline: 1px solid rgba(0, 0, 0, 0.2) !important;
 }
 
