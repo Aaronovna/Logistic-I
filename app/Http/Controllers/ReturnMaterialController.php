@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ReturnMaterial;
+use Illuminate\Support\Facades\DB;
 
 class ReturnMaterialController extends Controller
 {
@@ -76,5 +77,37 @@ class ReturnMaterialController extends Controller
         return response()->json([
             'message' => 'Return material deleted successfully!'
         ]);
+    }
+
+    public function storeBulkReturnMaterials(Request $request)
+    {
+        $validated = $request->validate([
+            'materials' => 'required|array',
+            'materials.*.return_id' => 'required|integer|exists:return_requests,id',
+            'materials.*.name' => 'nullable|string',
+            'materials.*.quantity' => 'nullable|integer|min:1',
+            'materials.*.weight' => 'nullable|integer|min:0',
+            'materials.*.category' => 'nullable|string',
+        ]);
+
+        try {
+            DB::beginTransaction(); // Start a transaction
+
+            foreach ($validated['materials'] as $materialData) {
+                ReturnMaterial::create([
+                    'return_id' => $materialData['return_id'],
+                    'name' => $materialData['name'] ?? '',
+                    'quantity' => $materialData['quantity'] ?? null, // Allow nullable values
+                    'weight' => $materialData['weight'] ?? null,    // Allow nullable values
+                    'category' => $materialData['category'] ?? '',
+                ]);
+            }
+
+            DB::commit(); // Commit the transaction
+            return response()->json(['message' => 'Materials successfully added'], 200);
+        } catch (\Exception $e) {
+            DB::rollBack(); // Roll back the transaction on error
+            return response()->json(['error' => 'An error occurred', 'details' => $e->getMessage()], 500);
+        }
     }
 }

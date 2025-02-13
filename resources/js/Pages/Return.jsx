@@ -1,11 +1,14 @@
 import InventoryLayout from "@/Layouts/InventoryLayout";
 import { Card2 } from "@/Components/Cards";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { useStateContext } from "@/context/contextProvider";
 import updateStatus from "@/api/updateStatus";
 import Status from "@/Components/Status";
 import { returnStatus } from "@/Constants/status";
+import { dateFormatShort, dateTimeFormatShort } from "@/Constants/options";
+import { TbX } from "react-icons/tb";
+import { filterArray } from "@/functions/filterArray";
 
 const Return = ({ auth }) => {
   if (!hasAccess(auth.user.type, [2050, 2051, 2052])) {
@@ -13,13 +16,14 @@ const Return = ({ auth }) => {
       <Unauthorized />
     )
   }
-  const { themePreference } = useStateContext();
+
+  const { themePreference, debugMode } = useStateContext();
 
   const [returns, setReturns] = useState([]);
   const fetchReturns = async () => {
     try {
       const response = await axios.get('/return/request/get');
-      setReturns(response.data);
+      setReturns(filterArray(response.data, 'status', ['Completed', 'Cancelled'], true));
     } catch (error) {
 
     }
@@ -40,6 +44,57 @@ const Return = ({ auth }) => {
     fetchReturnedMaterials();
   }, [])
 
+  const [gridApi, setGridApi] = useState(null);
+
+  const onGridReady = useCallback((params) => {
+    setGridApi(params.api);
+  }, []);
+
+  const [selectedData, setSelectedData] = useState(null);
+  const onSelectionChanged = (event) => {
+    const selectedRows = event.api.getSelectedRows();
+    setSelectedData(selectedRows[0] || null);
+    setOpenDetailSection(true);
+  };
+
+  const [openDetailSection, setOpenDetailSection] = useState(false);
+
+  const acceptReturn = async (id) => {
+    updateStatus(`/return/request/update/${id}`, { status: 'Request Approved' }, () => {
+      fetchReturns();
+      fetchReturnedMaterials();
+    });
+  }
+
+  const deliverReturn = async (id) => {
+    updateStatus(`/return/request/update/${id}`, { status: 'Delivered' });
+    fetchReturns();
+    fetchReturnedMaterials();
+  }
+
+  const onAccept = async (id, data) => {
+    const materials = data.map(item => ({
+      return_id: id,  // Ensure return_id is passed for each material
+      name: item.name,
+      category: item.category,
+      quantity: item.quantityType === 'qty' ? item.quantity : null,
+      weight: item.quantityType === 'wt' ? item.quantity : null,
+    }));
+
+    try {
+      const response = await axios.post('/return/create/bulk', { materials });
+
+      toast.success(response.data.message);
+
+      const url = `/return/request/update/${id}`;
+      updateStatus(url, { status: 'Completed' });
+      fetchReturns();
+      fetchReturnedMaterials();
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'An error occurred');
+    }
+  };
+
   return (
     <AuthenticatedLayout user={auth.user}>
       <Head title="Return" />
@@ -49,15 +104,85 @@ const Return = ({ auth }) => {
             <Card2 name="Return Requests" data={returns?.length} className="w-fit" />
           </div>
 
-          <div className={`${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} style={{ height: '508px' }} >
-            <AgGridReact
-              rowData={returns}
-              columnDefs={colDefs}
-              rowSelection='single'
-              pagination={true}
-            />
+          <div className='mt-8 flex items-end'>
+            <p className='font-medium text-2xl'>Return Requests</p>
+            <Link
+              className='ml-auto font-medium border-card'
+              href={route('return-history')}
+            >
+              View History
+            </Link>
           </div>
-          <div className={`${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} style={{ height: '508px' }} >
+
+          <div className="flex gap-4 mt-2">
+            <div className={`h-[508px] ${openDetailSection ? 'w-4/6' : 'w-full'} ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} >
+              <AgGridReact
+                rowData={returns}
+                columnDefs={colDefs}
+                rowSelection='single'
+                pagination={true}
+                onGridReady={onGridReady}
+                onSelectionChanged={onSelectionChanged}
+                getRowStyle={() => ({
+                  cursor: "pointer",
+                })}
+              />
+            </div>
+
+            <div className={`w-2/6 border-card flex-1 p-4 ${openDetailSection ? 'block' : 'hidden'} flex flex-col shadow-lg`}>
+              <div className="flex items-start">
+                <p className="text-gray-600">{new Date(selectedData?.created_at).toLocaleString(undefined, dateTimeFormatShort)}</p>
+                <button className="ml-auto" onClick={() => setOpenDetailSection(false)}><TbX size={20} /></button>
+              </div>
+              <div className="mt-8">
+                <div className="flex justify-between mb-4 text-sm">
+                  <p className="text-lg font-medium">Items List</p>
+                  <Status statusArray={returnStatus} status={selectedData?.status} />
+                </div>
+
+                <div className="max-h-64 overflow-y-auto">
+                  {selectedData && JSON.parse(selectedData.items).map((item, index) => {
+                    return (
+                      <div key={index} className="w-full flex flex-col border mb-2 rounded-md">
+                        <div className="w-full flex justify-between px-2 pt-1">
+                          <p className="font-medium">{item.name}</p>
+                          <p className="text-right font-medium text-gray-600 text-sm">
+                            {item.quantityType === 'qty' ? `${item.quantity} pcs.` : `${item.quantity} kilo/s`}
+                          </p>
+                        </div>
+                        <p className="bg-gray-100 text-sm px-2 pb-1 text-gray-600">{item.category}</p>
+                      </div>
+                    )
+                  })}
+                </div>
+                <p className="text-sm italic p-1 mt-2">{selectedData?.comment}</p>
+              </div>
+              <div className="mt-auto">
+                {
+                  selectedData?.status === 'Waiting for Approval' ?
+                    <button onClick={() => acceptReturn(selectedData?.id)} className="leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-green-100 text-green-600 outline outline-1 outline-green-300" >
+                      Accept
+                    </button> : null
+                }
+                {
+                  debugMode && selectedData?.status === 'Request Approved' ?
+                    <button onClick={() => deliverReturn(selectedData?.id)} className="italic leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-green-100 text-green-600 outline outline-1 outline-green-300" >
+                      Mark as delivered
+                    </button> : null
+                }
+                {
+                  selectedData?.status === 'Delivered' ?
+                    <button onClick={() => onAccept(selectedData?.id, JSON.parse(selectedData?.items))} className="leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-green-100 text-green-600 outline outline-1 outline-green-300" >
+                      Complete
+                    </button> : null
+                }
+              </div>
+            </div>
+          </div>
+
+          <p className="mt-6 text-xl font-semibold">Returned Materials</p>
+
+          <div className={`mt-2 ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} style={{ height: '508px' }} >
             <AgGridReact
               rowData={returnedMaterials}
               columnDefs={returnedMaterialColDefs}
@@ -73,117 +198,25 @@ const Return = ({ auth }) => {
 
 export default Return;
 
-const acceptReturn = async (id) => {
-  updateStatus(`/return/request/update/${id}`, { status: 'Request Approved' });
-}
-
-const deliverReturn = async (id) => {
-  updateStatus(`/return/request/update/${id}`, { status: 'Delivered' });
-}
-
-const onAccept = async (id, data) => {
-  const returnPromises = data.map(async (item) => {
-    const payload = {
-      return_id: id,
-      name: item.name,
-      category: item.category,
-      weight: item.quantityType === 'wt' ? item.quantity : null,
-      quantity: item.quantityType === 'qty' ? item.quantity : null,
-      assoc_product: item.assoc_product,
-    }
-    try {
-      const response = await axios.post(`/return/create`, payload)
-      toast.success('success');
-    } catch (error) {
-      toast.error('error');
-    }
-  })
-
-  const results = await Promise.all(returnPromises);
-
-  const url = `/return/request/update/${id}`;
-  updateStatus(url, { status: 'Completed' })
-}
-
 const colDefs = [
   {
-    field: "created_at", headerName: 'Date', maxWidth: 100,
-    cellRenderer: (params) => {
-      return (
-        <span>{new Date(params.data.created_at).toLocaleDateString()}</span>
-      )
-    }
+    field: "created_at", headerName: 'Date', flex: 1, maxWidth: 150,
+    valueFormatter: (params) => new Date(params.value).toLocaleString(undefined, dateFormatShort)
   },
   {
-    field: "infrastructure_name", headerName: "From", minWidth: 300,
+    field: "infrastructure_name", headerName: "From", flex: 1, minWidth: 200,
   },
   {
-    field: "items", autoHeight: true, flex: 1,
-    cellRenderer: (params) => {
-      const items = JSON.parse(params.data.items);
-
-      return (
-        <div>
-          <span className="w-full flex">
-            <p className="w-2/6 font-medium text-gray-600">Category</p>
-            <p className="w-3/6 font-medium text-gray-600">Name</p>
-            <p className="w-1/6 font-medium text-gray-600 text-right">Qty.</p>
-          </span>
-          {
-            items.map((item, index) => {
-              return (
-                <span key={index} className="w-full flex">
-                  <p className="w-2/6 overflow-hidden text-ellipsis">{item.category}</p>
-                  <p className="w-3/6 overflow-hidden text-ellipsis">{item.name}</p>
-                  <p className="w-1/6 text-right">{item.quantity}</p>
-                </span>
-
-              )
-            })
-          }
-        </div>
-      )
-    }
+    field: "comment", flex: 2,
   },
   {
-    field: 'status',
+    field: 'status', flex: 1, minWidth: 200,
     cellRenderer: (params) => {
       return (
         <Status statusArray={returnStatus} status={params.data.status} className="leading-normal whitespace-nowrap p-1 px-3 rounded-full" />
       )
     }
   },
-  {
-    field: 'Action', minWidth: 120,
-    cellRenderer: (params) => {
-      if (params.data.status === 'Waiting for Approval') {
-        return (
-          <button onClick={() => acceptReturn(params.data.id)} className="leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-green-100 text-green-600 outline outline-1 outline-green-300" >
-            Accept
-          </button>
-        )
-      }
-
-      const { debugMode } = useStateContext();
-      if (debugMode && params.data.status === 'Request Approved') {
-        return (
-          <button onClick={() => deliverReturn(params.data.id)} className="italic leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-green-100 text-green-600 outline outline-1 outline-green-300" >
-            Mark as delivered
-          </button>
-        )
-      }
-
-      if (params.data.status === 'Delivered') {
-        return (
-          <button onClick={() => onAccept(params.data.id, JSON.parse(params.data.items))} className="leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-green-100 text-green-600 outline outline-1 outline-green-300" >
-            Complete
-          </button>
-        )
-      }
-
-      return null;
-    }
-  }
 ]
 
 const returnedMaterialColDefs = [

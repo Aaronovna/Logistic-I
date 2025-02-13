@@ -64,6 +64,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     })->name('reports-view');
 
     Route::get('/return', fn() => Inertia::render('Return'))->name('return');
+    Route::get('/return/history', fn() => Inertia::render('Return.History'))->name('return-history');
 });
 
 //! END: PAGES ROUTES //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,6 +166,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post('/return/create', [ReturnMaterialController::class, 'store'])->name('return.store');
     Route::patch('/return/update/{id}', [ReturnMaterialController::class, 'update'])->name('return.update');
     Route::delete('/return/delete/{id}', [ReturnMaterialController::class, 'destroy'])->name('return.destroy');
+    Route::post('/return/create/bulk', [ReturnMaterialController::class, 'storeBulkReturnMaterials'])->name('return.storeBulkReturnMaterials');
 
     Route::get('/file/get', [FileController::class, 'index']);
     Route::get('/file/get/{id}', [FileController::class, 'show']);
