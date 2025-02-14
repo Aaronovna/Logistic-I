@@ -23,7 +23,7 @@ const Return = ({ auth }) => {
   const fetchReturns = async () => {
     try {
       const response = await axios.get('/return/request/get');
-      setReturns(filterArray(response.data, 'status', ['Completed', 'Cancelled'], true));
+      setReturns(filterArray(response.data, 'status', ['Completed', 'Canceled'], true));
     } catch (error) {
 
     }
@@ -77,8 +77,8 @@ const Return = ({ auth }) => {
       return_id: id,  // Ensure return_id is passed for each material
       name: item.name,
       category: item.category,
-      quantity: item.quantityType === 'qty' ? item.quantity : null,
-      weight: item.quantityType === 'wt' ? item.quantity : null,
+      quantity: item.quantityType === 'qty' ? item.value : null,
+      unit: item.quantityType === 'unit' ? item.value : null,
     }));
 
     try {
@@ -147,7 +147,7 @@ const Return = ({ auth }) => {
                         <div className="w-full flex justify-between px-2 pt-1">
                           <p className="font-medium">{item.name}</p>
                           <p className="text-right font-medium text-gray-600 text-sm">
-                            {item.quantityType === 'qty' ? `${item.quantity} pcs.` : `${item.quantity} kilo/s`}
+                            {item.quantityType === 'qty' ? `${item.value} pcs.` : `${item.value}`}
                           </p>
                         </div>
                         <p className="bg-gray-100 text-sm px-2 pb-1 text-gray-600">{item.category}</p>
@@ -235,10 +235,10 @@ const returnedMaterialColDefs = [
     field: 'category', flex: 1,
   },
   {
-    field: 'qty/wt', headerName: 'Quantity / Weight', flex: 1,
+    field: 'qty/unit', headerName: 'Quantity / Unit', flex: 1,
     cellRenderer: (params) => {
       return (
-        <span>{params.data.quantity ? `${params.data.quantity} Qty.` : `${params.data.weight} Wt.`}</span>
+        <span>{params.data.quantity ? `${params.data.quantity} Qty.` : `${params.data.unit}`}</span>
       )
     }
   },

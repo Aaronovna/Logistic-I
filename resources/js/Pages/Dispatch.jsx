@@ -226,12 +226,12 @@ const Dispatch = ({ auth }) => {
     }
 
     try {
-      const requestStatusPayload = { status: 'Materials Procured' };
+      const requestStatusPayload = { status: 'Materials Fulfilled' };
       await axios.patch(`/request/update/${requestData.id}`, requestStatusPayload);
-      toast.success("Materials marked as procured and ready for delivery.");
+      toast.success("Materials marked as fulfilled and ready for delivery.");
     } catch (error) {
       console.error("Error preparing for delivery:", error);
-      toast.error("Failed to mark materials as procured.");
+      toast.error("Failed to mark materials as fulfilled.");
     }
 
     fetchAllRequests();
@@ -423,7 +423,7 @@ const Dispatch = ({ auth }) => {
           }
 
           {requestData && getStatusStep(requestStatus, requestData?.status) === 3 &&
-            <div className={`justify-end gap-2 mt-4 ${requestData?.status === 'Materials Procured' ? 'flex' : 'hidden'}`}>
+            <div className={`justify-end gap-2 mt-4 ${requestData?.status === 'Materials Fulfilled' ? 'flex' : 'hidden'}`}>
               {
                 debugMode ? <button className='border-card italic' onClick={() => CompleteDeliver(requestData?.id)}>Make Delivered</button> : null
               }

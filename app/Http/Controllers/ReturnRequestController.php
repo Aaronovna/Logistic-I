@@ -28,8 +28,8 @@ class ReturnRequestController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'items' => 'nullable|json',
-            'comment' => 'nullable|string',
+            'items' => 'required|json',
+            'comment' => 'required|string',
             'status' => 'reqired|string',
             'requested_by_id' => 'required|exists:users,id',
             'infrastructure_id' => 'required|exists:infrastructures,id',

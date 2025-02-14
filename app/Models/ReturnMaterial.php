@@ -10,7 +10,7 @@ class ReturnMaterial extends Model
     use HasFactory;
 
     protected $fillable = [
-        'return_id', 'name', 'quantity','weight','category'
+        'return_id', 'name', 'quantity','unit','category'
     ];
     
     public function request()

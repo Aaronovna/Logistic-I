@@ -8,7 +8,7 @@ export default function RequestCard({ data = {} }) {
   const statusSteps = [
     "Request Created", /* "Request Canceled",  */
     "Request Approved", /* "Request Rejected", */
-    "Materials Procured",
+    "Materials Fulfilled",
     "Preparing for Delivery",
     "In Transit",
     "Delivered",

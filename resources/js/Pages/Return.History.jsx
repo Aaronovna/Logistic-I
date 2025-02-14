@@ -105,7 +105,7 @@ const ReturnHistory = ({ auth }) => {
                       <div className="w-full flex justify-between px-2 pt-1">
                         <p className="font-medium">{item.name}</p>
                         <p className="text-right font-medium text-gray-600 text-sm">
-                          {item.quantityType === 'qty' ? `${item.quantity} pcs.` : `${item.quantity} kilo/s`}
+                          {item.quantityType === 'qty' ? `${item.value} pcs.` : `${item.value} kilo/s`}
                         </p>
                       </div>
                       <p className="bg-gray-100 text-sm px-2 pb-1 text-gray-600">{item.category}</p>

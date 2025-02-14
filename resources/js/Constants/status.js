@@ -71,7 +71,7 @@ export const requestStatus = [
         color: 'bg-blue-100 text-blue-600',
     },
     {
-        name: 'Materials Procured',
+        name: 'Materials Fulfilled',
         color: 'bg-purple-100 text-purple-600',
     },
     {

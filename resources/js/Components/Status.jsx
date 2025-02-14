@@ -1,4 +1,4 @@
-const Status = ({ statusArray = [], status = '', style = 1, className = undefined }) => {
+const Status = ({ statusArray = [], status = '', style = 1, className = undefined, onClick = () => { } }) => {
     let statusStyle;
 
     if (style === 1 && !className) {
@@ -9,7 +9,8 @@ const Status = ({ statusArray = [], status = '', style = 1, className = undefine
     }
 
     return (
-        <span className={`${className ? className : statusStyle} ${statusArray.find(item => item.name === status)?.color}`}>
+        <span onClick={onClick}
+            className={`${className ? className : statusStyle} ${statusArray.find(item => item.name === status)?.color}`}>
             {status}
         </span>
     )

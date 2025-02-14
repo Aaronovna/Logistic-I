@@ -24,10 +24,10 @@ class ReturnMaterialController extends Controller
     {
         $validated = $request->validate([
             'return_id' => 'required|exists:return_requests,id',
-            'name' => 'nullable|string',
-            'quantity' => 'nullable|integer',
-            'weight' => 'nullable|integer',
-            'category' => 'nullable|string',
+            'name' => 'required|string',
+            'quantity' => 'required|integer',
+            'unit' => 'required|string',
+            'category' => 'required|string',
         ]);
 
         $material = ReturnMaterial::create($validated);
@@ -55,7 +55,7 @@ class ReturnMaterialController extends Controller
             'return_id' => 'required|exists:return_requests,id',
             'name' => 'nullable|string',
             'quantity' => 'nullable|integer',
-            'weight' => 'nullable|integer',
+            'unit' => 'nullable|string',
             'category' => 'nullable|string',
         ]);
 
@@ -86,7 +86,7 @@ class ReturnMaterialController extends Controller
             'materials.*.return_id' => 'required|integer|exists:return_requests,id',
             'materials.*.name' => 'nullable|string',
             'materials.*.quantity' => 'nullable|integer|min:1',
-            'materials.*.weight' => 'nullable|integer|min:0',
+            'materials.*.unit' => 'nullable|string',
             'materials.*.category' => 'nullable|string',
         ]);
 
@@ -98,7 +98,7 @@ class ReturnMaterialController extends Controller
                     'return_id' => $materialData['return_id'],
                     'name' => $materialData['name'] ?? '',
                     'quantity' => $materialData['quantity'] ?? null, // Allow nullable values
-                    'weight' => $materialData['weight'] ?? null,    // Allow nullable values
+                    'unit' => $materialData['unit'] ?? null,    // Allow nullable values
                     'category' => $materialData['category'] ?? '',
                 ]);
             }

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('return_id')->constrained('return_requests');
             $table->string('name')->nullable();
             $table->integer('quantity')->nullable();
-            $table->integer('weight')->nullable();
+            $table->string('unit')->nullable();
             $table->string('category')->nullable();
             $table->timestamps();
         });
