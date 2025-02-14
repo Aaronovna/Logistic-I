@@ -86,7 +86,7 @@ export const infrastructureLinks = [
         Icon: TbHomeCog
     },
     {
-        name: ['terminal', 'terminal-request'],
+        name: ['terminal', 'terminal-history'],
         Icon: TbBus
     },
 ];

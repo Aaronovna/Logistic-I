@@ -38,7 +38,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/depot', fn() => Inertia::render('Depot'))->name('depot');
     Route::get('/depot/history', fn() => Inertia::render('Depot.History'))->name('depot-history');
     Route::get('/terminal', fn() => Inertia::render('Terminal'))->name('terminal');
-    Route::get('/terminal/request', fn() => Inertia::render('Terminal.Request'))->name('terminal-request');
+    Route::get('/terminal/history', fn() => Inertia::render('Terminal.History'))->name('terminal-history');
     Route::get('/tasks', action: fn() => Inertia::render('Tasks'))->name('tasks');
     Route::get('/reports', fn() => Inertia::render('Reports'))->name('reports');
     Route::get('/assignments', fn() => Inertia::render('Assignments'))->name('assignments');

@@ -1,9 +1,18 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useStateContext } from '@/context/contextProvider';
 import { AgGridReact } from 'ag-grid-react';
 
 import InfrastructureLayout from '@/Layouts/InfrastructureLayout';
+import Status from '@/Components/Status';
+import updateStatus from '@/api/updateStatus';
+import { handleInputChange } from '@/functions/handleInputChange';
 import { filterArray } from '@/functions/filterArray';
+import { requestStatus } from '@/Constants/status';
+import { returnStatus } from '@/Constants/status';
+import { returnCategories } from '@/Constants/categories';
+import { TbX } from "react-icons/tb";
+import { dateTimeFormatShort } from '@/Constants/options';
+import { simpleFlatUnits } from '@/Constants/units';
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
@@ -41,6 +50,7 @@ const Terminal = ({ auth }) => {
     fetchRequest();
     fetchInfrastructures();
     fetchProducts();
+    fetchReturns();
   }, [])
 
   const handleTerminalChange = (e) => {
@@ -55,55 +65,6 @@ const Terminal = ({ auth }) => {
       setSelectedTerminal(terminals[0]);
     }
   }, [terminals])
-
-  const colDefs = [
-    { field: "user_name", filter: true, flex: 1, minWidth: 120, headerName: 'User' },
-    { field: "type", filter: true, flex: 1, minWidth: 120 },
-    { field: "items", filter: true, flex: 1, minWidth: 120, headerName: 'Requested Material', autoHeight: true,
-      cellRenderer: (params) => {
-        const items  = JSON.parse(params.data.items);
-        
-        return (
-          <div>
-            {
-              items.map((item, index)=>{
-                return (
-                  <p key={index}>{`${item.product_name ? item.product_name : `ID:${item.product_id}`} ${item.quantity}`}</p>
-                )
-              })
-            }
-          </div>
-        )
-      }
-     },
-    { field: "status", filter: true, flex: 1, minWidth: 120 },
-    { field: "Action", maxWidth: 100,
-      cellRenderer: (params => {
-        const handleDelete = async (id) => {
-          try {
-            const response = await axios.delete(`/request/delete/${id}`);  // Replace with your actual delete endpoint
-            if (response.status === 200) {
-              alert('Product deleted successfully');
-            } else {
-              alert('Failed to delete product');
-            }
-          } catch (error) {
-            console.error('Error deleting product:', error);
-            alert('Failed to delete product');
-          }
-        };
-  
-        return (
-          <button
-            onClick={() => handleDelete(params.data.id)}  // Assuming `product_id` is the ID to delete
-            className="px-2 py-1"
-          >
-            Delete
-          </button>
-        );
-      })
-     },
-  ];
 
   const [openRequestModal, setOpenRequestModal] = useState(false);
 
@@ -196,22 +157,33 @@ const Terminal = ({ auth }) => {
   const handleAddRequestSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate that all items have a quantity
+    const hasInvalidQuantity = requestMaterialFormData.items.some(
+      (item) => !item.quantity || item.quantity <= 0
+    );
+
+    if (hasInvalidQuantity) {
+      toast.error("Please ensure all items have a valid quantity.");
+      return;
+    }
+
     const data = {
       user_id: auth.user.id,
       infrastructure_id: selectedTerminal.id,
       type: requestMaterialFormData.type,
-      items: JSON.stringify(requestMaterialFormData.items),
-    }
-
-    console.log(data);
+      items: JSON.stringify(requestMaterialFormData.items), // Still converting to a string as per your logic
+    };
 
     try {
       const response = await axios.post('/request/create', data);
-
+      fetchRequest();
+      setOpenRequestModal(false);
+      toast.success("Request submitted successfully.");
     } catch (error) {
-
+      toast.error("Failed to submit the request.");
+      console.error(error);
     }
-  }
+  };
 
   const handleAddRequestInputChange = (e) => {
     const { name, value } = e.target;
@@ -221,28 +193,170 @@ const Terminal = ({ auth }) => {
   const [requests, setRequests] = useState();
   const fetchRequest = async () => {
     try {
-      const response = await axios.get('request/get/infrastructure/terminal');
-      setRequests(response.data);
+      const response = await axios.get('/request/get/infrastructure/depot');
+      setRequests(filterArray(response.data, 'status', ['Completed', 'Request Canceled'], true));
     } catch (error) {
       toast.error(productToastMessages.show.error, error);
     }
   };
 
+  const [returnModal, setReturnModal] = useState(false);
+
+  const [selectedTerminalRequests, setSelectedTerminalRequests] = useState([]);
+  useEffect(() => {
+    if (selectedTerminal) {
+      setSelectedTerminalRequests(filterArray(requests, 'infrastructure_id', [selectedTerminal.id]))
+    }
+  }, [requests, selectedTerminal])
+
+  const [returnRequestFormData, setReturnRequestFormData] = useState({
+    comment: ''
+  });
+
+  const [items, setItems] = useState([
+    { category: '', name: '', assoc_product: '', quantityType: 'qty', value: '' }
+  ]);
+
+  const handleAddItem = () => {
+    setItems([
+      ...items,
+      { category: '', name: '', assoc_product: '', quantityType: 'qty', value: '' }
+    ]); // Add a new empty item with quantityType defaulted to 'qty'
+  };
+
+  const handleRemoveItem = (index) => {
+    const newItems = items.filter((_, i) => i !== index); // Remove the item at the given index
+    setItems(newItems);
+  };
+
+  const returnRequestSubmit = async (e) => {
+    e.preventDefault();
+
+    const fixUnitSpacing = (value) => {
+      // Insert a space between the number and unit if it’s missing (e.g., "1cm" -> "1 cm")
+      return value.replace(/(\d)([a-zA-Z]+)/, '$1 $2');
+    };
+
+    const validateUnit = (value) => {
+      const fixedValue = fixUnitSpacing(value); // Fix the spacing before validation
+
+      const unitPattern = simpleFlatUnits
+        .map(unit => `(${unit.abbreviation}|${unit.name.replace(/ /g, '\\s')})`)
+        .join('|');
+
+      const regex = new RegExp(`\\b(${unitPattern})\\b$`, 'i');
+      return regex.test(fixedValue) ? fixedValue : false;
+    };
+
+    const validatedItems = items.map(item => {
+      if (!item.category || !item.name || !item.quantityType || item.value === undefined) {
+        throw new Error('All fields must be populated except for assoc_product.');
+      }
+
+      if (item.quantityType === "unit") {
+        const validValue = validateUnit(item.value);
+        if (!validValue) {
+          throw new Error(`Value "${item.value}" must end with a valid unit abbreviation or name (e.g., mm, cm, kg, meter, etc.).`);
+        }
+        item.value = validValue; // Replace the value with the fixed one
+      }
+
+      return item;
+    });
+
+    const payload = {
+      items: JSON.stringify(validatedItems),
+      comment: returnRequestFormData.comment,
+      requested_by_id: auth.user.id,
+      infrastructure_id: selectedTerminal.id,
+    };
+
+    try {
+      const response = await axios.post('/return/request/create', payload);
+      toast.success('Return request submitted successfully!');
+      fetchReturns();
+      setReturnModal(false);
+    } catch (error) {
+      toast.error('Failed to submit the return request.');
+    }
+  };
+
+  const [returns, setReturns] = useState();
+  const fetchReturns = async () => {
+    try {
+      const response = await axios.get('/return/request/get');
+      setReturns(filterArray(response.data, 'status', ['Completed', 'Canceled'], true));
+    } catch (error) {
+      toast.error(productToastMessages.show.error, error);
+    }
+  };
+
+  const [selectedReturnRequests, setSelectedReturnRequests] = useState([]);
+  useEffect(() => {
+    if (selectedTerminal) {
+      setSelectedReturnRequests(filterArray(returns, 'infrastructure_id', [selectedTerminal.id]))
+    }
+  }, [returns, selectedTerminal])
+
+  const [gridApi, setGridApi] = useState(null);
+
+  const onRequestGridReady = useCallback((params) => {
+    setGridApi(params.api);
+  }, []);
+
+  const [openRequestDetailSection, setOpenRequestDetailSection] = useState(false);
+  const [selectedRequestData, setSelectedRequestData] = useState(null);
+  const onRequestSelectionChanged = (event) => {
+    const selectedRows = event.api.getSelectedRows();
+    setSelectedRequestData(selectedRows[0] || null);
+    setOpenRequestDetailSection(true);
+  };
+
+  const onReturnMaterialGridReady = useCallback((params) => {
+    setGridApi(params.api);
+  }, []);
+
+  const [openReturnMaterialDetailSection, setOpenReturnMaterialDetailSection] = useState(false);
+  const [selectedReturnMaterialData, setSelectedReturnMaterialData] = useState(null);
+  const onReturnMaterialSelectionChanged = (event) => {
+    const selectedRows = event.api.getSelectedRows();
+    setSelectedReturnMaterialData(selectedRows[0] || null);
+    setOpenReturnMaterialDetailSection(true);
+  };
+
+  const CompleteOrder = (id) => {
+    const url = `/request/update/${id}`;
+    updateStatus(url, { status: 'Completed' }, fetchRequest)
+  }
+
+  const CancelOrder = (id) => {
+    const url = `/request/update/${id}`;
+    updateStatus(url, { status: 'Request Canceled' }, fetchRequest)
+  }
+
+  const CancelReturn = (id) => {
+    const url = `/return/request/update/${id}`;
+    updateStatus(url, { status: 'Canceled' }, () => {
+      fetchReturns();
+      setReturnModal(false);
+    })
+  }
+
   return (
     <AuthenticatedLayout
       user={auth.user}
     >
-      <Head title="Depot" />
-      <InfrastructureLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Terminal</h2>}>
+      <Head title="Terminal" />
+      <InfrastructureLayout user={auth.user} header={<NavHeader headerName="Terminal" />}>
         <div className="content">
-          <div className='border-card p-4 shadow-sm mb-4 flex flex-col h-56 bg-cover'
+          <div className='border-card p-4 shadow-sm flex flex-col h-56 bg-cover bg-white'
             style={{
               backgroundImage: selectedTerminal?.image_url ? `url(${selectedTerminal.image_url})` : 'none',
             }}>
             <div className='flex'>
               <p className='text-xl font-semibold py-2 px-4 bg-white/40 backdrop-blur-sm rounded-full shadow-sm w-fit'>{selectedTerminal?.name}</p>
               <div className='ml-auto bg-white/10 backdrop-blur-sm rounded-full h-fit duration-200 px-2'>
-                <select className='p-2 bg-transparent border-0' name="selectdepot" id="selectdepot" onChange={handleTerminalChange}>
+                <select className='p-2 bg-transparent border-0' name="selectterminal" id="selectterminal" onChange={handleTerminalChange}>
                   {terminals && terminals.map((terminal, index) => {
                     return (
                       <option key={index} value={terminal.id} style={{ background: theme.background, color: theme.text }}>{terminal.name}</option>
@@ -255,10 +369,13 @@ const Terminal = ({ auth }) => {
             <p className=' mt-auto py-1 px-2 bg-white/40 backdrop-blur-sm rounded-full shadow-md w-fit'>{selectedTerminal?.address}</p>
           </div>
 
-          <div className='w-full flex gap-2 mb-4'>
-            <button className='border-card font-semibold' style={{ background: theme.accent, color: theme.background }}>Return</button>
+          <div className='w-full flex mb-2 items-end mt-6'>
+            <div className='flex items-baseline ml-2'>
+              <p className='font-semibold text-2xl'>Requests</p>
+              <Link className='ml-2 text-sm hover:underline text-gray-600' href={route('terminal-history')}>History</Link>
+            </div>
             <button
-              className='border-card font-semibold'
+              className='ml-auto border-card font-medium'
               style={{ background: theme.accent, color: theme.background }}
               onClick={() => setOpenRequestModal(true)}
             >
@@ -266,16 +383,131 @@ const Terminal = ({ auth }) => {
             </button>
           </div>
 
-          <div className={`w-full ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} style={{ height: '434px' }} >
-            <AgGridReact
-              rowData={requests}
-              columnDefs={colDefs}
-              rowSelection='single'
-              pagination={true}
-            /* onGridReady={onGridReady}
-            onSelectionChanged={onSelectionChanged} */
-            />
+          <div className='h-[434px] flex gap-2'>
+            <div className={`${selectedRequestData && openRequestDetailSection ? 'w-4/6' : 'w-full'} ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`}>
+              <AgGridReact
+                rowData={selectedTerminalRequests}
+                columnDefs={requestColDef}
+                rowSelection='single'
+                pagination={true}
+                onGridReady={onRequestGridReady}
+                onSelectionChanged={onRequestSelectionChanged}
+                onRowClicked={() => setOpenRequestDetailSection(true)}
+                getRowStyle={() => ({
+                  cursor: "pointer",
+                })}
+              />
+            </div>
+
+            <div className={`w-2/6 border-card flex-1 p-4 ${selectedRequestData && openRequestDetailSection ? 'block' : 'hidden'} flex flex-col shadow-lg`}>
+              <div className="flex items-start">
+                <p className="text-gray-600">{new Date(selectedRequestData?.created_at).toLocaleString(undefined, dateTimeFormatShort)}</p>
+                <button className="ml-auto" onClick={() => setOpenRequestDetailSection(false)}><TbX size={20} /></button>
+              </div>
+
+              <p className='mt-6 font-medium mb-2'>Requested Products</p>
+              <div className='max-h-64 overflow-y-auto'>
+                {selectedRequestData && JSON.parse(selectedRequestData.items).map((item, index) => {
+                  return (
+                    <div className={`border mb-2 rounded-md ${item.filled ? 'bg-green-50' : 'bg-red-50'}`}>
+                      <p key={index} className='flex justify-between px-2 pt-1'>
+                        <span className=''>{item.product_name}</span>
+                        <span className="italic text-sm text-gray-600">{item.quantity} pcs.</span>
+                      </p>
+                      <span className={`text-sm px-2 pb-1 ${item.filled ? 'text-green-500' : 'text-red-500'}`}>
+                        {item.filled ? 'Fulfilled' : 'Pending Fulfillment'}
+                      </span>
+                    </div>
+                  )
+                })
+                }
+              </div>
+
+              <div className='ml-auto mt-auto'>
+                {selectedRequestData?.status === 'Request Created' || selectedRequestData?.status === 'Request Approved' ?
+                  <button
+                    onClick={() => CancelOrder(selectedRequestData?.id)}
+                    className="leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-red-100 text-red-600 outline outline-1 outline-red-300"
+                  >
+                    Cancel
+                  </button> : null
+                }
+
+                {selectedRequestData?.status === 'Delivered' ?
+                  <button
+                    onClick={() => CompleteOrder(selectedRequestData?.id)}
+                    className="leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-green-100 text-green-600 outline outline-1 outline-green-300"
+                  >
+                    Complete
+                  </button> : null
+                }
+              </div>
+
+            </div>
+
           </div>
+
+          <div className='w-full flex mb-2 items-end mt-6'>
+            <div className='flex items-baseline ml-2'>
+              <p className='font-semibold text-2xl'>Returns</p>
+              <Link className='ml-2 text-sm hover:underline text-gray-600' href={route('terminal-history') + '#return-section'}>History</Link>
+            </div>
+            <button className='ml-auto border-card font-medium mr-2' style={{ background: theme.accent, color: theme.background }} onClick={() => setReturnModal(true)}>Return</button>
+          </div>
+
+          <div className='h-[434px] flex gap-2'>
+
+            <div className={`${selectedReturnMaterialData && openReturnMaterialDetailSection ? 'w-4/6' : 'w-full'} ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`}>
+              <AgGridReact
+                rowData={selectedReturnRequests}
+                columnDefs={returnColDef}
+                rowSelection='single'
+                pagination={true}
+                onGridReady={onReturnMaterialGridReady}
+                onSelectionChanged={onReturnMaterialSelectionChanged}
+                getRowStyle={() => ({
+                  cursor: "pointer",
+                })}
+                onRowClicked={() => setOpenReturnMaterialDetailSection(true)}
+              />
+            </div>
+
+            <div className={`w-2/6 border-card flex-1 p-4 ${selectedReturnMaterialData && openReturnMaterialDetailSection ? 'block' : 'hidden'} flex flex-col shadow-lg`}>
+              <div className="flex items-start">
+                <p className="text-gray-600">{new Date(selectedReturnMaterialData?.created_at).toLocaleString(undefined, dateTimeFormatShort)}</p>
+                <button className="ml-auto" onClick={() => setOpenReturnMaterialDetailSection(false)}><TbX size={20} /></button>
+              </div>
+
+              <p className='mt-6 font-medium mb-2'>Item requested to be returned</p>
+              <div className='max-h-64 overflow-y-auto'>
+                {selectedReturnMaterialData && JSON.parse(selectedReturnMaterialData.items).map((item, index) => {
+                  return (
+                    <div key={index} className="w-full flex flex-col border mb-2 rounded-md">
+                      <div className="w-full flex justify-between px-2 pt-1">
+                        <p className="font-medium">{item.name}</p>
+                        <p className="text-right font-medium text-gray-600 text-sm">
+                          {item.quantityType === 'qty' ? `${item.value} pcs.` : `${item.value}`}
+                        </p>
+                      </div>
+                      <p className="bg-gray-100 text-sm px-2 pb-1 text-gray-600">{item.category}</p>
+                    </div>
+                  )
+                })
+                }
+              </div>
+              <p className="text-sm italic p-1 mt-2">{selectedReturnMaterialData?.comment}</p>
+
+              <div className='ml-auto mt-auto'>
+                {selectedReturnMaterialData?.status === 'Waiting for Approval' || selectedReturnMaterialData?.status === 'Request Approved' ?
+                  <button onClick={() => CancelReturn(selectedReturnMaterialData?.id)} className="leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-red-100 text-red-600 outline outline-1 outline-red-300" >
+                    Cancel
+                  </button> : null
+                }
+              </div>
+            </div>
+
+          </div>
+
         </div>
 
         <Modal show={openRequestModal} onClose={() => setOpenRequestModal(false)}>
@@ -363,9 +595,174 @@ const Terminal = ({ auth }) => {
             </form>
           </div>
         </Modal>
+
+        <Modal show={returnModal} onClose={() => setReturnModal(false)} maxWidth='4xl' name="Create return request">
+          <form onSubmit={returnRequestSubmit}>
+            <div className='h-52 overflow-y-auto pr-1 gutter-stable border-card'>
+              {items.map((item, index) => (
+                <div key={index} className='border-b pb-2 mb-2'>
+                  <div className='flex gap-2'>
+                    {/* Category Selection */}
+                    <select
+                      name={`category-${index}`}
+                      className='border-card w-1/4'
+                      value={item.category}
+                      onChange={(e) => {
+                        const newItems = [...items];
+                        newItems[index].category = e.target.value;
+                        setItems(newItems);
+                      }}
+                    >
+                      <option value="">Select Category</option>
+                      {returnCategories.map((cat, catIndex) => (
+                        <option value={cat.name} key={catIndex}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    {/* Item / Material Name Input */}
+                    <input
+                      name={`name-${index}`}
+                      className='resize-none border-card w-1/4'
+                      placeholder='Item / Material'
+                      value={item.name}
+                      onChange={(e) => {
+                        const newItems = [...items];
+                        newItems[index].name = e.target.value;
+                        setItems(newItems);
+                      }}
+                    />
+
+                    {/* Associated Products Input */}
+                    <input
+                      name={`assoc_product-${index}`}
+                      className='resize-none border-card w-1/4'
+                      placeholder='Assoc. Products'
+                      value={item.assoc_product}
+                      onChange={(e) => {
+                        const newItems = [...items];
+                        newItems[index].assoc_product = e.target.value;
+                        setItems(newItems);
+                      }}
+                    />
+
+                    {/* Quantity Type Radio Buttons */}
+                    <div className='flex items-center gap-1'>
+                      <span className='flex items-center'>
+                        <input
+                          type="radio"
+                          name={`quantityType-${index}`}
+                          id={`qty-${index}`}
+                          value="qty"
+                          checked={item.quantityType === 'qty'}
+                          onChange={(e) => {
+                            const newItems = [...items];
+                            newItems[index].quantityType = e.target.value;
+                            setItems(newItems);
+                          }}
+                        />
+                        <label htmlFor={`qty-${index}`}>qty.</label>
+                      </span>
+                      <span className='flex items-center'>
+                        <input
+                          type="radio"
+                          name={`quantityType-${index}`}
+                          id={`unit-${index}`}
+                          value="unit"
+                          checked={item.quantityType === 'unit'}
+                          onChange={(e) => {
+                            const newItems = [...items];
+                            newItems[index].quantityType = e.target.value;
+                            setItems(newItems);
+                          }}
+                        />
+                        <label htmlFor={`unit-${index}`}>unit</label>
+                      </span>
+                    </div>
+
+                    {/* Quantity/Unit Input */}
+                    <input
+                      name={`value-${index}`}
+                      type={item.quantityType === 'qty' ? 'number' : 'text'}
+                      className='resize-none border-card w-1/6'
+                      placeholder='1, 2kg, 3L'
+                      value={item.value}
+                      onChange={(e) => {
+                        const newItems = [...items];
+                        newItems[index].value = e.target.value;
+                        setItems(newItems);
+                      }}
+                    />
+
+                    {/* Remove Button */}
+                    <button
+                      type='button'
+                      className='border-card text-red-500 px-2'
+                      onClick={() => handleRemoveItem(index)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {/* Add Button Only After Last Row */}
+              <button type='button' className='border-card w-full mt-2' onClick={handleAddItem}>
+                Add
+              </button>
+            </div>
+
+
+            <textarea
+              name="comment" id="comment"
+              className='w-full resize-none mt-2 border-card' rows={5} placeholder='Comment'
+              value={returnRequestFormData.comment}
+              onChange={(e) => handleInputChange(e, setReturnRequestFormData)}
+            />
+            <button type='submit' className='border-card'>Submit</button>
+          </form>
+        </Modal>
       </InfrastructureLayout>
     </AuthenticatedLayout>
   );
 }
 
 export default Terminal;
+
+const requestColDef = [
+  { field: "id", filter: true, maxWidth: 100 },
+  {
+    field: 'created_at', headerName: 'Date',
+    valueFormatter: (params) => new Date(params.value).toLocaleString(undefined, dateTimeFormatShort)
+  },
+  { field: "user_name", filter: true, flex: 1, minWidth: 120, headerName: 'Requested by' },
+  { field: "type", filter: true, flex: 1, minWidth: 120, headerName: 'Purpose' },
+  {
+    field: "status", flex: 1, minWidth: 120,
+    cellRenderer: (params) => {
+      return (
+        <Status statusArray={requestStatus} status={params.value} className='leading-normal whitespace-nowrap p-1 px-3 rounded-full' />
+      )
+    }
+  },
+];
+
+const returnColDef = [
+  { field: "id", filter: true, maxWidth: 100 },
+  {
+    field: 'created_at', headerName: 'Date',
+    valueFormatter: (params) => new Date(params.value).toLocaleString(undefined, dateTimeFormatShort)
+  },
+  {
+    field: 'requested_by_name', headerName: 'Requested by'
+  },
+  { field: 'comment', flex: 1 },
+  {
+    field: 'status',
+    cellRenderer: (params) => <Status
+      statusArray={returnStatus} status={params.data.status}
+      className='leading-normal whitespace-nowrap p-1 px-3 rounded-full'
+    />
+  }
+];
