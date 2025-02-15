@@ -40,6 +40,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/terminal', fn() => Inertia::render('Terminal'))->name('terminal');
     Route::get('/terminal/history', fn() => Inertia::render('Terminal.History'))->name('terminal-history');
     Route::get('/tasks', action: fn() => Inertia::render('Tasks'))->name('tasks');
+    Route::get('/tasks/history', action: fn() => Inertia::render('Tasks.History'))->name('tasks-history');
     Route::get('/reports', fn() => Inertia::render('Reports'))->name('reports');
     Route::get('/assignments', fn() => Inertia::render('Assignments'))->name('assignments');
     Route::get('/module', fn() => Inertia::render('Module'))->name('module');
@@ -102,7 +103,8 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post('/user/create', [UserController::class, 'store'])->name('user.store');
     Route::patch('/user/update/permission/{id}', [UserController::class, 'update_permission'])->name('user.update_permission');
     Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.destroy');
-
+    Route::get('/user/get/auditor/auto', [UserController::class, 'autoAssignAuditor'])->name('user.autoAssignAuditor');
+    
     Route::get('/inventory/get', [InventoryController::class, 'index'])->name('inventory.index');
     Route::get('/inventory/get/{id}', [InventoryController::class, 'show'])->name('inventory.show');
     Route::post('/inventory/create', [InventoryController::class, 'store'])->name('inventory.store');

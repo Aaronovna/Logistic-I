@@ -14,6 +14,8 @@ class AuditTask extends Model
         'type',
         'status',
         'scope',
+        'startdate',
+        'deadline',
         'description',
         'assigned_to',
         'assigned_by'

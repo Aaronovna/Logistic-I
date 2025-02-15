@@ -36,6 +36,8 @@ class AuditTaskController extends Controller
             'type' => 'required|string',
             'title' => 'required|string',
             'scope' => 'required|string',
+            'startdate' => 'required|date_format:Y-m-d H:i:s',
+            'deadline' => 'required|date_format:Y-m-d H:i:s',
             'description' => 'required|string',
             'assigned_by' => 'required|exists:users,id'
         ]);

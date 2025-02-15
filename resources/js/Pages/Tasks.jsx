@@ -10,8 +10,12 @@ import { auditTasks } from '@/Constants/auditTasks';
 import { dateFormatShort } from '@/Constants/options';
 import { gradients } from "@/Constants/themes";
 import { dateTimeFormatLong } from '@/Constants/options';
+import { getStatusStep } from '@/Constants/status';
 
 import { TbPlus } from 'react-icons/tb';
+import axios from 'axios';
+import Status from '@/Components/Status';
+import updateStatus from '@/api/updateStatus';
 
 const Tasks = ({ auth }) => {
   if (!hasAccess(auth.user.type, [2050, 2051, 2054, 2055])) {
@@ -29,10 +33,13 @@ const Tasks = ({ auth }) => {
     assigned_to: null,
     assigned_by: null,
     scope: '',
+    startdate: new Date().toISOString().split('T')[0],
+    deadline: '',/* new Date().toISOString().split('T')[0], */
     description: '',
   });
 
   const [tasks, setTasks] = useState([]);
+  const [filteredTasks, setFilteredTasks] = useState([]);
   const fetchTasks = async () => {
     try {
       const response = await axios.get('/audit/task/get');
@@ -65,12 +72,16 @@ const Tasks = ({ auth }) => {
       title: createTaskFormData.title === '' ? `${new Date().toLocaleString(undefined, dateFormatShort)} | ${createTaskFormData.type}` : createTaskFormData.title,
       description: createTaskFormData.description,
       scope: createTaskFormData.scope,
+      startdate: new Date(createTaskFormData.startdate).toISOString().slice(0, 19).replace('T', ' '),
+      deadline: new Date(createTaskFormData.deadline).toISOString().slice(0, 19).replace('T', ' '),
       assigned_to: '',
       assigned_by: auth.user.id,
     };
 
     try {
       const response = await axios.post('audit/task/create', payload)
+      fetchTasks();
+      setOpenCreateTaskModal(false);
     } catch (error) {
 
     }
@@ -85,14 +96,20 @@ const Tasks = ({ auth }) => {
 
   const handleDeleteTask = async (id) => {
     try {
-      const response = axios.delete(`/audit/task/delete/${id}`)
+      const response = axios.delete(`/audit/task/delete/${id}`);
+      fetchTasks();
+      setOpenViewTaskModal(false);
     } catch (error) {
 
     }
   }
 
-  const handleCancelTask = async () => {
-
+  const handleCancelTask = async (id) => {
+    const url = `/audit/task/update/${id}`;
+    updateStatus(url, { status: 'Canceled' }, () => {
+      fetchTasks();
+      setOpenViewTaskModal(false);
+    });
   }
 
   const [addTaskAuditorFormData, setAddTaskAuditorFormData] = useState({
@@ -104,10 +121,53 @@ const Tasks = ({ auth }) => {
 
     try {
       const response = await axios.patch(`/audit/task/update/${id}`, addTaskAuditorFormData);
+      fetchTasks();
+      setOpenViewTaskModal(false);
     } catch (error) {
 
     }
   }
+
+  const handleAutoAddTaskAuditorSubmit = async (e, id) => {
+    e.preventDefault();
+
+    try {
+      // Fetch the auditor ID from the API
+      const { data: assigned_to } = await axios.get('/user/get/auditor/auto');
+
+      // If no auditor is found, handle the error
+      if (!assigned_to) {
+        throw new Error('No available auditor found.');
+      }
+
+      // Update the task with the assigned auditor
+      await axios.patch(`/audit/task/update/${id}`, { assigned_to });
+
+      // Success feedback (optional)
+      console.log(`Task ${id} successfully assigned to auditor ${assigned_to}`);
+      toast.success('Task successfully assigned to auditor.');
+      fetchTasks();
+      setOpenViewTaskModal(false);
+    } catch (error) {
+      console.error('Error assigning task:', error.response?.data || error.message);
+      toast.error(error.response?.data?.error || 'An error occurred while assigning the task.');
+    }
+  };
+
+  const [activeFilter, setActiveFilter] = useState('No Filter');
+  const filterTasks = (status) => {
+    if (status === 'No Filter') {
+      setFilteredTasks(tasks);
+    } else {
+      const filteredTasks = filterArray(tasks, 'status', [status]);
+      setFilteredTasks(filteredTasks);
+    }
+    setActiveFilter(status);
+  };
+
+  useEffect(() => {
+    filterTasks(activeFilter);
+  }, [tasks]);
 
   return (
     <AuthenticatedLayout
@@ -128,65 +188,97 @@ const Tasks = ({ auth }) => {
             </div>
           </div>
 
-          <div className='mt-8 border-card p-4'>
-            <div className='flex w-full justify-between mb-4'>
-              <p className='font-medium text-3xl' style={{ color: theme.text }}>Task</p>
+          <div className='flex flex-col w-full justify-between mt-8'>
+            <div className='flex gap-2 mb-4'>
+              {auditTaskStatus.map((status, index) => {
+                return (
+                  <span key={index} className={`cursor-pointer shadow-sm ${activeFilter === status.name ? 'scale-110 mx-1 shadow-xl' : null}`}>
+                    <Status statusArray={auditTaskStatus} status={status.name} onClick={() => filterTasks(status.name)} />
+                  </span>
+                )
+              })}
+              <span>
+                <span onClick={() => filterTasks('No Filter')}
+                  className={`leading-normal whitespace-nowrap p-1 px-3 rounded-lg w-fit h-fit bg-gray-100 text-gray-600 cursor-pointer shadow-sm ${activeFilter === 'No Filter' ? 'scale-x-150 mx-1 shadow-xl' : null}`}>
+                  No Filter
+                </span>
+              </span>
+            </div>
+
+            <div className='w-full flex mb-2 mt-2 items-end'>
+              <div className='flex items-baseline ml-2'>
+                <p className='font-semibold text-2xl'>Audit Tasks</p>
+                <Link className='ml-2 text-sm hover:underline text-gray-600' href={route('tasks-history')}>History</Link>
+              </div>
               <button
+                className='ml-auto border-card font-medium'
+                style={{ background: theme.accent, color: theme.background }}
                 onClick={() => setOpenCreateTaskModal(true)}
-                className='font-medium border-card'
-                style={{ background: theme.accent, color: theme.background, borderColor: theme.border }}
               >
                 Create Task
               </button>
             </div>
-            <div className='flex gap-2 mb-4'>
-              {auditTaskStatus.map((status, index) => {
-                return (
-                  <button key={index} className={`rounded-md py-1 px-2 h-fit w-fit font-medium shadow-sm whitespace-nowrap ${status.color}`}>{status.name}</button>
-                )
-              })}
-            </div>
-            <div className='grid gap-4 grid-cols-2'>
-              {
-                tasks && tasks.map((task, index) => {
-                  return (
-                    <AuditTaskCard data={task} key={index} onClick={() => handleClickTask(task)} />
-                  )
-                })
-              }
-            </div>
           </div>
 
-          <Modal show={openCreateTaskModal} onClose={() => setOpenCreateTaskModal(false)}>
-            <div className='p-4'>
-              <p className='modal-header'>Create Task</p>
+          <div className='grid gap-4 grid-cols-2'>
+            {
+              filteredTasks && filteredTasks.map((task, index) => {
+                return (
+                  <AuditTaskCard data={task} key={index} onClick={() => handleClickTask(task)} />
+                )
+              })
+            }
+          </div>
+
+          <Modal show={openCreateTaskModal} onClose={() => setOpenCreateTaskModal(false)} name='Create Task'>
+            <div>
+              <p className='modal-header'></p>
               <form onSubmit={handleCreateTaskSubmit}>
                 <select name="type" id="type" className='border-card w-full' onChange={(e) => handleInputChange(e, setCreateTaskFormData)}>
                   <option value=''>Select Task</option>
                   {
                     auditTasks.map((task, index) => {
                       return (
-                        <option value={task.name} key={index}>{task.name}</option>
+                        <option value={task.name} key={index} className='text-sm'>{task.name}</option>
                       )
                     })
                   }
                 </select>
-
+                <div className='flex border-card p-1 mt-2 bg-white'>
+                  <div className='w-1/2 flex items-center'>
+                    <label htmlFor="startdate" className='px-2 text-nowrap text-gray-500'>Start Date:</label>
+                    <input type="date" name="startdate" id="startdate"
+                      className='w-full p-1 border-none'
+                      value={createTaskFormData.startdate}
+                      onChange={(e) => handleInputChange(e, setCreateTaskFormData)}
+                    />
+                  </div>
+                  <div className='w-1/2 flex items-center'>
+                    <label htmlFor="deadline" className='px-2 text-gray-500'>Deadline:</label>
+                    <input type="date" name="deadline" id="deadline"
+                      className={`w-full p-1 border-none ${createTaskFormData.deadline ? null : 'text-red-500'}`}
+                      value={createTaskFormData.deadline}
+                      onChange={(e) => handleInputChange(e, setCreateTaskFormData)}
+                    />
+                  </div>
+                </div>
                 <input type="text" name="title" id="title"
-                  className='border-card w-full mt-2'
+                  className='border-card w-full mt-6'
                   placeholder={createTaskFormData.type === '' ? 'Title' : `Title: ${new Date().toLocaleString(undefined, dateFormatShort)} | ${createTaskFormData.type}`}
                   value={createTaskFormData.title}
                   onChange={(e) => handleInputChange(e, setCreateTaskFormData)}
                 />
-                <input type="text" name="scope" id="scope"
-                  className='border-card w-full mt-8'
-                  placeholder="Scope"
-                  value={createTaskFormData.scope}
-                  onChange={(e) => handleInputChange(e, setCreateTaskFormData)}
-                />
+                <div>
+                  <input type="text" name="scope" id="scope"
+                    className='border-card w-full mt-2'
+                    placeholder="Scope"
+                    value={createTaskFormData.scope}
+                    onChange={(e) => handleInputChange(e, setCreateTaskFormData)}
+                  />
+                </div>
 
                 <textarea name="description" id="description" className='resize-none w-full border-card mt-2' placeholder='Description' rows={6} value={createTaskFormData.description} onChange={(e) => handleInputChange(e, setCreateTaskFormData)} />
-                <p className='italic text-sm my-4 mx-2'>
+                <p className='italic text-sm my-4 mx-2 h-10'>
                   {createTaskFormData.type && auditTasks.find(task => task.name === createTaskFormData.type).desc || 'Please select task'}
                 </p>
 
@@ -195,11 +287,10 @@ const Tasks = ({ auth }) => {
             </div>
           </Modal>
 
-          <Modal show={openViewTaskModal} onClose={() => setOpenViewTaskModal(false)}>
-            <div className='p-4 min-h-96 flex flex-col'>
-              <p className='modal-header'>{selectedTask?.type}</p>
-              <div className='flex justify-between'>
-                <p className='text-gray-500 font-medium mb-4'>{new Date(selectedTask?.created_at).toLocaleString(undefined, dateTimeFormatLong)}</p>
+          <Modal show={openViewTaskModal} onClose={() => setOpenViewTaskModal(false)} name={selectedTask?.type}>
+            <div className='min-h-96 flex flex-col'>
+              <div className='flex justify-between items-end mb-4'>
+                <p className='text-gray-500 font-medium'>{new Date(selectedTask?.created_at).toLocaleString(undefined, dateTimeFormatLong)}</p>
                 <p className={`
                     rounded-md py-1 px-2 h-fit w-fit font-medium shadow-sm 
                     ${auditTaskStatus.find(status => status.name === selectedTask?.status)?.color}
@@ -209,8 +300,14 @@ const Tasks = ({ auth }) => {
               </div>
               <p className='font-medium text-lg'>{selectedTask?.title}</p>
               <p className='font-medium'>Scope: {selectedTask?.scope}</p>
-              <p className='text-gray-500 mt-4'>{selectedTask?.description}</p>
-              <div className='bg-gray-100 border-card p-2 mt-20 relative flex items-center mb-4'>
+              <p className='font-medium'>Deadline: {new Date(selectedTask?.deadline + 'Z').toLocaleString(undefined, dateTimeFormatLong)}</p>
+
+              <textarea readOnly name="description" id="description"
+                value={selectedTask?.description || ''} rows={5}
+                className='mt-4 resize-none border-none bg-transparent text-gray-600'
+              />
+
+              <div className='bg-gray-100 border-card p-2 relative flex items-center mb-4 mt-auto'>
                 {
                   selectedTask?.assigned_to ?
                     <div className='flex justify-between w-full'>
@@ -240,15 +337,23 @@ const Tasks = ({ auth }) => {
                 }
               </div>
               {
-                selectedTask?.status === 'Pending' ?
-                  <button className='border-card font-medium bg-red-100 text-red-600' onClick={() => handleDeleteTask(selectedTask?.id)}>Delete</button> :
-                  <button className='border-card font-medium bg-red-100 text-red-600'>Cancel</button>
+                selectedTask && getStatusStep(auditTaskStatus, selectedTask?.status) === 1 &&
+                <button className='border-card font-medium bg-red-100 text-red-600' onClick={() => handleDeleteTask(selectedTask?.id)}>Delete</button>
               }
               {
-                selectedTask?.assigned_to ?
-                  null :
-                  <button className='border-card font-medium bg-blue-100 text-blue-600 mt-2' onClick={(e) => handleAddTaskAuditorSubmit(e, selectedTask?.id)}>Save</button>
+                selectedTask && (getStatusStep(auditTaskStatus, selectedTask?.status) === 2 || getStatusStep(auditTaskStatus, selectedTask?.status) === 3) &&
+                <button className='border-card font-medium bg-red-100 text-red-600' onClick={() => handleCancelTask(selectedTask?.id)}>Cancel</button>
               }
+              <div className='flex gap-2 w-full'>
+                {
+                  selectedTask?.assigned_to ? null :
+                    <button className='border-card font-medium w-full bg-blue-100 text-blue-600 mt-2' onClick={(e) => handleAutoAddTaskAuditorSubmit(e, selectedTask?.id)}>Auto Assign Auditor</button>
+                }
+                {
+                  selectedTask?.assigned_to ? null :
+                    <button className='border-card font-medium w-full bg-blue-100 text-blue-600 mt-2' onClick={(e) => handleAddTaskAuditorSubmit(e, selectedTask?.id)}>Save</button>
+                }
+              </div>
             </div>
           </Modal>
         </div>

@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('type');
             $table->string('scope');
             $table->string('description');
+            $table->dateTime('startdate');
+            $table->dateTime('deadline');
             $table->string('status')->default('Pending');
             $table->boolean('auto_gen')->default(false);
             $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('restrict');

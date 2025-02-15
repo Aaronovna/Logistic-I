@@ -108,7 +108,7 @@ const Receipt = ({ auth }) => {
         products: data.products,
       });
       toast.success(response.data.message);
-  
+
       const url = `/receipt/update/${id}`;
       updateStatus(url, { status: 'Success' });
       fetchReceivedShipment();
@@ -127,6 +127,7 @@ const Receipt = ({ auth }) => {
 
   const onCreateTaskSubmit = async (e, data) => {
     e.preventDefault();
+    const formatDateTime = (date) => date.toISOString().slice(0, 19).replace('T', ' ');
 
     const payload = {
       type: 'Goods Receipt Note (GRN) Review and Quantity Check',
@@ -138,6 +139,8 @@ const Receipt = ({ auth }) => {
         `,
       scope: `Order: ${data.order_id} Fleet: ${JSON.parse(data.fleet).name} | ${JSON.parse(data.fleet).plate}`,
       auto_gen: true,
+      startdate: formatDateTime(new Date()),
+      deadline: formatDateTime(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)),
       assigned_by: auth.user.id,
     };
 
@@ -296,7 +299,7 @@ const Receipt = ({ auth }) => {
                   {
                     ordersDummyData?.map((data, index) => {
                       return (
-                        <UpcomingShipmentCard data={data} key={index} callback={()=>{setOpenUpcomingShipmentModal(false);fetchReceivedShipment();}} />
+                        <UpcomingShipmentCard data={data} key={index} callback={() => { setOpenUpcomingShipmentModal(false); fetchReceivedShipment(); }} />
                       )
                     })
                   }
