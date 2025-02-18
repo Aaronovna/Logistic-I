@@ -238,9 +238,16 @@ const Dispatch = ({ auth }) => {
     setOpenRequestModal(false);
   };
 
-  const CompleteDeliver = (id) => {
+  const CompleteDeliver = async (id) => {
     const url = `/request/update/${id}`;
     updateStatus(url, { status: 'Delivered' });
+
+    try {
+      const response = await axios.post(`/dispatch/trail/create/${id}`);
+    } catch (error) {
+      
+    }
+
     fetchAllRequests();
     setOpenRequestModal(false);
   }

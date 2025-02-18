@@ -37,6 +37,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('inventories');
-        Schema::dropIfExists('inventory_trail');
+        Schema::dropIfExists('inventory_trails');
     }
 };

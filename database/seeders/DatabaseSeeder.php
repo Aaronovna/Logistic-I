@@ -15,14 +15,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        
         $this->call([
             CategorySeeder::class,
             PositionSeeder::class,
         ]);
-        
         Supplier::factory(10)->create();
-        User::factory(6)->create();
         Product::factory(20)->create();
+        User::factory(6)->create();
+        
+        $this->call(DispatchTrailSeeder::class);
+
 
         Infrastructure::factory(2)->ofType(100)->create();
         Infrastructure::factory(2)->ofType(101)->create();

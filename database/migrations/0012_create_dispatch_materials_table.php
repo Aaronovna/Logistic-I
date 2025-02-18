@@ -17,6 +17,14 @@ return new class extends Migration
             $table->string('type');
             $table->timestamps();
         });
+
+        Schema::create('dispatch_trails', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('request_id')->nullable()->constrained('request_materials')->onDelete('set null');
+            $table->foreignId('product_id')->constrained('products')->onDelete('restrict');
+            $table->integer('quantity')->default(0);
+            $table->timestamps();
+        });
     }
 
     /**
@@ -25,5 +33,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('dispatch_materials');
+        Schema::dropIfExists('dispatch_trails');
     }
 };

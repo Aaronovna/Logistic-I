@@ -45,7 +45,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/assignments', fn() => Inertia::render('Assignments'))->name('assignments');
     Route::get('/module', fn() => Inertia::render('Module'))->name('module');
     Route::get('/infrastructure', fn() => Inertia::render('Infrastructure'))->name('infrastructure');
-    
+
     Route::get('/infrastructure/view', function (\Illuminate\Http\Request $request) {
         return Inertia::render('Infrastructure.View', [
             'id' => $request->query('id'), // Extract 'name' from the query string
@@ -104,7 +104,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::patch('/user/update/permission/{id}', [UserController::class, 'update_permission'])->name('user.update_permission');
     Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.destroy');
     Route::get('/user/get/auditor/auto', [UserController::class, 'autoAssignAuditor'])->name('user.autoAssignAuditor');
-    
+
     Route::get('/inventory/get', [InventoryController::class, 'index'])->name('inventory.index');
     Route::get('/inventory/get/{id}', [InventoryController::class, 'show'])->name('inventory.show');
     Route::post('/inventory/create', [InventoryController::class, 'store'])->name('inventory.store');
@@ -140,7 +140,18 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/dispatch/get/{id}', [DispatchMaterialController::class, 'show'])->name('dispatch.show');
     Route::post('/dispatch/create', [DispatchMaterialController::class, 'store'])->name('dispatch.store');
     Route::patch('/dispatch/update/{id}', [DispatchMaterialController::class, 'update'])->name('dispatch.update');
-    Route::delete('/dispatch/delete/{id}', [DispatchMaterialController::class, 'destroy'])->name('dispatch.destroy');
+
+    // Route for all dispatch trails
+    Route::get('/dispatch/trails/get', [DispatchMaterialController::class, 'getAllDispatches'])->name('dispatch.getAllDispatches');
+
+    // Route for dispatch trails by product ID
+    Route::get('/dispatch/trails/get/product/{productId}', [DispatchMaterialController::class, 'getDispatchByProduct']);
+
+    // Route for quantities by product ID
+    Route::get('/dispatch/trails/get/product/{productId}/quantities', [DispatchMaterialController::class, 'getQuantitiesByProduct']);
+
+    // Route for quantities by product ID and days range
+    Route::get('/dispatch/trails/get/product/{productId}/quantities/days/{days}', [DispatchMaterialController::class, 'getQuantitiesByProductAndDays']);
 
     Route::get('/audit/task/get', [AuditTaskController::class, 'index'])->name('auditTask.index');
     Route::get('/audit/task/get/{id}', [AuditTaskController::class, 'show'])->name('auditTask.show');
@@ -148,7 +159,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post('/audit/task/create', [AuditTaskController::class, 'store'])->name('auditTask.store');
     Route::patch('/audit/task/update/{id}', [AuditTaskController::class, 'update'])->name('auditTask.update');
     Route::delete('/audit/task/delete/{id}', [AuditTaskController::class, 'destroy'])->name('auditTask.destroy');
-    
+
     Route::get('/audit/report/get', [AuditReportController::class, 'index'])->name('auditReport.index');
     Route::get('/audit/report/get/{id}', [AuditReportController::class, 'show'])->name('auditReport.show');
     Route::get('/audit/report/get/by/task/{id}', [AuditReportController::class, 'showByTask'])->name('auditReport.showByTask');
@@ -175,6 +186,19 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post('file/store', [FileController::class, 'store']);
     Route::delete('/file/delete/{id}', [FileController::class, 'destroy']);
 });
+
+    // Route for all dispatch trails
+    Route::get('/dispatch/trails/get', [DispatchMaterialController::class, 'getAllDispatches'])->name('dispatch.getAllDispatches');
+
+    // Route for dispatch trails by product ID
+    Route::get('/dispatch/trails/get/product/{productId}', [DispatchMaterialController::class, 'getDispatchByProduct']);
+
+    // Route for quantities by product ID
+    Route::get('/dispatch/trails/get/product/{productId}/quantities', [DispatchMaterialController::class, 'getQuantitiesByProduct']);
+
+    // Route for quantities by product ID and days range
+    Route::get('/dispatch/trails/get/product/{productId}/quantities/days/{days}', [DispatchMaterialController::class, 'getQuantitiesByProductAndDays']);
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -127,3 +127,13 @@ const fleet = [
   { name: "Highway Shuttle", plate: "GH2345IJ" },
   { name: "Utility Freighter", plate: "KL6789MN" },
 ];
+
+export const generateDemandData = (count, min, max) => {
+  if (count <= 0 || min > max) {
+      throw new Error("Invalid input parameters");
+  }
+  
+  return Array.from({ length: count }, () => 
+      Math.floor(Math.random() * (max - min + 1)) + min
+  );
+};

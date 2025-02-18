@@ -6,6 +6,8 @@ import PopperMenu from "../PopperMenu";
 import { useStateContext } from "@/context/contextProvider";
 import toast from "react-hot-toast";
 import { productToastMessages } from "@/Constants/toastMessages";
+import { generateDemandData } from "@/Pages/Dev";
+import { TbSparkles } from "react-icons/tb";
 
 const product_image_placeholder = 'https://psediting.websites.co.in/obaju-turquoise/img/product-placeholder.png';
 
@@ -58,35 +60,66 @@ export const ProductCard = ({ product, isFlip = false, className = '', categorie
     })
   }, [product]);
 
+  const [predictedStock, setPredictStock] = useState([]);
+  const getPrediction = async () => {
+    let demands
+    if (product.id === 100000) {
+      demands = generateDemandData(30, 1, 10);
+    } else if (product.id === 100001) {
+      demands = generateDemandData(30, 30, 60);
+    } else if (product.id === 100002) {
+      demands = generateDemandData(30, 50, 100);
+    } else {
+      demands = generateDemandData(30, 1, 100);
+    }
+
+    const payload = {
+      "product_id": product.id,
+      "demands": demands
+    }
+
+    try {
+      const response = await axios.post('http://127.0.0.1:5000/predict', payload);
+      let totalDemand = Math.ceil(response.data.predicted_demand.reduce((sum, value) => sum + value, 0));
+      console.log(totalDemand);
+      setPredictStock(totalDemand);
+    } catch (error) {
+
+    }
+  }
+
+  /* useEffect(()=>{
+    getPrediction();
+  },[]) */
 
   return (
     <div style={{ color: theme.text, borderColor: theme.border }}
       className={`relative flex md:flex-row flex-col mb-2 border rounded-lg overflow-hidden md:h-28 ` + className}
     >
-      <div className="flex flex-col w-full pr-2 md:border-r">
-        <div className="relative flex cursor-pointer h-28" onClick={() => setflip(!flip)}>
+      <div className="flex flex-col w-1/2 pr-2 md:border-r">
+        <div className="relative flex cursor-pointer h-28" onClick={() => { getPrediction(); setflip(!flip) }}>
           <div style={{ outlineColor: theme.border, backgroundSize: '100%' }}
             className='w-28 aspect-square outline outline-1 rounded-l-md inline-block overflow-hidden product-placeholder'
           >
             <img
               src={product.image_url || `https://picsum.photos/seed/${product.id}/200/200`}
-              /* src={product.image_url} */
               className={`w-full h-full`}
             />
           </div>
+
           {!flip
-            ? <div className='flex flex-col mx-4 h-full w-3/5 select-none'>
-              <p className='md:text-xl font-semibold'>{`${product.name} ${product.model}`}</p>
-              <p className='font-medium md:text-base text-sm text-gray-400'>{product.brand}</p>
+            ? <div className='flex flex-col mx-2 h-full flex-1 select-none py-1'>
+              <p className='text-lg font-semibold'>{`${product.name} ${product.model}`}</p>
+              <p className='text text-gray-400'>{product.brand}</p>
               <p className='mt-auto md:text-base text-sm text-gray-400'>{product.category_name}</p>
             </div>
-            : <p className='m-4 mt-0 select-none text-wrap w-3/5 h-full'>{product.description}</p>
+            : <p className='m-4 mt-0 select-none text-wrap flex-1 h-full py-1'>{product.description}</p>
           }
-          <p className='font-medium text-gray-300 h-fit select-none absolute right-0 bottom-0 hidden md:block'>{product.id}</p>
+
         </div>
       </div>
 
-      <div className='md:pl-2 pl-0 md:w-1/2 w-full md:border-none border-t h-full'>
+      <div className='md:pl-2 pl-0 md:w-1/2 w-full md:border-none border-t h-full py-1'>
         <span className="flex ml-4 md:ml-0">
           <p className='block md:mb-2 mb-0 font-semibold'>{product.supplier_name}</p>
         </span>
@@ -98,6 +131,10 @@ export const ProductCard = ({ product, isFlip = false, className = '', categorie
               ? <p className="inline ml-1 text-xs" style={{ color: product.low_on_stock ? theme.danger : theme.text }}>{product.stock === 0 ? 'out of stock' : 'low'}</p>
               : null
             }
+          </span>
+          <span className='inline-block ml-10 group'>
+            <p className='text-gray-400 md:text-base text-sm flex'>Safe Stock Level <TbSparkles className="ml-1 group-hover:opacity-100 opacity-0" size={16} color="purple"/></p>
+            <p className='md:text-xl text-lg font-semibold inline'>{predictedStock}</p>
           </span>
           <span className='inline-block ml-auto mr-4 md:mr-2'>
             <p className='text-gray-400 md:text-base text-sm'>Buying Price</p>
