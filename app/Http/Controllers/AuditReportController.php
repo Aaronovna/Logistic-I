@@ -21,6 +21,8 @@ class AuditReportController extends Controller
             $report->task_type = $report->audit_task->type ?? 'N/A';
             $report->task_status = $report->audit_task->status ?? 'N/A';
             $report->task_description = $report->audit_task->description ?? 'N/A';
+            $report->task_startdate = $report->audit_task->startdate ?? 'N/A';
+            $report->task_deadline = $report->audit_task->deadline ?? 'N/A';
             $report->task_assigned_to = $report->audit_task->assigned_to ?? 'N/A';
             $report->task_assigned_by = $report->audit_task->assigned_by ?? 'N/A';
             $report->task_assigned_to_name = $report->audit_task->assignedToUser->name ?? 'N/A';
@@ -69,6 +71,8 @@ class AuditReportController extends Controller
         $report->task_type = $report->audit_task->type ?? 'N/A';
         $report->task_status = $report->audit_task->status ?? 'N/A';
         $report->task_description = $report->audit_task->description ?? 'N/A';
+        $report->task_startdate = $report->audit_task->startdate ?? 'N/A';
+        $report->task_deadline = $report->audit_task->deadline ?? 'N/A';
         $report->task_assigned_to = $report->audit_task->assigned_to ?? 'N/A';
         $report->task_assigned_by = $report->audit_task->assigned_by ?? 'N/A';
         $report->task_assigned_to_name = $report->audit_task->assignedToUser->name ?? 'N/A';

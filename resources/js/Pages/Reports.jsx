@@ -12,6 +12,7 @@ import { TbReport } from 'react-icons/tb';
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
+import { dateFormatShort } from '@/Constants/options';
 
 const Card = ({ name = "name", data = 0, Icon }) => {
   return (
@@ -38,7 +39,7 @@ const Reports = ({ auth }) => {
   const fetchUsers = async () => {
     try {
       const response = await axios.get('/user/get');
-      setUsers(filterArray(response.data, 'type', [2054,2055]));
+      setUsers(filterArray(response.data, 'type', [2054, 2055]));
     } catch (error) {
       toast.error(error);
     }
@@ -87,15 +88,17 @@ const Reports = ({ auth }) => {
       <Head title="Reports" />
       <AuditLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Reports</h2>}>
         <div className="content">
-          <div className='flex gap-10'>
-            <div className='border-card p-4 w-1/2 h-64 flex flex-col shadow-md hover:shadow-lg duration-200 cursor-pointer' onClick={() => handleReportClick(reports[0]?.id)}>
-              <div className='flex'>
-                <p className='text-xl font-semibold drop-shadow-lg'>Recent Report</p>
-                <p className='text-lg font-semibold text-gray-600 ml-auto'>{new Date(reports[0]?.created_at).toLocaleDateString()}</p>
+          <div className='flex gap-4'>
+            <div className='overflow-hidden border-card p-0 w-1/2 h-64 flex flex-col shadow-md hover:shadow-xl hover:scale-[101%] duration-200 cursor-pointer pattern1 bg-cover' onClick={() => handleReportClick(reports[0]?.id)}>
+              <div className='flex m-4'>
+                <p className='text-xl font-medium text-white'>Recent Report</p>
+                <p className='text-lg font-medium ml-auto text-white'>{new Date(reports[0]?.created_at).toLocaleDateString(undefined, dateFormatShort)}</p>
               </div>
-              <p className='mt-10'>{reports[0]?.task_type}</p>
-              <p className='font-medium text-lg drop-shadow-lg'>{reports[0]?.task_title}</p>
-              <p className='mt-auto font-medium text-lg text-gray-600'>{reports[0]?.task_assigned_to_name}</p>
+              <div className='bg-white mt-16 px-4 py-2 shadow-lg'>
+                <p>{reports[0]?.task_assigned_to_name}</p>
+                <p className='font-medium text-lg drop-shadow-lg'>{reports[0]?.task_title}</p>
+              </div>
+              <p className='mt-auto font-medium text-lg text-white m-4'>{reports[0]?.task_type}</p>
             </div>
 
             <div className='w-1/2 gap-4 h-64 flex flex-wrap'>
@@ -105,7 +108,7 @@ const Reports = ({ auth }) => {
             </div>
           </div>
 
-          <p className='font-semibold text-xl mt-8 mb-4'>Reports</p>
+          <p className='font-semibold text-xl mt-8 mb-4'>Pending Reviews</p>
           <div className='flex flex-col gap-2'>
             {
               reports && reports.map((report, index) => {

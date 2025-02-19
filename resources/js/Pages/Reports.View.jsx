@@ -4,7 +4,7 @@ import { router } from "@inertiajs/react";
 import { useStateContext } from "@/context/contextProvider";
 
 import AuditLayout from "@/Layouts/AuditLayout";
-import { dateTimeFormatShort } from "@/Constants/options";
+import { dateTimeFormatLong, dateTimeFormatShort } from "@/Constants/options";
 
 const ReportsView = ({ auth }) => {
   if (!hasAccess(auth.user.type, [2050, 2051, 2054, 2055])) {
@@ -65,7 +65,6 @@ const ReportsView = ({ auth }) => {
     }
     try {
       const reportResponse = await axios.patch(`/audit/report/update/${rid}`, reportPayload);
-      // If the report creation is successful, update the task status
       if (reportResponse.status === 200) {
         const payload = {
           status: 'Completed'
@@ -73,6 +72,7 @@ const ReportsView = ({ auth }) => {
 
         try {
           const updateResponse = await axios.patch(`/audit/task/update/${tid}`, payload);
+          fetchReport(id);
         } catch (updateError) {
           console.error("Error updating task status:", updateError);
         }
@@ -83,6 +83,9 @@ const ReportsView = ({ auth }) => {
     }
   }
 
+  const [viewMediaModal, setViewMediaModal] = useState(false);
+  const [media, setMedia] = useState(null);
+
   return (
     <AuthenticatedLayout user={auth.user}>
       <Head title="View Peport" />
@@ -90,69 +93,96 @@ const ReportsView = ({ auth }) => {
         header={<h2 style={{ color: theme.text }}>
           <span className='header hover:underline cursor-pointer' onClick={handleClick1}>{`Reports`}</span>
           <span className='header'>{' > '}</span>
-          <span className='header hover:underline cursor-pointer' onClick={()=>handleClick2(id)}>{`View`}</span>
+          <span className='header hover:underline cursor-pointer' onClick={() => handleClick2(id)}>{`View`}</span>
         </h2>}
       >
         <div className="content">
           <div className="border-card p-8">
-            <p className="font-semibold text-xl">Task Details</p>
-            <div className="flex justify-between mt-4">
-              <p className="font-medium text-lg">{report?.task_title}</p>
-              <p>Task created on: {new Date(report?.created_at).toLocaleString(undefined, dateTimeFormatShort)}</p>
+            <p className="font-medium text-xl mb-2 ml-1">Task Details</p>
+            <div className="bg-gray-100 p-4 rounded-md">
+              <div className="flex items-end">
+                <p className="text-lg font-semibold">{report?.task_title}</p>
+              </div>
+              <p className="font-medium text-gray-600 mt-1">
+                {`${new Date(report?.task_startdate).toLocaleString(undefined, dateTimeFormatShort)} - ${new Date(report?.task_deadline).toLocaleString(undefined, dateTimeFormatShort)}`}
+              </p>
+              <p className="mt-8 font-semibold">{report?.task_type}</p>
+              <p className="text-gray-600 text-sm">Assigned by {report?.task_assigned_by_name}</p>
+              <p className="font-medium mt-6">Scope: {report?.task_scope}</p>
+              <p className="my-2 text-gray-600">{report?.task_description}</p>
             </div>
-            <p>{report?.task_type}</p>
-            <p className="mt-4">Scope: {report?.task_scope}</p>
-            <p className="italic mt-2 text-gray-600">{report?.task_description}</p>
 
-            <p className="font-semibold text-xl mt-8">Summary Report</p>
-            <p>Submmited on: {new Date(report?.task_created_at).toLocaleString(undefined, dateTimeFormatShort)}</p>
-            <p>Location: {report?.location}</p>
-            <p className="mt-4 font-medium">Details</p>
-            <p>{report?.details}</p>
-            <p className="mt-2 font-medium">{report?.final_comment}</p>
-            {
-              report?.task_status === 'Pending Review' ? <div className="flex">
+            <p className="font-medium text-xl mt-8 mb-2 ml-1">Report's Summary</p>
+            <div className="bg-gray-100 p-4 rounded-md">
+              <p className="font-semibold text-lg">{report?.location}</p>
+              <p>Submmited on {new Date(report?.task_created_at).toLocaleString(undefined, dateTimeFormatLong)}</p>
+              <p className="mt-8">{report?.details}</p>
+              <p className="mt-4">{report?.final_comment}</p>
+
+              <div className="mt-10 w-fit flex flex-col">
+                <p className="">{report?.task_assigned_to_name}</p>
+                <p className="text-gray-600">Auditor</p>
+              </div>
+            </div>
+
+            <div className="flex mt-4">
+              {report?.task_status === 'Pending Review' ?
                 <button className="ml-auto border-card" onClick={() => updateTaskStatus(report?.id, report?.task_id)}>Accept</button>
-              </div> : null
-            }
+                : null}
+            </div>
 
           </div>
           <div className="border-card p-8 mt-4">
-            <p className="font-semibold text-xl">Evidences</p>
-            <div className="mt-2">
+            <p className="font-semibold text-lg">Evidences</p>
+            <div className="mt-2 flex gap-2 flex-wrap w-full">
               {evidences.map((file, index) => {
                 return (
-                  <div key={index} className="w-fit mb-2 text-sm group">
+                  <div key={index} className="w-1/4" onClick={() => { setViewMediaModal(true); setMedia(file) }}>
                     {/* Handle Image Files */}
                     {file.type === "image/png" || file.type === "image/jpeg" ? (
-                      <div>
-                        <a href={file.url} target="_blank" rel="noopener noreferrer">
-                          <img src={file.url} alt={file.name} className="border-card p-0 w-72" />
-                        </a>
-                        <p className="text-nowrap italic group-hover:underline">
-                          {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                        </p>
+                      <div className="h-48 w-full rounded-lg overflow-hidden">
+                        <div
+                          className="w-full h-full bg-cover bg-center cursor-pointer hover:scale-110"
+                          style={{ backgroundImage: `url(${file.url})` }}>
+                        </div>
                       </div>
                     ) : null}
 
                     {/* Handle Video Files */}
                     {file.type === "video/mp4" ? (
-                      <div>
-                        <video controls className="w-72 border-card">
-                          <source src={file.url} type="video/mp4" />
-                          Your browser does not support the video tag.
+                      <div className="h-48 w-full rounded-lg overflow-hidden bg-black">
+                        <video autoPlay loop src={file.url} className="w-full h-full hover:scale-110">
                         </video>
-                        <p className="text-nowrap italic group-hover:underline">
-                          {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                        </p>
                       </div>
                     ) : null}
                   </div>
                 );
               })}
             </div>
+
           </div>
         </div>
+
+        <Modal show={viewMediaModal} onClose={() => setViewMediaModal(false)} name="">
+          {
+            !(media?.type === 'image/png') ? null :
+              <div className="w-full">
+                <img src={media?.url} alt={media?.ur} className="rounded-lg" />
+                <p className="text-nowrap italic group-hover:underline mt-2">
+                  {media?.name} ({(media?.size / 1024 / 1024).toFixed(2)} MB)
+                </p>
+              </div>
+          }
+          {
+            !(media?.type === 'video/mp4') ? null :
+              <div>
+                <video controls src={media?.url} type="video/mp4" className="rounded-lg" />
+                <p className="text-nowrap italic group-hover:underline mt-2">
+                  {media?.name} ({(media?.size / 1024 / 1024).toFixed(2)} MB)
+                </p>
+              </div>
+          }
+        </Modal>
       </AuditLayout>
     </AuthenticatedLayout>
   )
