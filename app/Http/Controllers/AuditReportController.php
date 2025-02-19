@@ -84,7 +84,7 @@ class AuditReportController extends Controller
 
         // If no report is found, return a 404 response with a message
         if (!$report) {
-            return response()->json(['message' => 'Report not found'], 404);
+            return response()->json(['message' => 'Report not found'], status: 201);
         }
 
         return response()->json($report);
