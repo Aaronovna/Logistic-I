@@ -1,31 +1,19 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import DefaultLayout from '@/Layouts/InventoryLayout';
+import InventoryLayout from '@/Layouts/InventoryLayout';
 import { usePage, router } from '@inertiajs/react';
 import { useStateContext } from '@/context/contextProvider';
 import { useState, useEffect } from 'react';
 import { TbEdit } from "react-icons/tb";
-import Modal from '@/Components/Modal';
+import { WeatherCloudChip, WeatherHumidityWindChip, WeatherTempChip } from '@/Components/Chips';
 
-const options = [
-  {
-    name: 'Type',
-    value: null,
-  },
-  {
-    name: 'Warehouse',
-    value: 100,
-  },
-  {
-    name: 'Depot',
-    value: 101,
-  },
-  {
-    name: 'Terminal',
-    value: 102,
-  },
-]
+const OPENWEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
 export default function Infrastructure_View({ auth }) {
+  if (!hasAccess(auth.user.type, [2050, 2051])) {
+    return (
+      <Unauthorized />
+    )
+  }
+
   const { theme } = useStateContext();
   const { props } = usePage();
   const { id } = props;
@@ -45,7 +33,7 @@ export default function Infrastructure_View({ auth }) {
       const response = await axios.get(`/infrastructure/get/${id}`);
       setInfrastructure(response.data);
     } catch (error) {
-      toast.error(productToastMessages.show.error, error);
+      handleClick1();
     }
   };
 
@@ -57,7 +45,6 @@ export default function Infrastructure_View({ auth }) {
   useEffect(() => {
     if (infrastructure) {
       setEditInfrustructureFormData({
-        type: infrastructure.type,
         name: infrastructure.name,
         address: infrastructure.address,
         access: infrastructure.access ? JSON.parse(infrastructure.access).join(", ") : [],
@@ -69,7 +56,6 @@ export default function Infrastructure_View({ auth }) {
   const [openEditInfrastructureModal, setOpenEditInfrastructureModal] = useState(false);
 
   const [editInfrustructureFormData, setEditInfrustructureFormData] = useState({
-    type: null,
     name: '',
     address: '',
     access: '',
@@ -87,7 +73,6 @@ export default function Infrastructure_View({ auth }) {
     const parsedArray = editInfrustructureFormData.access.split(/[\s,;\n]+/).filter(Boolean);
 
     const data = {
-      type: editInfrustructureFormData.type,
       name: editInfrustructureFormData.name,
       address: editInfrustructureFormData.address,
       access: JSON.stringify(parsedArray),
@@ -97,47 +82,69 @@ export default function Infrastructure_View({ auth }) {
     try {
       const response = await axios.patch(`/infrastructure/update/${id}`, data);
       setEditInfrustructureFormData({
-        type: null,
         name: '',
         address: '',
         access: '',
         image_url: '',
       })
-      fetchInfrastructure();
+      fetchInfrastructure(id);
       setOpenEditInfrastructureModal(false);
     } catch (error) {
       setOpenEditInfrastructureModal(false);
     }
   }
 
+  const [weather, setWeather] = useState(null);
+  const fetchWeather = async (lat, lng) => {
+    try {
+      const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${OPENWEATHER_API_KEY}&units=metric`)
+      const data = await response.json();
+      if (response.ok) {
+        setWeather(data);
+      }
+    } catch (error) {
+
+    }
+  }
+
+  useEffect(() => {
+    if (infrastructure) {
+      fetchWeather(infrastructure.lat, infrastructure.lng);
+    }
+  }, [infrastructure])
+
   return (
     <AuthenticatedLayout
       user={auth.user}
     >
       <Head title="View Infrastructure" />
-
-      <DefaultLayout user={auth.user}
-        header={<h2 style={{ color: theme.text }}>
-          <span className='header hover:underline cursor-pointer' onClick={handleClick1}>{`Infrastructure`}</span>
-          <span className='header'>{' > '}</span>
-          <span className='header hover:underline cursor-pointer' onClick={()=>handleClick2(id)}>{`View`}</span>
-        </h2>}
+      <InventoryLayout user={auth.user}
+        header={<BreadCrumbsHeader
+          headerNames={["Depot", "View"]}
+          onClickHandlers={[
+            () => handleClick1(),
+            () => handleClick2(id)
+          ]} />}
       >
 
         <div className="content">
-
-          <div className='w-full border-card h-56 bg-cover bg-center flex' style={{ backgroundImage: `url(${infrastructure?.image_url ? infrastructure?.image_url : ''})` }}>
+          <div className='relative w-full border-card h-72 bg-cover bg-center flex' style={{ backgroundImage: `url(${infrastructure?.image_url ? infrastructure?.image_url : ''})` }}>
+            <div className='h-fit'>
+              <WeatherCloudChip data={weather} />
+              <WeatherHumidityWindChip data={weather} className='mt-4' />
+            </div>
+            <WeatherTempChip temp={weather?.main.temp} className='absolute bottom-2 left-2 bg-white/80' />
             <span onClick={() => setOpenEditInfrastructureModal(true)}
-              className='mt-auto ml-auto p-3 rounded-full shadow-lg hover:scale-105 duration-200 cursor-pointer'
+              className='absolute bottom-2 right-2 p-3 rounded-full shadow-lg hover:scale-105 duration-200 cursor-pointer'
               style={{ background: theme.accent, color: theme.background }}
             >
               <TbEdit size={24} />
             </span>
           </div>
-          
+
           <div style={{ color: theme.text }}>
-            <p className='text-2xl font-semibold mt-4'>{infrastructure?.name}</p>
-            <p className='text-xl'>{infrastructure?.address}</p>
+            <p className='text-xl font-medium mt-4'>{infrastructure?.name}</p>
+            <p>{infrastructure?.address}</p>
 
             <p className='text-xl font-semibold mt-4' >Access</p>
             <div className='my-2'>
@@ -151,30 +158,15 @@ export default function Infrastructure_View({ auth }) {
             </div>
           </div>
 
-          <Modal show={openEditInfrastructureModal} onClose={() => setOpenEditInfrastructureModal(false)}>
-            <div className='p-4' style={{ color: theme.text }}>
-              <p className='font-semibold text-xl mt-2 mb-4' style={{ color: theme.text }}>Edit Infrastructure Detail</p>
+          <Modal show={openEditInfrastructureModal} onClose={() => setOpenEditInfrastructureModal(false)} name='Edit Infrastructure Information'>
+            <div style={{ color: theme.text }}>
               <form onSubmit={handleEditInfrastructureSubmit}>
-                <div className='flex gap-2 mb-2'>
-                  <input type="text" name="name" id="name" placeholder='Name'
-                    className='border-card bg-transparent w-1/2'
-                    style={{ borderColor: theme.border }}
-                    value={editInfrustructureFormData.name}
-                    onChange={handleEditInventoryInputChange}
-                  />
-                  <select name="type" id="type"
-                    className='border-card bg-transparent w-1/2' style={{ borderColor: theme.border }}
-                    onChange={handleEditInventoryInputChange}
-                  >
-                    {
-                      options.map((option, index) => {
-                        return (
-                          <option key={index} value={option.value} style={{ background: theme.background }}>{option.name}</option>
-                        )
-                      })
-                    }
-                  </select>
-                </div>
+                <input type="text" name="name" id="name" placeholder='Name'
+                  className='border-card bg-transparent w-full mb-2'
+                  style={{ borderColor: theme.border }}
+                  value={editInfrustructureFormData.name}
+                  onChange={handleEditInventoryInputChange}
+                />
                 <input type="text" name="address" id="address" placeholder='Address'
                   className='border-card bg-transparent w-full mb-2'
                   style={{ borderColor: theme.border }}
@@ -201,7 +193,7 @@ export default function Infrastructure_View({ auth }) {
             </div>
           </Modal>
         </div>
-      </DefaultLayout>
+      </InventoryLayout>
     </AuthenticatedLayout>
   );
 }

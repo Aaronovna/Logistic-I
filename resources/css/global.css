@@ -12,6 +12,24 @@
     font-style: normal;
 }
 
+.montserrat {
+    font-family: "Montserrat", serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+}
+
+.quicksand {
+    font-family: "Quicksand", serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+}
+
+.fredoka {
+    font-family: "Fredoka", serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+  }
+
 * {
     @apply poppins-regular;
 }

@@ -19,8 +19,8 @@ return new class extends Migration
             $table->json('access')->nullable();
             $table->string('image_url');
             $table->timestamps();
-            //$table->decimal('lng',10,7)->nullable();
-            //$table->decimal('lat',10,7)->nullable();
+            $table->decimal('lng',10,7)->nullable();
+            $table->decimal('lat',10,7)->nullable();
         });
     }
 

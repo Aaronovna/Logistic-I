@@ -10,7 +10,7 @@ class Infrastructure extends Model
     use HasFactory;
 
     protected $fillable = [
-        'type', 'name', 'address', 'access', 'image_url'
+        'type', 'name', 'address', 'access', 'image_url', 'lng', 'lat'
     ];
 
     public function request()

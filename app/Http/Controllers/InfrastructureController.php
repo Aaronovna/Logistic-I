@@ -27,6 +27,8 @@ class InfrastructureController extends Controller
             'address' => 'required|string|max:500',
             'image_url' => 'required|string|max:500',
             'access' => 'nullable|json',
+            'lat' => 'nullable|numeric|min:-90|max:90',
+            'lng' => 'nullable|numeric|min:-180|max:180',
         ]);
         try {
             // Create the record
@@ -51,11 +53,11 @@ class InfrastructureController extends Controller
     {
         $infrastructure = Infrastructure::findOrFail($id);
 
-    if (!$infrastructure) {
-        return response()->json(['message' => 'Infrastructure not found.'], 404);
-    }
+        if (!$infrastructure) {
+            return response()->json(['message' => 'Infrastructure not found.'], 404);
+        }
 
-    return response()->json($infrastructure);
+        return response()->json($infrastructure);
     }
 
     /**
@@ -64,11 +66,12 @@ class InfrastructureController extends Controller
     public function update(Request $request, string $id)
     {
         $request = $request->validate([
-            'type' => 'required|integer',
             'name' => 'required|string|max:500',
             'address' => 'required|string|max:500',
             'image_url' => 'required|string|max:500',
             'access' => 'nullable|json',
+            'lat' => 'nullable|numeric|min:-90|max:90',
+            'lng' => 'nullable|numeric|min:-180|max:180',
         ]);
 
         $infrastructure = Infrastructure::findOrFail($id);
