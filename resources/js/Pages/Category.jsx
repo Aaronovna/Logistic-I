@@ -153,7 +153,7 @@ const Category = ({ auth }) => {
     >
       <Head title="Category" />
 
-      <InventoryLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Manage Categories</h2>}>
+      <InventoryLayout user={auth.user} header={<NavHeader headerName="Category"/>}>
         <div className="content">
           <div className='flex flex-col gap-4'>
             <div className='flex items-end'>
@@ -195,9 +195,8 @@ const Category = ({ auth }) => {
       </InventoryLayout>
 
       {/* MODAL FOR CREATING NEW CATEGORY */}
-      <Modal show={openAddModal} onClose={() => setOpenAddModal(false)} maxWidth='lg'>
-        <form onSubmit={handleAddSubmit} className="p-4" style={{ color: theme.text }}>
-          <p className='font-semibold text-xl mt-2 mb-4'>Add New Category</p>
+      <Modal show={openAddModal} onClose={() => setOpenAddModal(false)} maxWidth='lg' name="Add New Category">
+        <form onSubmit={handleAddSubmit} style={{ color: theme.text }}>
           <input
             type="text"
             name="name"
@@ -224,9 +223,8 @@ const Category = ({ auth }) => {
       </Modal>
 
       {/* MODAL FOR EDITING EXISTING CATEGORY */}
-      <Modal show={openEditModal} onClose={() => setOpenEditModal(false)}>
-        <form onSubmit={handleEditSubmit} className="p-4" style={{ color: theme.text }}>
-          <p className='font-semibold text-xl mt-2 mb-4'>Edit Category</p>
+      <Modal show={openEditModal} onClose={() => setOpenEditModal(false)} name="Edit Category">
+        <form onSubmit={handleEditSubmit} style={{ color: theme.text }}>
           <input
             type="text"
             name="name"

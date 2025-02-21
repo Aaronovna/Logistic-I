@@ -186,7 +186,7 @@ const Product = ({ auth }) => {
     >
       <Head title="Product" />
 
-      <InventoryLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Product</h2>}>
+      <InventoryLayout user={auth.user} header={<NavHeader headerName="Product"/>}>
         <div className="content">
           <div className='md:items-end mb-2 md:mb-0 md:gap-4 overflow-x-auto snap-mandatory snap-x pb-1 whitespace-nowrap'>
             <Card2 data={productStats?.totalStock} name="Total Stocks" className={cardStyle} Icon={TbPackages} iconColor={feedbackVibrant.info} />

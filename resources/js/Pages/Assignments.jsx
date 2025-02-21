@@ -38,7 +38,7 @@ const Assignments = ({ auth }) => {
   return (
     <AuthenticatedLayout user={auth.user}>
       <Head title="My Tasks" />
-      <AuditLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Assignments</h2>}>
+      <AuditLayout user={auth.user} header={<NavHeader headerName="Assignments"/>}>
         <div className="content">
           <div className="flex items-end gap-4">
             <Card2 data={filterArray(tasks, 'status', ['In Progress', 'Pending Review'])?.length} name="Active Task" className="w-full" />

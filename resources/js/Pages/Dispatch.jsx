@@ -258,7 +258,7 @@ const Dispatch = ({ auth }) => {
     >
       <Head title="Dispatch" />
 
-      <InventoryLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Dispatch</h2>}>
+      <InventoryLayout user={auth.user} header={<NavHeader headerName="Dispatch"/>}>
         <div className="content flex flex-col h-screen">
           <div className='flex gap-4 mb-8'>
             <Card2 name='Total Requests' data={requests?.length} className='w-1/2' />

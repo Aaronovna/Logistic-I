@@ -510,9 +510,8 @@ const Terminal = ({ auth }) => {
 
         </div>
 
-        <Modal show={openRequestModal} onClose={() => setOpenRequestModal(false)}>
-          <div className='p-4' style={{ color: theme.text }}>
-            <p className='font-semibold text-xl mt-2 mb-4'>Request Materials</p>
+        <Modal show={openRequestModal} onClose={() => setOpenRequestModal(false)} name="Request Material">
+          <div style={{ color: theme.text }}>
             <form onSubmit={handleAddRequestSubmit}>
               <div className='flex gap-2'>
                 <div className='relative w-full'>

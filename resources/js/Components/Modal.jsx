@@ -1,5 +1,6 @@
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { useStateContext } from '@/context/contextProvider';
+import { TbX } from 'react-icons/tb';
 
 export default function Modal({name = "Modal Name", children, show = false, maxWidth = '2xl', closeable = true, onClose = () => { } }) {
   const { theme } = useStateContext();
@@ -50,7 +51,10 @@ export default function Modal({name = "Modal Name", children, show = false, maxW
             style={{ background: theme.background, borderColor: theme.border, padding: '1rem' }}
             className={`mb-6 border-card backdrop-blur-sm rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:mx-auto ${maxWidthClass}`}
           >
-            <p className='modal-header mb-4'>{name}</p>
+            <div className='flex mb-4'>
+              <p className='text-xl font-medium mt-2 pb-2 tracking-wider'>{name}</p>
+              <button onClick={onClose} className='ml-auto'><TbX size={32}/></button>
+            </div>
               {children}
           </DialogPanel>
         </TransitionChild>

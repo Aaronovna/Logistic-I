@@ -273,7 +273,7 @@ const Warehouse = ({ auth }) => {
     >
       <Head title="Receipt" />
 
-      <InventoryLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Warehouse</h2>}>
+      <InventoryLayout user={auth.user} header={<NavHeader headerName="Warehouse"/>}>
         <div className="content bg-cover" >
           <div
             className='border-card p-4 shadow-md mb-6 flex bg-cover bg-center'
@@ -361,9 +361,8 @@ const Warehouse = ({ auth }) => {
         </div>
       </InventoryLayout>
 
-      <Modal show={openAddInventoryModal} onClose={() => setOpenAddInventoryModal(false)} maxWidth='lg'>
-        <div className='p-4' style={{ color: theme.text }}>
-          <p className='font-semibold text-xl mt-2 mb-4'>Add Inventory</p>
+      <Modal show={openAddInventoryModal} onClose={() => setOpenAddInventoryModal(false)} maxWidth='lg' name="Add Inventory">
+        <div style={{ color: theme.text }}>
           <form onSubmit={handleAddInventorySubmit} className="flex flex-col" style={{ color: theme.text }}>
             <div className='relative w-full'>
               <input

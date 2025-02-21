@@ -90,11 +90,13 @@ const ReportsView = ({ auth }) => {
     <AuthenticatedLayout user={auth.user}>
       <Head title="View Peport" />
       <AuditLayout user={auth.user}
-        header={<h2 style={{ color: theme.text }}>
-          <span className='header hover:underline cursor-pointer' onClick={handleClick1}>{`Reports`}</span>
-          <span className='header'>{' > '}</span>
-          <span className='header hover:underline cursor-pointer' onClick={() => handleClick2(id)}>{`View`}</span>
-        </h2>}
+        header={<BreadCrumbsHeader
+          headerNames={["Reports", "View"]}
+          onClickHandlers={[
+            () => handleClick1(),
+            () => handleClick2(id)
+          ]} />
+        }
       >
         <div className="content">
           <div className="border-card p-8">
@@ -163,7 +165,7 @@ const ReportsView = ({ auth }) => {
           </div>
         </div>
 
-        <Modal show={viewMediaModal} onClose={() => setViewMediaModal(false)} name="">
+        <Modal show={viewMediaModal} onClose={() => setViewMediaModal(false)} name="Preview">
           {
             !(media?.type === 'image/png') ? null :
               <div className="w-full">

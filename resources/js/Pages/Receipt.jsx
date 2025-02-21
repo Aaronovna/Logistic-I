@@ -162,7 +162,7 @@ const Receipt = ({ auth }) => {
       user={auth.user}
     >
       <Head title="Receipt" />
-      <InventoryLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Receipt</h2>}>
+      <InventoryLayout user={auth.user} header={<NavHeader headerName="Receipt"/>}>
         <div className="content">
           <div
             className='relative rounded-xl p-4 flex h-44 overflow-hidden shadow-xl cursor-pointer hover:shadow-2xl duration-200'

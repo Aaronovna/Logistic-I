@@ -342,7 +342,7 @@ export default function User({ auth }) {
       user={auth.user}
     >
       <Head title="Users" />
-      <DefaultLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Manage Users</h2>}>
+      <DefaultLayout user={auth.user} header={<NavHeader headerName="User"/>}>
         <div className='content flex flex-col'>
 
           <div className='flex items-center gap-6'>
@@ -523,9 +523,8 @@ export default function User({ auth }) {
         </div>
       </DefaultLayout>
 
-      <Modal show={openAddUserModal} onClose={() => setOpenAddUserModal(false)} maxWidth={'2xl'}>
-        <div className='p-4' style={{ color: theme.text }}>
-          <p className='font-semibold text-xl mt-2 mb-4'>Create User</p>
+      <Modal show={openAddUserModal} onClose={() => setOpenAddUserModal(false)} maxWidth={'2xl'} name="Create User">
+        <div style={{ color: theme.text }}>
           <form onSubmit={handleAddUserSubmit} className='flex flex-col gap-2'>
             <div className='relative w-full'>
               <input
@@ -563,9 +562,10 @@ export default function User({ auth }) {
         </div>
       </Modal>
 
-      <Modal show={openEditPositionPermissionsModal} onClose={() => setOpenEditPositionPermissionsModal(false)} maxWidth={'2xl'}>
-        <div className='p-4' style={{ color: theme.text }}>
-          <p className='font-semibold text-xl mt-2 mb-4'>Edit <span className='font-semibold text-xl mt-2 mb-4' style={{ color: theme.accent }}>{positionSelectedData && `${positionSelectedData.name}'s`}</span> Permissions</p>
+      <Modal show={openEditPositionPermissionsModal} onClose={() => setOpenEditPositionPermissionsModal(false)} maxWidth={'2xl'}
+        name={`Edit ${positionSelectedData && `${positionSelectedData.name}'s`} Permissions`}
+      >
+        <div style={{ color: theme.text }}>
           <form onSubmit={handleEditPositionPermissionsSubmit} className='flex flex-col gap-2'>
             <div className='my-2 relative border-card p-1 grid grid-cols-3 grid-rows-3 grid-flow-col' style={{ color: theme.text, borderColor: theme.border }}>
               {permissions.map((role, index) => {

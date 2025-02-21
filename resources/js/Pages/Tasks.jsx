@@ -174,7 +174,7 @@ const Tasks = ({ auth }) => {
       user={auth.user}
     >
       <Head title="Tasks" />
-      <AuditLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Tasks</h2>}>
+      <AuditLayout user={auth.user} header={<NavHeader headerName="Tasks"/>}>
         <div className="content relative">
           <button className='hidden fixed z-10 rounded-full p-3 bg-white bottom-8 shadow-lg right-8 items-center'>
             <TbPlus size={28} />

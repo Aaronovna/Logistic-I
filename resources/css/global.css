@@ -102,7 +102,7 @@ select:focus {
 }
 
 .header {
-    @apply font-medium md:text-3xl text-xl;
+    @apply font-medium md:text-2xl text-xl tracking-widest;
 }
 
 /* .asd {
@@ -167,8 +167,4 @@ input[data-autocompleted] {
 
 .if-disable {
     @apply disabled:cursor-not-allowed disabled:!bg-gray-300 disabled:!text-gray-700;
-}
-
-.modal-header{
-    @apply text-2xl font-medium mt-2  pb-2 tracking-wide;
 }

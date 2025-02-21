@@ -186,11 +186,13 @@ const AssignmentsView = ({ auth }) => {
     <AuthenticatedLayout user={auth.user}>
       <Head title="My Tasks" />
       <AuditLayout user={auth.user}
-        header={<h2 style={{ color: theme.text }}>
-          <span className='header hover:underline cursor-pointer' onClick={handleClick1}>{`Assignments`}</span>
-          <span className='header'>{' > '}</span>
-          <span className='header hover:underline cursor-pointer' onClick={() => handleClick2(id)}>{`View`}</span>
-        </h2>}
+        header={<BreadCrumbsHeader
+          headerNames={["Assignments", "View"]}
+          onClickHandlers={[
+            () => handleClick1(),
+            () => handleClick2(id)
+          ]} />
+        }
       >
         <div className="content">
           <div className="border-card p-8">

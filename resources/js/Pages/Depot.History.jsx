@@ -59,8 +59,7 @@ const DepotHistory = ({ auth }) => {
           onClickHandlers={[
             () => router.get('/depot'),
             () => router.get('/depot/history')
-          ]}
-        />
+          ]} />
         }
       >
         <div className="content">
@@ -73,7 +72,7 @@ const DepotHistory = ({ auth }) => {
               pagination={true}
             />
           </div>
-          
+
           <p className="font-medium text-xl mb-2 mt-6" id="return-section">Return History</p>
           <div className={`w-full h-96 ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`}>
             <AgGridReact

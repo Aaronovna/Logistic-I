@@ -98,7 +98,7 @@ export default function Dashboard({ auth }) {
     >
       <Head title="Dashboard" />
 
-      <InventoryLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Dashboard</h2>}>
+      <InventoryLayout user={auth.user} header={<NavHeader headerName="Dashboard"/>}>
         <div className="content">
           <div className='flex gap-4'>
             <Chart data={productStats?.productsByCategory} series={pieSeries} legendPosition='right' title='Product Stock' className='border-card w-1/2 shadow-md' />

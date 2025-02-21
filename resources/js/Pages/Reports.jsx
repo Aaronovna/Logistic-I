@@ -86,7 +86,7 @@ const Reports = ({ auth }) => {
       user={auth.user}
     >
       <Head title="Reports" />
-      <AuditLayout user={auth.user} header={<h2 className="header" style={{ color: theme.text }}>Reports</h2>}>
+      <AuditLayout user={auth.user} header={<NavHeader headerName="Reports"/>}>
         <div className="content">
           <div className='flex gap-4'>
             <div className='overflow-hidden border-card p-0 w-1/2 h-64 flex flex-col shadow-md hover:shadow-xl hover:scale-[101%] duration-200 cursor-pointer pattern1 bg-cover' onClick={() => handleReportClick(reports[0]?.id)}>

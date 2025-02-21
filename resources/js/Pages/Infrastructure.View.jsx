@@ -120,7 +120,7 @@ export default function Infrastructure_View({ auth }) {
       <Head title="View Infrastructure" />
       <InventoryLayout user={auth.user}
         header={<BreadCrumbsHeader
-          headerNames={["Depot", "View"]}
+          headerNames={["Infrastructure", "View"]}
           onClickHandlers={[
             () => handleClick1(),
             () => handleClick2(id)
