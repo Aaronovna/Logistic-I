@@ -3,7 +3,7 @@ const pic = 'https://media.istockphoto.com/id/457796927/photo/warehouse-building
 const InfrastructureCard = ({ data = {}, onClick = () => {} }) => {
   return (
     <div 
-      className='relative md:w-[calc(33%-0.5rem)] w-[calc(50%-0.5rem)] h-52 p-4 border-card overflow-hidden bg-cover bg-center hover:cursor-pointer'
+      className='relative h-52 p-4 border-card overflow-hidden bg-cover bg-center hover:cursor-pointer'
       style={{backgroundImage: `url(${data?.image_url})`}}
       onClick={onClick}
     >

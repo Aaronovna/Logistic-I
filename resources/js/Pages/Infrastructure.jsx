@@ -131,7 +131,7 @@ export default function Infrastructure({ auth }) {
           </div>
 
           <p className='font-medium text-xl px-2' style={{ color: theme.text }}>Warehouses</p>
-          <div className="py-4 flex flex-wrap gap-4">
+          <div className="py-4 grid grid-cols-3 gap-4">
             {infrastructures && filterArray(infrastructures, 'type', [100]).length > 0 ? (
               filterArray(infrastructures, 'type', [100]).map((data, index) => (
                 <InfrastructureCard key={index} data={data} onClick={() => handleInfrastructureClick(data.id)} />
@@ -142,7 +142,7 @@ export default function Infrastructure({ auth }) {
           </div>
 
           <p className='font-medium text-xl px-2' style={{ color: theme.text }}>Depots</p>
-          <div className='py-4 flex flex-wrap gap-4'>
+          <div className="py-4 grid grid-cols-3 gap-4">
             {infrastructures && filterArray(infrastructures, 'type', [101]).length > 0 ? (
               filterArray(infrastructures, 'type', [101]).map((data, index) => (
                 <InfrastructureCard key={index} data={data} onClick={() => handleInfrastructureClick(data.id)} />
@@ -153,7 +153,7 @@ export default function Infrastructure({ auth }) {
           </div>
 
           <p className='font-medium text-xl px-2' style={{ color: theme.text }}>Terminals</p>
-          <div className='py-4 flex flex-wrap gap-4'>
+          <div className="py-4 grid grid-cols-3 gap-4">
             {infrastructures && filterArray(infrastructures, 'type', [102]).length > 0 ? (
               filterArray(infrastructures, 'type', [102]).map((data, index) => (
                 <InfrastructureCard key={index} data={data} onClick={() => handleInfrastructureClick(data.id)} />

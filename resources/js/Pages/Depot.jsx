@@ -13,6 +13,9 @@ import { returnCategories } from '@/Constants/categories';
 import { TbX } from "react-icons/tb";
 import { dateTimeFormatShort } from '@/Constants/options';
 import { simpleFlatUnits } from '@/Constants/units';
+import { WeatherCloudChip, WeatherHumidityWindChip, WeatherTempChip } from '@/Components/Chips';
+
+const OPENWEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
 const Depot = ({ auth }) => {
   if (!hasAccess(auth.user.type, [2050, 2051, 2053])) {
@@ -340,6 +343,25 @@ const Depot = ({ auth }) => {
     })
   }
 
+  const [weather, setWeather] = useState(null);
+  const fetchWeather = async (lat, lng) => {
+    try {
+      const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${OPENWEATHER_API_KEY}&units=metric`)
+      const data = await response.json();
+      if (response.ok) {
+        setWeather(data);
+      } else setWeather(null);
+    } catch (error) {
+
+    }
+  }
+
+  useEffect(() => {
+    if (selectedDepot) {
+      fetchWeather(selectedDepot.lat, selectedDepot.lng);
+    }
+  }, [selectedDepot])
+
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -352,19 +374,22 @@ const Depot = ({ auth }) => {
               backgroundImage: selectedDepot?.image_url ? `url(${selectedDepot.image_url})` : 'none',
             }}>
             <div className='flex'>
-              <p className='text-xl font-semibold py-2 px-4 bg-white/40 backdrop-blur-sm rounded-full shadow-sm w-fit'>{selectedDepot?.name}</p>
-              <div className='ml-auto bg-white/10 backdrop-blur-sm rounded-full h-fit duration-200 px-2'>
-                <select className='p-2 bg-transparent border-0' name="selectdepot" id="selectdepot" onChange={handleDepotChange}>
-                  {depots && depots.map((depot, index) => {
-                    return (
-                      <option key={index} value={depot.id} style={{ background: theme.background, color: theme.text }}>{depot.name}</option>
-                    )
-                  })
-                  }
-                </select>
-              </div>
+              <p className='font-semibold w-fit max-w-[50%] mt-auto py-1 px-3 text-lg bg-white/40 backdrop-blur-sm rounded-full shadow-md truncate'>{selectedDepot?.name}</p>
+              <WeatherTempChip temp={weather?.main.temp} className='ml-2 py-1 px-3' />
+              <select className='py-1 px-3 border-0 ml-auto rounded-full bg-white/5 backdrop-blur-md' name="selectdepot" id="selectdepot" onChange={handleDepotChange}>
+                {depots && depots.map((depot, index) => {
+                  return (
+                    <option key={index} value={depot.id} style={{ background: theme.background, color: theme.text }}>{depot.name}</option>
+                  )
+                })
+                }
+              </select>
             </div>
-            <p className=' mt-auto py-1 px-2 bg-white/40 backdrop-blur-sm rounded-full shadow-md w-fit'>{selectedDepot?.address}</p>
+            <div className='mt-auto w-full flex gap-2'>
+              <p className='fredoka w-fit max-w-[50%] mt-auto py-1 px-3 text-lg bg-white/40 backdrop-blur-sm rounded-full shadow-md truncate'>{selectedDepot?.address}</p>
+              <WeatherHumidityWindChip data={weather} className='ml-auto' />
+              <WeatherCloudChip data={weather} />
+            </div>
           </div>
 
           <div className='w-full flex mb-2 items-end mt-6'>

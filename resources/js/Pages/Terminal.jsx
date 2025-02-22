@@ -13,9 +13,9 @@ import { returnCategories } from '@/Constants/categories';
 import { TbX } from "react-icons/tb";
 import { dateTimeFormatShort } from '@/Constants/options';
 import { simpleFlatUnits } from '@/Constants/units';
+import { WeatherCloudChip, WeatherHumidityWindChip, WeatherTempChip } from '@/Components/Chips';
 
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
+const OPENWEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
 const Terminal = ({ auth }) => {
   if (!hasAccess(auth.user.type, [2050, 2051, 2053])) {
@@ -342,6 +342,25 @@ const Terminal = ({ auth }) => {
     })
   }
 
+  const [weather, setWeather] = useState(null);
+  const fetchWeather = async (lat, lng) => {
+    try {
+      const response = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${OPENWEATHER_API_KEY}&units=metric`)
+      const data = await response.json();
+      if (response.ok) {
+        setWeather(data);
+      } else setWeather(null);
+    } catch (error) {
+
+    }
+  }
+
+  useEffect(() => {
+    if (selectedTerminal) {
+      fetchWeather(selectedTerminal.lat, selectedTerminal.lng);
+    }
+  }, [selectedTerminal])
+
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -354,19 +373,22 @@ const Terminal = ({ auth }) => {
               backgroundImage: selectedTerminal?.image_url ? `url(${selectedTerminal.image_url})` : 'none',
             }}>
             <div className='flex'>
-              <p className='text-xl font-semibold py-2 px-4 bg-white/40 backdrop-blur-sm rounded-full shadow-sm w-fit'>{selectedTerminal?.name}</p>
-              <div className='ml-auto bg-white/10 backdrop-blur-sm rounded-full h-fit duration-200 px-2'>
-                <select className='p-2 bg-transparent border-0' name="selectterminal" id="selectterminal" onChange={handleTerminalChange}>
-                  {terminals && terminals.map((terminal, index) => {
-                    return (
-                      <option key={index} value={terminal.id} style={{ background: theme.background, color: theme.text }}>{terminal.name}</option>
-                    )
-                  })
-                  }
-                </select>
-              </div>
+              <p className='font-semibold w-fit max-w-[50%] mt-auto py-1 px-3 text-lg bg-white/40 backdrop-blur-sm rounded-full shadow-md truncate'>{selectedTerminal?.name}</p>
+              <WeatherTempChip temp={weather?.main.temp} className='ml-2 py-1 px-3' />
+              <select className='py-1 px-3 border-0 ml-auto rounded-full bg-white/5 backdrop-blur-md' name="selectterminal" id="selectterminal" onChange={handleTerminalChange}>
+                {terminals && terminals.map((terminal, index) => {
+                  return (
+                    <option key={index} value={terminal.id} style={{ background: theme.background, color: theme.text }}>{terminal.name}</option>
+                  )
+                })
+                }
+              </select>
             </div>
-            <p className=' mt-auto py-1 px-2 bg-white/40 backdrop-blur-sm rounded-full shadow-md w-fit'>{selectedTerminal?.address}</p>
+            <div className='mt-auto w-full flex gap-2'>
+              <p className='fredoka w-fit max-w-[50%] mt-auto py-1 px-3 text-lg bg-white/40 backdrop-blur-sm rounded-full shadow-md truncate'>{selectedTerminal?.address}</p>
+              <WeatherHumidityWindChip data={weather} className='ml-auto' />
+              <WeatherCloudChip data={weather} />
+            </div>
           </div>
 
           <div className='w-full flex mb-2 items-end mt-6'>

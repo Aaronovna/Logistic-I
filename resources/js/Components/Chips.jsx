@@ -1,6 +1,6 @@
 import { TbDroplet, TbWind } from "react-icons/tb";
 
-const chipStyle = "flex items-center bg-white/60 backdrop-blur-md shadow-md px-3 py-1 rounded-full capitalize w-fit ";
+const chipStyle = "flex items-center bg-white/60 backdrop-blur-md shadow-md px-3 py-1 rounded-full capitalize w-fit whitespace-nowrap ";
 
 export const WeatherCloudChip = ({ data = {}, className = "" }) => {
   return (
@@ -19,30 +19,29 @@ export const WeatherCloudChip = ({ data = {}, className = "" }) => {
 };
 
 export const WeatherHumidityWindChip = ({ data = {}, className = "" }) => {
-  return (
-    <span>
-      {!data ?
-        <span className={chipStyle + className}>
-          <p className="fredoka text-lg">Unavailable</p>
-        </span>
-        :
-        <span className={chipStyle + className}>
-          <TbDroplet />
-          <p className='fredoka text-lg ml-1'>{data?.main.humidity} %</p>
-          <p className='mx-2'>|</p>
-          <TbWind />
-          <p className='fredoka text-lg ml-1'>{data?.wind.speed} <span className='text-sm lowercase'>m/s</span></p>
-        </span>
-      }
-    </span>
+  if (!data) {
+    return (
+      <span className={chipStyle + className}>
+        <p className="fredoka text-lg">Unavailable</p>
+      </span>
+    )
+  }
 
+  return (
+    <span className={chipStyle + className}>
+      <TbDroplet />
+      <p className='fredoka text-lg ml-1'>{data?.main.humidity} %</p>
+      <p className='mx-2'>|</p>
+      <TbWind />
+      <p className='fredoka text-lg ml-1'>{data?.wind.speed} <span className='text-sm lowercase'>m/s</span></p>
+    </span>
   )
 }
 
 export const WeatherTempChip = ({ temp = 0, className = "" }) => {
   return (
     <span className={chipStyle + className}>
-      <p className='font-medium tracking-wider text-2xl fredoka'>
+      <p className='font-medium tracking-wider fredoka text-lg'>
         {temp ? `${temp.toFixed(1)}°C` : 'Unavailable'}
       </p>
     </span>
