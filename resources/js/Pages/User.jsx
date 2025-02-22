@@ -12,7 +12,7 @@ import { TbUser } from "react-icons/tb";
 import { TbBriefcase } from "react-icons/tb";
 import { TbUserPlus } from "react-icons/tb";
 import { TbPlus } from "react-icons/tb";
-import { TbX } from "react-icons/tb";
+import { TbX, TbCheck } from "react-icons/tb";
 
 import { Card } from '@/Components/Cards';
 import Modal from '@/Components/Modal';
@@ -54,39 +54,6 @@ export default function User({ auth }) {
   const [gridApi, setGridApi] = useState(null);
   const [openAddPositionModal, setOpenAddPositionModal] = useState(false);
   const [openEditPositionModal, setOpenEditPositionModal] = useState(false);
-
-  const [selectUserPermissionsForm, setSelectUserPermissionsForm] = useState(
-    permissions.map((permission) => ({
-      [permission.code]: false,
-    }))
-  );
-
-  const resetUserPermissionsForm = () => {
-    const resetPermissions = selectUserPermissionsForm.map((permission) => {
-      const roleCode = Object.keys(permission)[0];
-      return { [roleCode]: false };
-    });
-
-    setSelectUserPermissionsForm(resetPermissions); // Update the state with the reset values
-  };
-
-  const handleUserPermissionsCheckBoxesChange = (e, index, role) => {
-    const newPermissions = [...selectUserPermissionsForm];
-    newPermissions[index] = { ...newPermissions[index], [role.code]: e.target.checked };
-    setSelectUserPermissionsForm(newPermissions);
-  };
-
-  const handleEditUserPermissionsSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.patch(`/user/update/permission/${userSelectedData.id}`, { permissions: selectUserPermissionsForm });
-
-      toast.success(userToastMessages.update_UserPermission.success);
-      fetchUsers();
-    } catch (error) {
-      toast.error(userToastMessages.update_UserPermission.error, error);
-    }
-  }
 
   const [openEditPositionPermissionsModal, setOpenEditPositionPermissionsModal] = useState(false);
 
@@ -132,21 +99,44 @@ export default function User({ auth }) {
   }, []);
 
   const [userSelectedData, setUserSelectedData] = useState(null)
+  const [selectedUserPermissions, setSelectedUserPermissions] = useState(null)
+  const [positionId, setPositionId] = useState(null);
+  const changePermission = (e) => {
+    const id = Number(e.target.value);
+    setPositionId(id);
 
+    const position = positions.find((pos) => pos.id === id);
+
+    const perms = convertPermissions(position.permissions);
+    setSelectedUserPermissions(perms);
+  };
+
+  const submitSetUserPosition = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.patch(`/user/update/${userSelectedData.id}`, { position_id: positionId });
+      fetchUsers();
+    } catch (error) {
+
+    }
+  }
 
   const onUserSelectionChanged = (event) => {
     const selectedRows = event.api.getSelectedRows();
     const selectedUser = selectedRows[0] || null;
 
     setUserSelectedData(selectedUser);
-    resetUserPermissionsForm();
-
-    if (selectedUser && selectedUser.permissions) {
-      const permissions = convertPermissions(selectedUser.permissions);
-      setSelectUserPermissionsForm(permissions);
+    if (selectedUser.position) {
+      setSelectedUserPermissions(convertPermissions(selectedUser.position.permissions));
     } else {
-      resetUserPermissionsForm();
-    }
+      const perms = permissions.map((permission) => {
+        const roleCode = Object.keys(permission)[0];
+        return { [roleCode]: false };
+      });
+
+      setSelectedUserPermissions(perms);
+    };
   };
 
   const [positionSelectedData, setPositionSelectedData] = useState(null)
@@ -253,10 +243,10 @@ export default function User({ auth }) {
 
   const userColDefs = [
     { field: "id", filter: true, flex: 1, minWidth: 70, maxWidth: 90, },
-    { field: "name", filter: true, flex: 2, minWidth: 200 },
-    { field: "email", filter: true, flex: 2, minWidth: 200 },
+    { field: "name", filter: true, flex: 2, maxWidth: 220 },
+    { field: "email", filter: true, flex: 2, maxWidth: 300 },
     {
-      field: "email_verified_at", filter: true, flex: 1, headerName: "Status",
+      field: "email_verified_at", filter: true, flex: 1, headerName: "Status", maxWidth: 150,
       cellRenderer: (params) => {
         return (
           <span className='flex flex-col w-full justify-center items-center h-full'>
@@ -264,6 +254,10 @@ export default function User({ auth }) {
           </span>
         )
       }
+    },
+    {
+      field: "position", filter: true, flex: 1,
+      valueFormatter: (params) => params.value?.name
     },
   ];
 
@@ -328,21 +322,12 @@ export default function User({ auth }) {
     fetchPositions();
   }, []);
 
-  const handleTemplateChange = (e) => {
-    const { value } = e.target;
-    const selectedPosition = positions.find((position) => position.id === parseInt(value));
-    if (selectedPosition.permissions) {
-      const permissions = convertPermissions(selectedPosition.permissions);
-      setSelectUserPermissionsForm(permissions);
-    } else resetUserPermissionsForm();
-  };
-
   return (
     <AuthenticatedLayout
       user={auth.user}
     >
       <Head title="Users" />
-      <DefaultLayout user={auth.user} header={<NavHeader headerName="User"/>}>
+      <DefaultLayout user={auth.user} header={<NavHeader headerName="User" />}>
         <div className='content flex flex-col'>
 
           <div className='flex items-center gap-6'>
@@ -350,33 +335,74 @@ export default function User({ auth }) {
             <Card data={positions ? positions.length : "-"} name="Positions" Icon={TbBriefcase} />
           </div>
 
-          <div className='flex md:flex-row flex-col gap-8'>
+          <div className="w-full realtive mb-4">
+            <span className='flex justify-between h-14 items-center'>
+              <p className='text-xl font-semibold h-fit' style={{ color: theme.text }}>Users</p>
 
-            <div className="md:w-2/3 w-full realtive p-1">
-              <span className='flex justify-between h-14 items-center'>
-                <p className='text-xl font-semibold h-fit' style={{ color: theme.text }}>Users</p>
+              <button style={{ background: theme.accent, color: theme.background }}
+                disabled={userPermissions === '000' ? true : false}
+                className='m-2 mr-0 p-2 rounded-md flex items-center gap-1'
+                onClick={() => setOpenAddUserModal(true)}>
+                <TbUserPlus />
+                <p className='md:block hidden'>Add Users</p>
+              </button>
 
-                <button style={{ background: theme.accent, color: theme.background }}
-                  disabled={userPermissions === '000' ? true : false}
-                  className='m-2 mr-0 p-2 rounded-md flex items-center gap-1'
-                  onClick={() => setOpenAddUserModal(true)}>
-                  <TbUserPlus />
-                  <p className='md:block hidden'>Add Users</p>
-                </button>
-
-              </span>
-              <div className={themePreference === 'light' ? 'ag-theme-quartz ' : 'ag-theme-quartz-dark'} style={{ height: '380px' }}>
-                <AgGridReact
-                  rowData={users}
-                  columnDefs={userColDefs}
-                  rowSelection='single'
-                  onGridReady={onGridReady}
-                  onSelectionChanged={onUserSelectionChanged}
-                />
-              </div>
-
+            </span>
+            <div className={`h-96 ${themePreference === 'light' ? 'ag-theme-quartz ' : 'ag-theme-quartz-dark'}`}>
+              <AgGridReact
+                rowData={users}
+                columnDefs={userColDefs}
+                rowSelection='single'
+                onGridReady={onGridReady}
+                onSelectionChanged={onUserSelectionChanged}
+              />
             </div>
-            <div className="md:w-1/3 w-full relative p-1">
+
+          </div>
+          <div className='w-full flex gap-4'>
+            <div className='w-2/3' style={{ borderColor: theme.border }}>
+              <span className='flex justify-between h-14 ml-1 items-center'>
+                <p className='text-xl font-semibold h-fit' style={{ color: theme.text }}>User Information</p>
+              </span>
+              <div className='border-card h-96 p-4 relative overflow-hidden flex flex-col'>
+                {userSelectedData ? null :
+                  <div className='absolute top-0 left-0 w-full h-full bg-black/10 backdrop-blur-md z-10 flex items-center justify-center'>
+                    <p className='text-2xl font-medium tracking-wider text-gray-500'>Select user first</p>
+                  </div>
+                }
+                <p className='text-lg font-medium ml-1' style={{ color: theme.text }}>{userSelectedData ? userSelectedData.name : '-'}</p>
+                <p className='text-gray-600 ml-1'>{userSelectedData?.position?.name ? userSelectedData.position?.name : 'No position set yet'}</p>
+                <div className='my-2 relative border-card grid grid-cols-2 h-56 overflow-y-auto p-2'>
+                  {selectedUserPermissions &&
+                    permissions.map((permission, index) => {
+                      const permissionValue = selectedUserPermissions[index][permission.code]; // Get true/false using key
+
+                      return (
+                        <p key={index} className='capitalize flex gap-1 items-center hover:bg-gray-300 rounded'>
+                          <span>{permissionValue ? <TbCheck size={22} color='lime' /> : <TbX size={22} color='red' />}</span> {/* Display based on value */}
+                          <span>{permission.alias.replace(/_/g, " ")}</span>
+                        </p>
+                      );
+                    })}
+                </div>
+
+                <form className='flex gap-2 mt-auto' onSubmit={submitSetUserPosition}>
+                  <select name="su_position" id="su_position" className='border-card flex-1' onChange={changePermission}>
+                    <option value={null} className='text-sm text-gray-400'>Select Position</option>
+                    {
+                      positions && positions.map((position, index) => {
+                        return (
+                          <option value={position.id} key={index} className='text-sm'>{position.name}</option>
+                        )
+                      })
+                    }
+                  </select>
+                  <button className='border-card'>Save</button>
+                </form>
+              </div>
+            </div>
+
+            <div className="w-1/3 relative">
               <span className='flex justify-between h-14 items-center'>
                 <p className='text-xl font-semibold h-fit' style={{ color: theme.text }}>Positions</p>
                 <button
@@ -386,7 +412,7 @@ export default function User({ auth }) {
                   <TbPlus size={24} />
                 </button>
               </span>
-              <div className={themePreference === 'light' ? 'ag-theme-quartz ' : 'ag-theme-quartz-dark'} style={{ height: '380px' }}>
+              <div className={`h-96 ${themePreference === 'light' ? 'ag-theme-quartz ' : 'ag-theme-quartz-dark'}`}>
                 <AgGridReact
                   rowData={positions}
                   columnDefs={positionColDefs}
@@ -458,68 +484,6 @@ export default function User({ auth }) {
               </div>
             </div>
           </div>
-
-          <div className='border-card my-4 p-4' style={{ borderColor: theme.border }}>
-            <p className='text-xl font-medium' style={{ color: theme.text }}>Edit User</p>
-            <p className='text-lg' style={{ color: theme.text }}><span className='inline font-medium'>Name:</span> {userSelectedData ? userSelectedData.name : ''}</p>
-            <form onSubmit={handleEditUserPermissionsSubmit} className='my-4'>
-              <div className='flex justify-between'>
-                <p className='text-lg font-medium' style={{ color: theme.text }}>Edit User Permissions</p>
-                <span>
-                  <p className='inline-block text-lg font-medium' style={{ color: theme.text }}>Template: </p>
-                  <select
-                    style={{ color: theme.text, background: theme.background }}
-                    className="inline-block border-none" name="position_list" id="position_list"
-                    onChange={(e) => handleTemplateChange(e)}
-                    disabled={userSelectedData && userSelectedData.email_verified_at ? false : true}
-                  >
-
-                    <option value="none">None</option>
-                    {positions && positions.map((position, index) => {
-                      return (
-                        <option value={position.id} key={index}>{`${position.id} ${position.name}`}</option>
-                      )
-                    })}
-                  </select>
-                </span>
-              </div>
-              <div className='my-2 relative border-card p-1 grid grid-cols-3 grid-rows-3 grid-flow-col' style={{ color: theme.text, borderColor: theme.border }}>
-                <div className={`${userSelectedData === null ? 'hidden' : userSelectedData && userSelectedData.email_verified_at ? ' hidden ' : ' absolute '} top-0 left-0 rounded-lg backdrop-blur w-full h-full flex justify-center items-center`}>
-                  <p className='text-xl font-semibold'>User is not verified yet</p>
-                </div>
-                {permissions.map((role, index) => {
-                  return (
-                    <label htmlFor={`user-${role.code}`} className='flex m-1 w-fit h-fit gap-2 items-center select-none cursor-pointer' key={`user-${index}`}>
-                      <input
-                        type="checkbox"
-                        className={`h-0 w-0 absolute block invisible overflow-hidden ${themePreference === 'light' ? 'l' : 'd'}`}
-                        name={role.alias}
-                        id={`user-${role.code}`}
-                        checked={selectUserPermissionsForm[index][role.code]}
-                        onChange={(e) => handleUserPermissionsCheckBoxesChange(e, index, role)}
-                        disabled={userSelectedData && userSelectedData.email_verified_at ? false : true}
-                      />
-                      <span className='check w-5 h-5 inline-block rounded border' style={{ borderColor: theme.border }}></span>
-                      <p>{role.alias}</p>
-                    </label>
-                  )
-                })}
-              </div>
-              <div className='flex justify-between my-4'>
-                <button type='submit' disabled={userSelectedData ? false : true}
-                  className={`p-2 border-card font-medium disabled:cursor-not-allowed`}
-                  style={{ background: theme.accent, color: theme.background, borderColor: theme.border }}>
-                  Save
-                </button>
-                <button type='button' disabled={userSelectedData ? false : true}
-                  className={`p-2 border-card font-medium disabled:cursor-not-allowed`}
-                  style={{ color: theme.background, borderColor: theme.border, background: theme.danger }}
-                  onClick={() => handleDeleteUser(userSelectedData.id)}>
-                  Delete User
-                </button>
-              </div>
-            </form>
-          </div>
         </div>
       </DefaultLayout>
 
@@ -562,12 +526,12 @@ export default function User({ auth }) {
         </div>
       </Modal>
 
-      <Modal show={openEditPositionPermissionsModal} onClose={() => setOpenEditPositionPermissionsModal(false)} maxWidth={'2xl'}
+      <Modal show={openEditPositionPermissionsModal} onClose={() => setOpenEditPositionPermissionsModal(false)} maxWidth={'4xl'}
         name={`Edit ${positionSelectedData && `${positionSelectedData.name}'s`} Permissions`}
       >
         <div style={{ color: theme.text }}>
           <form onSubmit={handleEditPositionPermissionsSubmit} className='flex flex-col gap-2'>
-            <div className='my-2 relative border-card p-1 grid grid-cols-3 grid-rows-3 grid-flow-col' style={{ color: theme.text, borderColor: theme.border }}>
+            <div className='my-2 relative border-card p-1 grid grid-cols-3 max-h-96 overflow-y-auto' style={{ color: theme.text, borderColor: theme.border }}>
               {permissions.map((role, index) => {
                 return (
                   <label htmlFor={`position-${role.code}`} className='flex m-1 w-fit h-fit gap-2 items-center select-none cursor-pointer' key={`position-${index}`}>
@@ -579,8 +543,8 @@ export default function User({ auth }) {
                       checked={selectPositionPermissionsForm[index][role.code]}
                       onChange={(e) => handlePositionPermissionsCheckBoxesChange(e, index, role)}
                     />
-                    <span className='check w-5 h-5 inline-block rounded border' style={{ borderColor: theme.border }}></span>
-                    <p>{role.alias}</p>
+                    <span className='check w-4 h-4 inline-block rounded border' style={{ borderColor: theme.border }}></span>
+                    <p className='capitalize text-sm'>{role.alias.replace(/_/g, " ")}</p>
                   </label>
                 )
               })}

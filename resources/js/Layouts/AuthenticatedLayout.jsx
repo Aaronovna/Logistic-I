@@ -7,9 +7,9 @@ import Modal from '@/Components/Modal';
 const AuthenticatedLayout = ({ user, children }) => {
   const { setUserPermissions, theme } = useStateContext();
 
-  useEffect(() => {
+  /* useEffect(() => {
     setUserPermissions(JSON.parse(user.permissions));
-  }, []);
+  }, []); */
 
   const [openDev, setOpenDev] = useState(false);
 

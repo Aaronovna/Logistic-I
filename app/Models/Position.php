@@ -18,14 +18,43 @@ class Position extends Model
         static::creating(function ($position) {
             if (is_null($position->permissions)) {
                 $position->permissions = json_encode([
-                    "100" => false,
                     "101" => false,
-                    "150" => false,
-                    "151" => false,
-                    "200" => false,
+                    "102" => false,
+                    "111" => false,
+                    "112" => false,
+                    "121" => false,
+                    "122" => false,
+                    "131" => false,
+                    "132" => false,
+
                     "201" => false,
-                    "250" => false,
-                    "251" => false,
+                    "202" => false,
+                    "203" => false,
+
+                    "301" => false,
+                    "302" => false,
+                    "311" => false,
+                    "312" => false,
+                    "321" => false,
+                    "322" => false,
+                    "331" => false,
+                    "332" => false,
+                    "341" => false,
+                    "342" => false,
+                    "351" => false,
+                    "352" => false,
+
+                    "401" => false,
+                    "402" => false,
+                    "411" => false,
+                    "412" => false,
+
+                    "501" => false,
+                    "502" => false,
+                    "511" => false,
+                    "512" => false,
+                    "521" => false,
+                    "522" => false,
                 ]);
             }
         });

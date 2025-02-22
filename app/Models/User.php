@@ -21,7 +21,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
-        'permissions',
+        'position_id',
         'type'
     ];
 
@@ -45,28 +45,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'password' => 'hashed',
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($user) {
-            if (is_null($user->permissions)) {
-                $user->permissions = json_encode([
-                    "100" => false,
-                    "101" => false,
-                    "150" => false,
-                    "151" => false,
-                    "200" => false,
-                    "201" => false,
-                    "250" => false,
-                    "251" => false,
-                ]);
-            }
-        });
-    }
-
     public function auditTasks()
     {
         return $this->hasMany(AuditTask::class, 'assigned_to');
+    }
+    public function position()
+    {
+        return $this->belongsTo(Position::class);
     }
 }

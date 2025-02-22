@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->json('permissions')->nullable();
+            $table->foreignId('position_id')->nullable()->constrained('positions')->onDelete('restrict');
             $table->integer('type')->default(2056);
             $table->rememberToken();
             $table->timestamps();

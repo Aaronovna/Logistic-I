@@ -101,7 +101,7 @@ Route::middleware(["auth", "verified"])->group(function () {
 
     Route::get('/user/get', [UserController::class, 'index'])->name('user.index');
     Route::post('/user/create', [UserController::class, 'store'])->name('user.store');
-    Route::patch('/user/update/permission/{id}', [UserController::class, 'update_permission'])->name('user.update_permission');
+    Route::patch('/user/update/{id}', [UserController::class, 'update'])->name('user.update');
     Route::delete('/user/delete/{id}', [UserController::class, 'destroy'])->name('user.destroy');
     Route::get('/user/get/auditor/auto', [UserController::class, 'autoAssignAuditor'])->name('user.autoAssignAuditor');
 
