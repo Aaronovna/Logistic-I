@@ -6,7 +6,7 @@ import RequestsFolder from '@/Components/cards/RequestsFolder';
 import RequestCard from '@/Components/cards/RequestCard';
 import { Card2 } from '@/Components/Cards';
 import { filterArray } from '@/functions/filterArray';
-import updateStatus from '@/api/updateStatus';
+import updateStatus from '@/api/useUpdateStatus';
 import { dateTimeFormatLong } from '@/Constants/options';
 import Status from '@/Components/Status';
 import { getStatusStep, requestStatus } from '@/Constants/status';
@@ -29,7 +29,7 @@ const Dispatch = ({ auth }) => {
       const response = await axios.get('/request/get');
       setRequests(filterArray(response.data, 'status', ['Completed', 'Request Rejected', 'Request Cancelled'], true));
     } catch (error) {
-      toast.error(productToastMessages.show.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -38,7 +38,7 @@ const Dispatch = ({ auth }) => {
       const response = await axios.get('/request/get/infrastructure/depot');
       setDepotRequests(filterArray(response.data, 'status', ['Completed', 'Request Rejected', 'Request Cancelled'], true));
     } catch (error) {
-      toast.error(productToastMessages.show.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -47,7 +47,7 @@ const Dispatch = ({ auth }) => {
       const response = await axios.get('/request/get/infrastructure/terminal');
       setTerminalRequests(filterArray(response.data, 'status', ['Completed', 'Request Rejected', 'Request Cancelled'], true));
     } catch (error) {
-      toast.error(productToastMessages.show.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -77,14 +77,14 @@ const Dispatch = ({ auth }) => {
         const availabilityPromises = items.map(async (item) => {
           try {
             const response = await axios.get(`/product/get/${item.product_id}`);
-            const stockCount = response.data?.total_stock || 0; // Adjust based on your API response
+            const stockCount = response.data?.total_stock || 0;
             return {
               ...item,
               available: stockCount >= item.quantity,
               stockCount,
             };
           } catch (error) {
-            console.error(`Error fetching availability for product ${item.product_id}:`, error);
+            toast.error(`${error.status} ${error.response.data.message}`);
             return { ...item, available: false, stockCount: 0 };
           }
         });
@@ -107,8 +107,9 @@ const Dispatch = ({ auth }) => {
       const response = await axios.patch(`/request/update/${id}`, payload)
       fetchAllRequests();
       setOpenRequestModal(false);
+      toast.success(response.data.message);
     } catch (error) {
-
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   }
 
@@ -117,12 +118,14 @@ const Dispatch = ({ auth }) => {
       status: 'Request Rejected'
     }
     try {
-      const response = await axios.patch(`/request/update/${id}`, payload)
+      const response = await axios.patch(`/request/update/${id}`, payload);
+      toast.success(response.data.message);
     } catch (error) {
-
+      toast.error(`${error.status} ${error.response.data.message}`);
+    } finally {
+      fetchAllRequests();
+      setOpenRequestModal(false);
     }
-    fetchAllRequests();
-    setOpenRequestModal(false);
   }
 
   const createDispatch = async (data) => {
@@ -132,15 +135,16 @@ const Dispatch = ({ auth }) => {
     }
 
     try {
-      const response = await axios.post('/dispatch/create', payload)
+      const response = await axios.post('/dispatch/create', payload);
+      toast.success(response.data.message);
     } catch (error) {
-
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   }
 
   const handleCancelFill = async (productId, quantity, index) => {
     try {
-      const payload = { quantity: quantity, operation: 'subtract' }; // Pass negative quantity to add back to stock
+      const payload = { quantity: quantity, operation: 'subtract' };
       await axios.patch(`/inventory/stock/update/${productId}`, payload);
 
       // Update the local state to mark the item as not filled
@@ -245,7 +249,7 @@ const Dispatch = ({ auth }) => {
     try {
       const response = await axios.post(`/dispatch/trail/create/${id}`);
     } catch (error) {
-      
+
     }
 
     fetchAllRequests();
@@ -258,7 +262,7 @@ const Dispatch = ({ auth }) => {
     >
       <Head title="Dispatch" />
 
-      <InventoryLayout user={auth.user} header={<NavHeader headerName="Dispatch"/>}>
+      <InventoryLayout user={auth.user} header={<NavHeader headerName="Dispatch" />}>
         <div className="content flex flex-col h-screen">
           <div className='flex gap-4 mb-8'>
             <Card2 name='Total Requests' data={requests?.length} className='w-1/2' />

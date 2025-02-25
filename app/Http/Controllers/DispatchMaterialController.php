@@ -14,13 +14,8 @@ class DispatchMaterialController extends Controller
      */
     public function index()
     {
-        // Retrieve all DispatchMaterials
         $dispatchMaterials = DispatchMaterial::all();
-
-        return response()->json([
-            'message' => 'All dispatch materials retrieved successfully.',
-            'data' => $dispatchMaterials,
-        ]);
+        return response()->json(['data' => $dispatchMaterials], 200);
     }
 
     /**
@@ -28,19 +23,14 @@ class DispatchMaterialController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate the incoming request
         $validatedData = $request->validate([
             'request_id' => 'required|exists:request_materials,id',
             'type' => 'required|string',
         ]);
 
-        // Create the new DispatchMaterial
         $dispatchMaterial = DispatchMaterial::create($validatedData);
 
-        return response()->json([
-            'message' => 'Dispatch material created successfully.',
-            'data' => $dispatchMaterial,
-        ], 201);
+        return response()->json(['message' => 'Dispatch material created successfully.', 'data' => $dispatchMaterial,], 201);
     }
 
     /**
@@ -48,18 +38,13 @@ class DispatchMaterialController extends Controller
      */
     public function show(string $id)
     {
-        // Find the DispatchMaterial by ID
         $dispatchMaterial = DispatchMaterial::find($id);
 
-        // Check if the record exists
         if (!$dispatchMaterial) {
             return response()->json(['message' => 'Dispatch material not found.'], 404);
         }
 
-        return response()->json([
-            'message' => 'Dispatch material retrieved successfully.',
-            'data' => $dispatchMaterial,
-        ]);
+        return response()->json(['data' => $dispatchMaterial], 200);
     }
 
     /**
@@ -67,27 +52,19 @@ class DispatchMaterialController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        // Validate the request, allow partial updates (only provided fields)
+        $dispatchMaterial = DispatchMaterial::find($id);
+
+        if (!$dispatchMaterial) {
+            return response()->json(['message' => 'Dispatch not found'], 404);
+        }
+
         $validatedData = $request->validate([
             'status' => 'sometimes|string',
         ]);
 
-        // Find the DispatchMaterial by ID
-        $dispatchMaterial = DispatchMaterial::find($id);
+        $dispatchMaterial->update($validatedData);
 
-        // Check if the record exists
-        if (!$dispatchMaterial) {
-            return response()->json(['message' => 'Dispatch material not found.'], 404);
-        }
-
-        // Update only the fields that are provided in the request
-        $dispatchMaterial->fill($validatedData);
-        $dispatchMaterial->save();
-
-        return response()->json([
-            'message' => 'Dispatch material updated successfully.',
-            'data' => $dispatchMaterial,
-        ]);
+        return response()->json(['message' => 'Dispatch updated successfully', 'data' => $dispatchMaterial], 200);
     }
 
     /**
@@ -95,20 +72,15 @@ class DispatchMaterialController extends Controller
      */
     public function destroy(string $id)
     {
-        // Find the DispatchMaterial by ID
         $dispatchMaterial = DispatchMaterial::find($id);
 
-        // Check if the record exists
         if (!$dispatchMaterial) {
-            return response()->json(['message' => 'Dispatch material not found.'], 404);
+            return response()->json(['message' => 'Dispatch not found'], 404);
         }
 
-        // Delete the DispatchMaterial
         $dispatchMaterial->delete();
 
-        return response()->json([
-            'message' => 'Dispatch material deleted successfully.',
-        ]);
+        return response()->json(['message' => 'Dispatch deleted successfully'], 200);
     }
 
     public function createDispatchTrail(string $id)
