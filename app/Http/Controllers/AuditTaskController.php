@@ -114,7 +114,8 @@ class AuditTaskController extends Controller
             return response()->json(['error' => 'User not found'], 404);
         }
 
-        $tasks = AuditTask::with(['assignedToUser', 'assignedByUser'])
+        $tasks = AuditTask::where('assigned_to', $userId)
+            ->with(['assignedToUser', 'assignedByUser'])
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($selectedTask) {

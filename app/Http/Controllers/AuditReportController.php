@@ -12,24 +12,30 @@ class AuditReportController extends Controller
      */
     public function index()
     {
-        $reports = AuditReport::with(['audit_task', 'audit_task.assignedToUser', 'audit_task.assignedByUser'])->orderBy('created_at', 'desc')->get();
+        $reports = AuditReport::with(['audit_task', 'audit_task.assignedToUser', 'audit_task.assignedByUser'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($selectedReport) {
+                $report = $selectedReport->toArray();
 
-        // Append the assigned user names to each task
-        $reports->each(function ($report) {
-            $report->task_title = $report->audit_task->title ?? 'N/A';
-            $report->task_scope = $report->audit_task->scope ?? 'N/A';
-            $report->task_type = $report->audit_task->type ?? 'N/A';
-            $report->task_status = $report->audit_task->status ?? 'N/A';
-            $report->task_description = $report->audit_task->description ?? 'N/A';
-            $report->task_startdate = $report->audit_task->startdate ?? 'N/A';
-            $report->task_deadline = $report->audit_task->deadline ?? 'N/A';
-            $report->task_assigned_to = $report->audit_task->assigned_to ?? 'N/A';
-            $report->task_assigned_by = $report->audit_task->assigned_by ?? 'N/A';
-            $report->task_assigned_to_name = $report->audit_task->assignedToUser->name ?? 'N/A';
-            $report->task_assigned_by_name = $report->audit_task->assignedByUser->name ?? 'N/A';
-        });
+                $report['task_title'] = $selectedReport->audit_task->title ?? 'N/A';
+                $report['task_scope'] = $selectedReport->audit_task->scope ?? 'N/A';
+                $report['task_type'] = $selectedReport->audit_task->type ?? 'N/A';
+                $report['task_status'] = $selectedReport->audit_task->status ?? 'N/A';
+                $report['task_description'] = $selectedReport->audit_task->description ?? 'N/A';
+                $report['task_startdate'] = $selectedReport->audit_task->startdate ?? 'N/A';
+                $report['task_deadline'] = $selectedReport->audit_task->deadline ?? 'N/A';
+                $report['task_assigned_to'] = $selectedReport->audit_task->assigned_to ?? 'N/A';
+                $report['task_assigned_by'] = $selectedReport->audit_task->assigned_by ?? 'N/A';
+                $report['task_assigned_to_name'] = $selectedReport->audit_task->assignedToUser->name ?? 'N/A';
+                $report['task_assigned_by_name'] = $selectedReport->audit_task->assignedByUser->name ?? 'N/A';
 
-        return response()->json($reports);
+                unset($report['audit_task']);
+
+                return $report;
+            });
+
+        return response()->json(['data' => $reports], 200);
     }
 
     /**
@@ -46,13 +52,9 @@ class AuditReportController extends Controller
             'files' => 'required|json'
         ]);
 
-        // Create the new DispatchMaterial
         $report = AuditReport::create($validatedData);
 
-        return response()->json([
-            'message' => 'Report created successfully.',
-            'data' => $report,
-        ], 200);
+        return response()->json(['message' => 'Report created successfully.', 'data' => $report,], 200);
     }
 
     /**
@@ -60,62 +62,48 @@ class AuditReportController extends Controller
      */
     public function show(string $id)
     {
-        $report = AuditReport::with(['audit_task', 'audit_task.assignedToUser', 'audit_task.assignedByUser'])->find($id);
+        $selectedReport = AuditReport::with(['audit_task', 'audit_task.assignedToUser', 'audit_task.assignedByUser'])->find($id);
 
-        if (!$report) {
+        if (!$selectedReport) {
             return response()->json(['error' => 'Report not found'], 404);
         }
 
-        $report->task_title = $report->audit_task->title ?? 'N/A';
-        $report->task_scope = $report->audit_task->scope ?? 'N/A';
-        $report->task_type = $report->audit_task->type ?? 'N/A';
-        $report->task_status = $report->audit_task->status ?? 'N/A';
-        $report->task_description = $report->audit_task->description ?? 'N/A';
-        $report->task_startdate = $report->audit_task->startdate ?? 'N/A';
-        $report->task_deadline = $report->audit_task->deadline ?? 'N/A';
-        $report->task_assigned_to = $report->audit_task->assigned_to ?? 'N/A';
-        $report->task_assigned_by = $report->audit_task->assigned_by ?? 'N/A';
-        $report->task_assigned_to_name = $report->audit_task->assignedToUser->name ?? 'N/A';
-        $report->task_assigned_by_name = $report->audit_task->assignedByUser->name ?? 'N/A';
-        $report->task_created_at = $report->audit_task->created_at ?? 'N/A';
+        $report = $selectedReport->toArray();
 
-        return response()->json($report);
+        $report['task_title'] = $selectedReport->audit_task->title ?? 'N/A';
+        $report['task_scope'] = $selectedReport->audit_task->scope ?? 'N/A';
+        $report['task_type'] = $selectedReport->audit_task->type ?? 'N/A';
+        $report['task_status'] = $selectedReport->audit_task->status ?? 'N/A';
+        $report['task_description'] = $selectedReport->audit_task->description ?? 'N/A';
+        $report['task_startdate'] = $selectedReport->audit_task->startdate ?? 'N/A';
+        $report['task_deadline'] = $selectedReport->audit_task->deadline ?? 'N/A';
+        $report['task_assigned_to'] = $selectedReport->audit_task->assigned_to ?? 'N/A';
+        $report['task_assigned_by'] = $selectedReport->audit_task->assigned_by ?? 'N/A';
+        $report['task_assigned_to_name'] = $selectedReport->audit_task->assignedToUser->name ?? 'N/A';
+        $report['task_assigned_by_name'] = $selectedReport->audit_task->assignedByUser->name ?? 'N/A';
+
+        return response()->json(['data' => $report], 200);
     }
-
-    public function showByTask($taskId)
-    {
-        $report = AuditReport::where('task_id', $taskId)->first(); // This will return null if no report is found
-
-        // If no report is found, return a 404 response with a message
-        if (!$report) {
-            return response()->json(['message' => 'Report not found'], status: 201);
-        }
-
-        return response()->json($report);
-    }
-
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
     {
+        $report = AuditReport::find($id);
+
+        if (!$report) {
+            return response()->json(['message' => 'Report not found'], 404);
+        }
+
         $validatedData = $request->validate([
             'review_status' => 'sometimes|string',
             'reviewed_by' => 'sometimes|exists:users,id',
         ]);
 
-        // Find the category by its ID
-        $report = AuditReport::findOrFail($id);
+        $report->update($validatedData);
 
-        $report->fill($validatedData);
-        $report->save();
-
-        // Return a success response
-        return response()->json([
-            'message' => 'Updated successfully',
-            'task' => $report
-        ], 200);
+        return response()->json(['message' => 'Report updated successfully', 'task' => $report], 200);
     }
 
     /**
@@ -123,6 +111,25 @@ class AuditReportController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $report = AuditReport::find($id);
+
+        if (!$report) {
+            return response()->json(['message' => 'Report not found'], 404);
+        }
+
+        $report->delete();
+
+        return response()->json(['message' => 'Report deleted successfully'], 200);
+    }
+
+    public function showByTask(string $taskId)
+    {
+        $report = AuditReport::where('task_id', $taskId)->first();
+
+        if (!$report) {
+            return response()->json(['message' => 'Report not found'], 404);
+        }
+
+        return response()->json(['data' => $report], 200);
     }
 }

@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('audit_reports', function (Blueprint $table) {
             $table->id();
-            $table->string('location');
-            $table->string('details');
-            $table->string('final_comment');
+            $table->text('location');
+            $table->mediumText('details');
+            $table->mediumText('final_comment');
             $table->foreignId('task_id')->constrained('audit_tasks')->onDelete('restrict');
             $table->string('review_status')->nullable();
             $table->string('reviewed_by')->nullable();

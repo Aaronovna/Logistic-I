@@ -9,11 +9,9 @@ use App\Models\File;
 
 class FileController extends Controller
 {
-
-    // Fetch all uploaded files
     public function index()
     {
-        return File::all()->map(function ($file) {
+        $files = File::all()->map(function ($file) {
             return [
                 'id' => $file->id,
                 'name' => $file->name,
@@ -22,23 +20,21 @@ class FileController extends Controller
                 'url' => asset("storage/{$file->path}")
             ];
         });
+
+        return response()->json(['data' => $files], 200);
     }
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validatedData = $request->validate([
             'files.*' => 'required|file|mimes:jpg,jpeg,png,mp4,mov,avi|max:102400', // 100MB per file
         ]);
-
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 422);
-        }
 
         $uploadedFiles = [];
 
         foreach ($request->file('files') as $file) {
+
             $path = $file->store('uploads', 'public');
 
-            // Save file details to the database
             $fileRecord = File::create([
                 'name' => $file->getClientOriginalName(),
                 'path' => $path,
@@ -55,35 +51,34 @@ class FileController extends Controller
             ];
         }
 
-        return response()->json([
-            'message' => 'Files uploaded successfully',
-            'files' => $uploadedFiles
-        ]);
+        return response()->json(['message' => 'Files uploaded successfully', 'data' => $uploadedFiles,], 201);
     }
 
     public function show($id)
     {
-        $file = File::find($id);
+        $selectedFile = File::find($id);
 
-        if (!$file) {
-            return response()->json(['error' => 'File not found'], 404);
+        if (!$selectedFile) {
+            return response()->json(['message' => 'File not found'], 404);
         }
 
-        return response()->json([
-            'id' => $file->id,
-            'name' => $file->name,
-            'type' => $file->type,
-            'size' => $file->size,
-            'url' => asset("storage/{$file->path}")
-        ]);
+        $file = [
+            'id' => $selectedFile->id,
+            'name' => $selectedFile->name,
+            'type' => $selectedFile->type,
+            'size' => $selectedFile->size,
+            'url' => asset("storage/{$selectedFile->path}")
+        ];
+
+        return response()->json(['data' => $file], 200);
     }
 
-    // Delete a file
     public function destroy($id)
     {
         $file = File::find($id);
+
         if (!$file) {
-            return response()->json(['error' => 'File not found'], 404);
+            return response()->json(['message' => 'File not found'], 404);
         }
 
         Storage::disk('public')->delete($file->path);

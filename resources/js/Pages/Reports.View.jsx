@@ -14,7 +14,6 @@ const ReportsView = ({ auth }) => {
   }
 
   const { props } = usePage();
-  const { theme } = useStateContext();
   const { id } = props;
 
   const handleClick1 = () => {
@@ -29,9 +28,9 @@ const ReportsView = ({ auth }) => {
   const fetchReport = async (id) => {
     try {
       const response = await axios.get(`/audit/report/get/${id}`);
-      setReport(response.data);
+      setReport(response.data.data);
     } catch (error) {
-
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   }
 
@@ -42,9 +41,9 @@ const ReportsView = ({ auth }) => {
       const requests = JSON.parse(report.files).map(id => axios.get(`/file/get/${id}`));
       const responses = await Promise.all(requests);
 
-      setEvidences(responses.map(response => response.data));
+      setEvidences(responses.map(response => response.data.data));
     } catch (error) {
-      console.error("Error fetching images:", error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -63,23 +62,22 @@ const ReportsView = ({ auth }) => {
       review_status: 'Reviewed',
       reviewed_by: auth.user.id
     }
+
     try {
       const reportResponse = await axios.patch(`/audit/report/update/${rid}`, reportPayload);
       if (reportResponse.status === 200) {
-        const payload = {
-          status: 'Completed'
-        };
+        const payload = { status: 'Completed' };
 
         try {
-          const updateResponse = await axios.patch(`/audit/task/update/${tid}`, payload);
+          const response = await axios.patch(`/audit/task/update/${tid}`, payload);
           fetchReport(id);
         } catch (updateError) {
-          console.error("Error updating task status:", updateError);
+          toast.error(`${error.status} ${error.response.data.message}`);
         }
 
       }
     } catch (error) {
-
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   }
 

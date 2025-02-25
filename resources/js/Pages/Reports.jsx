@@ -33,15 +33,13 @@ const Reports = ({ auth }) => {
     )
   }
 
-  const { theme } = useStateContext();
-
   const [users, setUsers] = useState([]);
   const fetchUsers = async () => {
     try {
       const response = await axios.get('/user/get');
-      setUsers(filterArray(response.data, 'type', [2054, 2055]));
+      setUsers(filterArray(response.data.data, 'type', [2054, 2055]));
     } catch (error) {
-      toast.error(error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   }
 
@@ -49,9 +47,9 @@ const Reports = ({ auth }) => {
   const fetchTasks = async () => {
     try {
       const response = await axios.get('/audit/task/get');
-      setTasks(response.data);
+      setTasks(response.data.data);
     } catch (error) {
-      toast.error(error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   }
 
@@ -59,9 +57,9 @@ const Reports = ({ auth }) => {
   const fetchReports = async () => {
     try {
       const response = await axios.get('/audit/report/get');
-      setReports(response.data);
+      setReports(response.data.data);
     } catch (error) {
-      toast.error(error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   }
 
@@ -70,12 +68,6 @@ const Reports = ({ auth }) => {
     fetchTasks();
     fetchReports();
   }, [])
-
-  useEffect(() => {
-    if (users.length !== 0) {
-      //console.log(convertPermissions(users[0].permissions)[0][100]);
-    }
-  }, [users])
 
   const handleReportClick = (id) => {
     router.get('/reports/view', { id: id });
@@ -125,29 +117,3 @@ const Reports = ({ auth }) => {
 }
 
 export default Reports;
-
-/* const auditorColDefs = [
-  { field: "id", filter: true, flex: 1, minWidth: 70, maxWidth: 90, },
-  { field: "name", filter: true, flex: 2, minWidth: 200 },
-  {
-    field: "task", filter: true, flex: 1, minWidth: 70, maxWidth: 90,
-    cellRenderer: (params) => {
-      const [tasks, setTasks] = useState([]);
-      useEffect(() => {
-        const fetchUsers = async () => {
-          try {
-            const response = await axios.get(`/audit/user/task/get/${params.data.id}`);
-            setTasks(response.data);
-          } catch (error) {
-            toast.error("Failed to fetch tasks");
-          }
-        };
-
-        fetchUsers();
-      }, [params.data.id]);
-      return (
-        <p>{tasks?.length === 0 ? 'none' : tasks?.length}</p>
-      )
-    }
-  },
-]; */

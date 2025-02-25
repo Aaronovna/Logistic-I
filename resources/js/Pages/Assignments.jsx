@@ -7,7 +7,7 @@ import { Card2 } from "@/Components/Cards";
 import { auditTaskStatus } from "@/Constants/status";
 import { dateTimeFormatShort } from "@/Constants/options";
 import { filterArray } from "@/functions/filterArray";
-import { TbClockExclamation, TbCalendar } from "react-icons/tb";
+import { TbClockExclamation } from "react-icons/tb";
 
 const Assignments = ({ auth }) => {
   if (!hasAccess(auth.user.type, [2050, 2051, 2054, 2055])) {
@@ -16,15 +16,13 @@ const Assignments = ({ auth }) => {
     )
   }
 
-  const { theme } = useStateContext();
-
   const [tasks, setTasks] = useState([]);
   const fetchUsers = async (id) => {
     try {
       const response = await axios.get(`/audit/user/task/get/${id}`);
-      setTasks(response.data);
+      setTasks(response.data.data);
     } catch (error) {
-      toast.error("Failed to fetch tasks");
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 

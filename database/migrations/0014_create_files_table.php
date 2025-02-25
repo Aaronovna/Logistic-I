@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('files', function (Blueprint $table) {
             $table->id();
-            $table->string('name');  // Original file name
-            $table->string('path');  // Stored file path
-            $table->string('type');  // File type (image, video, etc.)
-            $table->bigInteger('size'); // File size in bytes
+            $table->string('name');
+            $table->string('path');
+            $table->string('type');
+            $table->bigInteger('size');
             $table->timestamps();
         });
     }

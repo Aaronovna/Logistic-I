@@ -11,7 +11,7 @@ import { dateFormatLong, dateTimeFormatShort } from "@/Constants/options";
 
 import { TbCloudUpload } from "react-icons/tb";
 import { TbX } from "react-icons/tb";
-import updateStatus from "@/api/updateStatus";
+import useUpdateStatus from "@/api/useUpdateStatus";
 
 const AssignmentsView = ({ auth }) => {
   if (!hasAccess(auth.user.type, [2050, 2051, 2054, 2055])) {
@@ -20,7 +20,7 @@ const AssignmentsView = ({ auth }) => {
     )
   }
 
-  const { theme } = useStateContext();
+  const { updateStatus } = useUpdateStatus();
   const { props } = usePage();
 
   const { id } = props;
@@ -41,11 +41,11 @@ const AssignmentsView = ({ auth }) => {
     setLoading(true); // Start loading
     try {
       const response = await axios.get(`/audit/task/get/${id}`);
-      setTask(response.data);
+      setTask(response.data.data);
     } catch (error) {
-      console.error("Error fetching task:", error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
@@ -53,14 +53,19 @@ const AssignmentsView = ({ auth }) => {
     fetchAssignment(id);
   }, []);
 
-  const handleAccept = (id) => {
-    updateStatus(`/audit/task/update/${id}`, { status: 'In Progress' }, () => fetchAssignment(id));
+  const handleAccept = async (id) => {
+    const response = await updateStatus(`/audit/task/update/${id}`, { status: 'In Progress' });
+
+    if (response && response.status === 200) {
+      fetchAssignment(id);
+      toast.success(response.data.message);
+    }
   }
 
-  const [files, setFiles] = useState([]);  // Store selected files
+  const [files, setFiles] = useState([]);
 
   const handleFileChange = (event) => {
-    setFiles([...files, ...event.target.files]); // Append new files to the list
+    setFiles([...files, ...event.target.files]);
   };
   const removeFile = (index) => {
     setFiles(files.filter((_, i) => i !== index));
@@ -78,62 +83,51 @@ const AssignmentsView = ({ auth }) => {
   const handleReportSubmit = async (e) => {
     e.preventDefault();
 
-    // Ensure reportFormData is populated before file upload
     if (!reportFormData.location || !reportFormData.details || !reportFormData.final_comment) {
-      alert("Please fill in all required fields before uploading files.");
+      toast.error("Please fill in all required fields before uploading files.");
       return;
     }
 
-    // Ensure files are selected before uploading
     if (files.length === 0) {
-      alert("Please select files first.");
+      toast.error("Please select files first.");
       return;
     }
 
     const formData = new FormData();
-    files.forEach(file => formData.append("files[]", file)); // Append multiple files
+    files.forEach(file => formData.append("files[]", file));
 
     try {
-      // Upload files first
-      const response = await axios.post("/file/store", formData, {
+      const fileUploadResponse = await axios.post("/file/store", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      // Collect file IDs (or paths) from the response and update reportFormData
-      const uploadedFiles = response.data.files; // Assuming this is the response format
+      if (fileUploadResponse.status === 201) {
+        const uploadedFiles = fileUploadResponse.data.files;
+        const fileIds = uploadedFiles.map(file => file.id);
 
-      // Collect file IDs (or paths) from the response and update reportFormData
-      const fileIds = uploadedFiles.map(file => file.id);
+        const reportPayload = {
+          location: reportFormData.location,
+          details: reportFormData.details,
+          final_comment: reportFormData.final_comment,
+          task_id: reportFormData.task_id,
+          review_status: 'Pending Review',
+          files: JSON.stringify(fileIds),
+        }
 
-      const reportPayload = {
-        location: reportFormData.location,
-        details: reportFormData.details,
-        final_comment: reportFormData.final_comment,
-        task_id: reportFormData.task_id,
-        review_status: 'Pending Review',
-        files: JSON.stringify(fileIds),
-      }
+        const reportResponse = await axios.post('/audit/report/create', reportPayload);
 
-      setFiles([]); // Clear selected files after upload
+        if (reportResponse.status === 200) {
+          const payload = { status: 'Pending Review' };
 
-      // Send report form data (with populated file_ids)
-      const reportResponse = await axios.post('/audit/report/create', reportPayload);
-
-      // If the report creation is successful, update the task status
-      if (reportResponse.status === 200) {
-        const payload = {
-          status: 'Pending Review'
-        };
-
-        try {
           const updateResponse = await axios.patch(`/audit/task/update/${id}`, payload);
+
           fetchAssignment(id);
-        } catch (updateError) {
-          console.error("Error updating task status:", updateError);
         }
       }
     } catch (error) {
-      console.error("Error uploading files or creating report:", error);
+      toast.error(`${error.status} ${error.response.data.message}`);
+    } finally {
+      setFiles([]);
     }
   };
 
@@ -144,7 +138,7 @@ const AssignmentsView = ({ auth }) => {
 
       // If report is found, set it
       if (response.status === 200) {
-        setReport(response.data);
+        setReport(response.data.data);
       }
     } catch (error) {
       // If there's a 404 error (report not found), handle it gracefully
@@ -170,7 +164,7 @@ const AssignmentsView = ({ auth }) => {
       const requests = JSON.parse(report.files).map(id => axios.get(`/file/get/${id}`));
       const responses = await Promise.all(requests);
 
-      setEvidences(responses.map(response => response.data));
+      setEvidences(responses.map(response => response.data.data));
     } catch (error) {
       console.error("Error fetching images:", error);
     }
@@ -215,7 +209,7 @@ const AssignmentsView = ({ auth }) => {
               }
             </div>
           </div>
-          
+
           {task?.status === "Pending" || loading ? null :
             <div className="border-card p-8 mt-4">
               <div className="flex mb-6">
