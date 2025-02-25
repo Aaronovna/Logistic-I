@@ -13,7 +13,7 @@ class PositionController extends Controller
     public function index()
     {
         $positions = Position::all();
-        return response()->json($positions);
+        return response()->json(['data' => $positions], 200);
     }
 
     /**
@@ -21,15 +21,13 @@ class PositionController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255|unique:positions,name'
         ]);
 
-        $position = Position::create([
-            'name' => $request->name,
-        ]);
+        $position = Position::create($validatedData);
 
-        return response()->json($position);
+        return response()->json(['message' => 'Position created successfully', 'data' => $position], 201);
     }
 
     /**
@@ -37,7 +35,13 @@ class PositionController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $position = Position::find($id);
+
+        if (!$position) {
+            return response()->json(['message' => 'Position not found'], 404);
+        }
+
+        return response()->json(['data' => $position], 200);
     }
 
     /**
@@ -45,19 +49,19 @@ class PositionController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
+        $position = Position::find($id);
+
+        if (!$position) {
+            return response()->json(['message' => 'Position not found'], 404);
+        }
+
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255|unique:positions,name'
         ]);
 
-        $position = Position::findOrFail($id);
+        $position->update($validatedData);
 
-        $position->name = $request->input('name');
-        $position->save();
-
-        return response()->json([
-            'message' => 'Position updated successfully',
-            'position' => $position
-        ], 200);
+        return response()->json(['message' => 'Position updated successfully', 'data' => $position], 200);
     }
 
     /**
@@ -65,22 +69,33 @@ class PositionController extends Controller
      */
     public function destroy(string $id)
     {
-        $position = Position::findOrFail($id);
+        $position = Position::find($id);
+
+        if (!$position) {
+            return response()->json(['message' => 'Position not found'], 404);
+        }
+
         $position->delete();
+
+        return response()->json(['message' => 'Position deleted successfully'], 200);
     }
 
-    public function update_permission(Request $request, string $id)
+    public function updatePermission(Request $request, string $id)
     {
-        $request->validate([
+        $position = Position::find($id);
+
+        if (!$position) {
+            return response()->json(['message' => 'Category not found'], 404);
+        }
+
+        $validatedData = $request->validate([
             'permissions' => 'required|array', // Ensure 'permissions' is an array
             'permissions.*' => 'array', // Each item in the 'permissions' array should be an array
             'permissions.*.*' => 'boolean' // Each value in the array should be a boolean
         ]);
 
-        $position = Position::findOrFail($id); // Throws 404 if the position is not found
-
         // Retrieve the permissions from the request
-        $newPermissions = $request->input('permissions');
+        $newPermissions = $validatedData['permissions'];
 
         // Process the permissions data
         $processedPermissions = [];
@@ -91,12 +106,8 @@ class PositionController extends Controller
         }
 
         $position->permissions = $processedPermissions;
-
         $position->save();
 
-        return response()->json([
-            'message' => 'Position permissions updated successfully!',
-            'permissions' => $position->permissions
-        ], 200);
+        return response()->json(['message' => 'Position permissions updated successfully', 'data' => $position->permissions], 200);
     }
 }

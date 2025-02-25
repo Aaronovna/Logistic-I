@@ -16,7 +16,7 @@ class UserController extends Controller
     public function index()
     {
         $users = User::with(['position'])->get();
-        return $users;
+        return response()->json(['data' => $users], 200);
     }
 
     /**
@@ -24,21 +24,19 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
+            'email' => 'required|string|lowercase|email|max:255|unique:users,email',
             'password' => ['required', Rules\Password::defaults()],
         ]);
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name' => $validatedData['name'],
+            'email' => $validatedData['email'],
+            'password' => Hash::make($validatedData['password']),
         ]);
 
-        return response()->json([
-            'message' => 'User created successfully',
-        ], 200);
+        return response()->json(['message' => 'User created successfully', 'data' => $user], 201);
     }
 
     /**
@@ -46,7 +44,13 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        return response()->json(['data' => $user], 200);
     }
 
     /**
@@ -54,22 +58,19 @@ class UserController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        // Validate incoming request
-        $validated = $request->validate([
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $validatedData = $request->validate([
             'position_id' => 'required|exists:positions,id',
         ]);
 
-        // Find user by ID or fail
-        $user = User::findOrFail($id);
+        $user->update($validatedData);
 
-        // Update user's position_id
-        $user->position_id = $validated['position_id'];
-        $user->save(); // Now actually saving changes
-
-        return response()->json([
-            'message' => 'User updated successfully',
-            'user' => $user // Returning updated user data
-        ], 200);
+        return response()->json(['message' => 'User updated successfully', 'data' => $user], 200);
     }
 
     /**
@@ -77,35 +78,41 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        $user = User::findOrFail($id);
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
         $user->delete();
+
+        return response()->json(['message' => 'User deleted successfully'], 200);
     }
 
     public function autoAssignAuditor()
     {
         // Step 1: Fetch auditors with their active task count (non-completed tasks)
-        $auditors = User::where('type', 2055) // Auditor type = 2055
+        $auditors = User::where('type', 2055)
             ->withCount([
                 'auditTasks' => function ($query) {
-                    $query->where('status', '!=', 'Completed'); // Count non-completed tasks only
+                    $query->where('status', '!=', 'Completed');
                 }
             ])
-            ->orderBy('audit_tasks_count', 'asc') // Fewest tasks first
+            ->orderBy('audit_tasks_count', 'asc')
             ->get();
 
         // Step 2: Get the last assigned auditor
         $lastAssignedAuditor = AuditTask::whereNotNull('assigned_to')
-            ->latest('updated_at') // Use updated_at for most recent task
+            ->latest('updated_at')
             ->value('assigned_to');
 
         // Step 3: Apply round-robin fallback to avoid repeated assignments
         $selectedAuditor = $auditors->firstWhere('id', '>', $lastAssignedAuditor) ?? $auditors->first();
 
-        // Final check
         if (!$selectedAuditor) {
             return response()->json(['error' => 'No available auditor'], 404);
         }
 
-        return $selectedAuditor->id;
+        return response()->json(['data' => $selectedAuditor], 200);
     }
 }

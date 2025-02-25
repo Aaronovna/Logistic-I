@@ -23,8 +23,6 @@ import { useStateContext } from '@/context/contextProvider';
 import { generatePassword } from '@/functions/passwordGenerator';
 import { convertPermissions } from '@/functions/permissionsConverter';
 
-import { userToastMessages, positionToastMessages } from '@/Constants/toastMessages';
-
 const dummyEmployeesData = [
   {
     fname: 'Saika',
@@ -82,13 +80,12 @@ export default function User({ auth }) {
     e.preventDefault();
     try {
       const response = await axios.patch(`/position/update/permission/${positionSelectedData.id}`, { permissions: selectPositionPermissionsForm });
-
-      toast.success(positionToastMessages.update_PositionPermission.success);
       fetchPositions();
       fetchUsers();
       setOpenEditPositionPermissionsModal(false);
+      toast.success(response.data.message);
     } catch (error) {
-      toast.error(positionToastMessages.update_PositionPermission.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   }
 
@@ -117,8 +114,9 @@ export default function User({ auth }) {
     try {
       const response = await axios.patch(`/user/update/${userSelectedData.id}`, { position_id: positionId });
       fetchUsers();
+      toast.success(response.data.message);
     } catch (error) {
-
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   }
 
@@ -183,13 +181,12 @@ export default function User({ auth }) {
     e.preventDefault();
     try {
       const response = await axios.post('/position/create', { name: addPositionName });
-
       setAddPositionName("");
-      toast.success(positionToastMessages.store.success);
       fetchPositions();
       setOpenAddPositionModal(false);
+      toast.success(response.data.message);
     } catch (error) {
-      toast.error(positionToastMessages.store.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -197,13 +194,12 @@ export default function User({ auth }) {
     e.preventDefault();
     try {
       const response = await axios.patch(`/position/update/${positionSelectedData.id}`, { name: editPositionName });
-
-      toast.success(positionToastMessages.update.success);
       setEditPositionName("");
       fetchPositions();
       setOpenEditPositionModal(false);
+      toast.success(response.data.message);
     } catch (error) {
-      toast.error(positionToastMessages.update.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -212,9 +208,9 @@ export default function User({ auth }) {
       await axios.delete(`/position/delete/${id}}`);
       fetchPositions();
       setOpenEditPositionModal(false);
-      toast.success(positionToastMessages.destroy.success);
+      toast.success(response.data.message);
     } catch (error) {
-      toast.error(positionToastMessages.destroy.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -222,12 +218,11 @@ export default function User({ auth }) {
     e.preventDefault();
     try {
       const response = await axios.post('/user/create', addUserFormData);
-
-      toast.success(userToastMessages.store.success);
       fetchUsers();
       setOpenAddUserModal(false);
+      toast.success(response.data.message);
     } catch (error) {
-      toast.error(userToastMessages.store.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -235,9 +230,9 @@ export default function User({ auth }) {
     try {
       await axios.delete(`/user/delete/${id}}`);
       fetchUsers();
-      toast.success(userToastMessages.destroy.success);
+      toast.success(response.data.message);
     } catch (error) {
-      toast.error(userToastMessages.destroy.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -269,18 +264,18 @@ export default function User({ auth }) {
   const fetchUsers = async () => {
     try {
       const response = await axios.get('/user/get');
-      setUsers(response.data);
+      setUsers(response.data.data);
     } catch (error) {
-      toast.error(userToastMessages.show.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
   const fetchPositions = async () => {
     try {
       const response = await axios.get('/position');
-      setPositions(response.data);
+      setPositions(response.data.data);
     } catch (error) {
-      toast.error(positionToastMessages.show.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -365,11 +360,15 @@ export default function User({ auth }) {
                 <p className='text-xl font-semibold h-fit' style={{ color: theme.text }}>User Information</p>
               </span>
               <div className='border-card h-96 p-4 relative overflow-hidden flex flex-col'>
-                {userSelectedData ? null :
+                {!userSelectedData || userSelectedData.email_verified_at === null ? (
                   <div className='absolute top-0 left-0 w-full h-full bg-black/10 backdrop-blur-md z-10 flex items-center justify-center'>
-                    <p className='text-2xl font-medium tracking-wider text-gray-500'>Select user first</p>
+                    {userSelectedData ? (
+                      <p className='text-2xl font-medium tracking-wider text-gray-500'>User not verified yet</p>
+                    ) : (
+                      <p className='text-2xl font-medium tracking-wider text-gray-500'>Select a user first</p>
+                    )}
                   </div>
-                }
+                ) : null}
                 <p className='text-lg font-medium ml-1' style={{ color: theme.text }}>{userSelectedData ? userSelectedData.name : '-'}</p>
                 <p className='text-gray-600 ml-1'>{userSelectedData?.position?.name ? userSelectedData.position?.name : 'No position set yet'}</p>
                 <div className='my-2 relative border-card grid grid-cols-2 h-56 overflow-y-auto p-2'>
