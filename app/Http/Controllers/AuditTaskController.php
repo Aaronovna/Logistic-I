@@ -15,17 +15,20 @@ class AuditTaskController extends Controller
     {
         $tasks = AuditTask::with(['assignedToUser', 'assignedByUser'])
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($selectedTask) {
+                $task = $selectedTask->toArray();
 
-        // Append the assigned user names to each task
-        $tasks->each(function ($task) {
-            $task->assigned_to_name = $task->assignedToUser->name ?? 'N/A';
-            $task->assigned_by_name = $task->assignedByUser->name ?? 'N/A';
-        });
+                $task['assigned_to_name'] = $selectedTask->assignedToUser->name ?? 'N/A';
+                $task['assigned_by_name'] = $selectedTask->assignedByUser->name ?? 'N/A';
 
-        return response()->json($tasks);
+                unset($task['assigned_by_user'], $task['assigned_to_user']);
+
+                return $task;
+            });
+
+        return response()->json(['data' => $tasks], 200);
     }
-
 
     /**
      * Store a newly created resource in storage.
@@ -42,13 +45,9 @@ class AuditTaskController extends Controller
             'assigned_by' => 'required|exists:users,id'
         ]);
 
-        // Create the new DispatchMaterial
         $task = AuditTask::create($validatedData);
 
-        return response()->json([
-            'message' => 'Task created successfully.',
-            'data' => $task,
-        ], 201);
+        return response()->json(['message' => 'Task created successfully.', 'data' => $task,], 201);
     }
 
     /**
@@ -56,37 +55,20 @@ class AuditTaskController extends Controller
      */
     public function show(string $id)
     {
-        $task = AuditTask::with(['assignedToUser', 'assignedByUser'])->find($id);
+        $selectedTask = AuditTask::with(['assignedToUser', 'assignedByUser'])->find($id);
 
-        if (!$task) {
+        if (!$selectedTask) {
             return response()->json(['error' => 'Task not found'], 404);
         }
 
-        // Add the assigned user names
-        $task->assigned_to_name = $task->assignedToUser->name ?? 'N/A';
-        $task->assigned_by_name = $task->assignedByUser->name ?? 'N/A';
+        $task = $selectedTask->toArray();
 
-        return response()->json($task);
-    }
+        $task['assigned_to_name'] = $selectedTask->assignedToUser->name ?? 'N/A';
+        $task['assigned_by_name'] = $selectedTask->assignedByUser->name ?? 'N/A';
 
-    public function showUserTasks(string $userId)
-    {
-        // Validate the user ID (Optional: Check if the user exists)
-        if (!User::find($userId)) {
-            return response()->json(['error' => 'User not found'], 404);
-        }
+        unset($task['assigned_by_user'], $task['assigned_to_user']);
 
-        $tasks = AuditTask::where('assigned_to', $userId)
-            ->with(['assignedToUser', 'assignedByUser'])
-            ->get();
-
-        // Append the assigned user names
-        $tasks->each(function ($task) {
-            $task->assigned_to_name = $task->assignedToUser->name ?? 'N/A';
-            $task->assigned_by_name = $task->assignedByUser->name ?? 'N/A';
-        });
-
-        return response()->json($tasks);
+        return response()->json(['data' => $task], 200);
     }
 
     /**
@@ -94,22 +76,20 @@ class AuditTaskController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $task = AuditTask::find($id);
+
+        if (!$task) {
+            return response()->json(['message' => 'Task not found'], 404);
+        }
+
         $validatedData = $request->validate([
             'assigned_to' => 'sometimes|exists:users,id',
             'status' => 'sometimes|string',
         ]);
 
-        // Find the category by its ID
-        $task = AuditTask::findOrFail($id);
+        $task->update($validatedData);
 
-        $task->fill($validatedData);
-        $task->save();
-
-        // Return a success response
-        return response()->json([
-            'message' => 'Updated successfully',
-            'task' => $task
-        ], 200);
+        return response()->json(['message' => 'Task updated successfully', 'data' => $task], 200);
     }
 
     /**
@@ -119,16 +99,35 @@ class AuditTaskController extends Controller
     {
         $task = AuditTask::find($id);
 
-        // Check if the record exists
         if (!$task) {
-            return response()->json(['message' => 'Task not found.'], 404);
+            return response()->json(['message' => 'Task not found'], 404);
         }
 
-        // Delete the DispatchMaterial
         $task->delete();
 
-        return response()->json([
-            'message' => 'Task deleted successfully.',
-        ]);
+        return response()->json(['message' => 'Task deleted successfully'], 200);
+    }
+
+    public function indexByUser(string $userId)
+    {
+        if (!User::find($userId)) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        $tasks = AuditTask::with(['assignedToUser', 'assignedByUser'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($selectedTask) {
+                $task = $selectedTask->toArray();
+
+                $task['assigned_to_name'] = $selectedTask->assignedToUser->name ?? 'N/A';
+                $task['assigned_by_name'] = $selectedTask->assignedByUser->name ?? 'N/A';
+
+                unset($task['assigned_by_user'], $task['assigned_to_user']);
+
+                return $task;
+            });
+
+        return response()->json(['data' => $tasks], 200);
     }
 }

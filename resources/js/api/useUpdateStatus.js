@@ -19,7 +19,7 @@ const useUpdateStatus = () => {
             return response;
         } catch (err) {
             setError(err);
-            toast.error(`${error.status} ${error.response.data.message}`);
+            toast.error(`${err.status} ${err.response.data.message}`);
         } finally {
             setLoading(false);
         }

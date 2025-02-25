@@ -15,7 +15,7 @@ import { getStatusStep } from '@/Constants/status';
 import { TbPlus } from 'react-icons/tb';
 import axios from 'axios';
 import Status from '@/Components/Status';
-import updateStatus from '@/api/useUpdateStatus';
+import useUpdateStatus from '@/api/useUpdateStatus';
 
 const Tasks = ({ auth }) => {
   if (!hasAccess(auth.user.type, [2050, 2051, 2054, 2055])) {
@@ -24,6 +24,7 @@ const Tasks = ({ auth }) => {
     )
   }
 
+  const { updateStatus } = useUpdateStatus();
   const { theme } = useStateContext();
   const [openCreateTaskModal, setOpenCreateTaskModal] = useState(false);
 
@@ -43,9 +44,9 @@ const Tasks = ({ auth }) => {
   const fetchTasks = async () => {
     try {
       const response = await axios.get('/audit/task/get');
-      setTasks(response.data);
+      setTasks(response.data.data);
     } catch (error) {
-      toast.error(error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   }
 
@@ -55,7 +56,7 @@ const Tasks = ({ auth }) => {
       const response = await axios.get('/user/get');
       setAuditors(filterArray(response.data.data, 'type', [2055]));
     } catch (error) {
-      toast.error(error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   }
 
@@ -82,8 +83,9 @@ const Tasks = ({ auth }) => {
       const response = await axios.post('audit/task/create', payload)
       fetchTasks();
       setOpenCreateTaskModal(false);
+      toast.success(response.data.message);
     } catch (error) {
-
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   }
 
@@ -96,20 +98,29 @@ const Tasks = ({ auth }) => {
 
   const handleDeleteTask = async (id) => {
     try {
-      const response = axios.delete(`/audit/task/delete/${id}`);
+      const response = await axios.delete(`/audit/task/delete/${id}`);
       fetchTasks();
       setOpenViewTaskModal(false);
+      toast.success(response.data.message);
     } catch (error) {
-
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   }
 
   const handleCancelTask = async (id) => {
     const url = `/audit/task/update/${id}`;
-    updateStatus(url, { status: 'Canceled' }, () => {
-      fetchTasks();
-      setOpenViewTaskModal(false);
-    });
+
+    try {
+      const response = await updateStatus(url, { status: 'Canceled' });
+
+      if (response && response.status === 200) {
+        fetchTasks();
+        setOpenViewTaskModal(false);
+        toast.success(response.data.message);
+      }
+    } catch (error) {
+      toast.error(`${error.status} ${error.response.data.message}`);
+    }
   }
 
   const [addTaskAuditorFormData, setAddTaskAuditorFormData] = useState({
@@ -123,8 +134,9 @@ const Tasks = ({ auth }) => {
       const response = await axios.patch(`/audit/task/update/${id}`, addTaskAuditorFormData);
       fetchTasks();
       setOpenViewTaskModal(false);
+      toast.success(response.data.message);
     } catch (error) {
-
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   }
 
@@ -132,24 +144,21 @@ const Tasks = ({ auth }) => {
     e.preventDefault();
 
     try {
-      // Fetch the auditor ID from the API
-      const response = await axios.get('/user/get/auditor/auto');
-            // If no auditor is found, handle the error
-      if (!response.data.data) {
-        throw new Error('No available auditor found.');
+      const autoAssignResponse = await axios.get('/user/get/auditor/auto');
+
+      if (autoAssignResponse.status === 200) {
+        try {
+          const response = await axios.patch(`/audit/task/update/${id}`, { assigned_to: autoAssignResponse.data.data.id });
+          fetchTasks();
+          setOpenViewTaskModal(false);
+          toast.success(response.data.message);
+        } catch (error) {
+          toast.error(`${error.status} ${error.response.data.message}`);
+        }
       }
 
-      // Update the task with the assigned auditor
-      await axios.patch(`/audit/task/update/${id}`, { assigned_to: response.data.data.id });
-
-      // Success feedback (optional)
-      console.log(`Task ${id} successfully assigned to auditor ${assigned_to}`);
-      toast.success('Task successfully assigned to auditor.');
-      fetchTasks();
-      setOpenViewTaskModal(false);
     } catch (error) {
-      console.error('Error assigning task:', error.response?.data || error.message);
-      toast.error(error.response?.data?.error || 'An error occurred while assigning the task.');
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -173,7 +182,7 @@ const Tasks = ({ auth }) => {
       user={auth.user}
     >
       <Head title="Tasks" />
-      <AuditLayout user={auth.user} header={<NavHeader headerName="Tasks"/>}>
+      <AuditLayout user={auth.user} header={<NavHeader headerName="Tasks" />}>
         <div className="content relative">
           <button className='hidden fixed z-10 rounded-full p-3 bg-white bottom-8 shadow-lg right-8 items-center'>
             <TbPlus size={28} />

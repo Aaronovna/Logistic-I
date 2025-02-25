@@ -155,7 +155,7 @@ Route::middleware(["auth", "verified"])->group(function () {
 
     Route::get('/audit/task/get', [AuditTaskController::class, 'index'])->name('auditTask.index');
     Route::get('/audit/task/get/{id}', [AuditTaskController::class, 'show'])->name('auditTask.show');
-    Route::get('/audit/user/task/get/{id}', [AuditTaskController::class, 'showUserTasks'])->name('auditTask.showUserTasks');
+    Route::get('/audit/user/task/get/{id}', [AuditTaskController::class, 'indexByUser'])->name('auditTask.indexByUser');
     Route::post('/audit/task/create', [AuditTaskController::class, 'store'])->name('auditTask.store');
     Route::patch('/audit/task/update/{id}', [AuditTaskController::class, 'update'])->name('auditTask.update');
     Route::delete('/audit/task/delete/{id}', [AuditTaskController::class, 'destroy'])->name('auditTask.destroy');

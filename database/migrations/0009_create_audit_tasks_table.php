@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('type');
-            $table->string('scope');
-            $table->string('description');
+            $table->text('scope');
+            $table->mediumText('description');
             $table->dateTime('startdate');
             $table->dateTime('deadline');
             $table->string('status')->default('Pending');
