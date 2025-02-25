@@ -24,6 +24,7 @@
         "vite": "^5.0"
     },
     "dependencies": {
+        "@google/generative-ai": "^0.22.0",
         "ag-charts-react": "^10.3.0",
         "ag-grid-react": "^32.1.0",
         "ol": "^10.4.0",

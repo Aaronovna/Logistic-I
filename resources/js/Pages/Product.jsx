@@ -7,6 +7,7 @@ import { Card2 } from '@/Components/Cards';
 import { ProductCard } from '@/Components/cards/ProductCard';
 import { feedbackVibrant } from "@/Constants/themes";
 import { productToastMessages } from '@/Constants/toastMessages';
+import { Badge } from '@/Components/Status';
 
 import { TbPlus } from "react-icons/tb";
 import { TbSearch } from "react-icons/tb";
@@ -14,6 +15,13 @@ import { TbPackage } from "react-icons/tb";
 import { TbPackages } from "react-icons/tb";
 import { TbCaretDownFilled } from "react-icons/tb";
 import { TbPackageOff } from "react-icons/tb";
+import { TbAlertTriangle } from 'react-icons/tb';
+import { TbSparkles } from 'react-icons/tb';
+import useGemini from '@/hooks/useGemini';
+import usePrediction from '@/hooks/usePrediction';
+import { generateDemandData } from './Dev';
+
+import IMAGE_PLACEHOLDER from "../../../public/assets/images/image-placeholder.png"
 
 const cardStyle = 'mb-2 snap-center mx-2 md:min-w-64 inline-block min-w-[100%]';
 
@@ -27,6 +35,12 @@ const Product = ({ auth }) => {
   const [products, setProducts] = useState([]);
   const [totalProductValue, setTotalProductValue] = useState(0);
   const [openAddProductModal, setOpenAddProductModal] = useState(false);
+  const { prompt, promptBuilder } = useGemini();
+  const [response, setResponse] = useState('');
+  const [viewReport, setViewReport] = useState(false);
+
+  const [prediction, setPrediction] = useState();
+  const { getPrediction } = usePrediction();
 
   const { theme } = useStateContext();
 
@@ -50,11 +64,6 @@ const Product = ({ auth }) => {
     } catch (error) {
       toast.error(productToastMessages.show.error, error);
     }
-  };
-
-  const updateData = () => {
-    fetchProducts();
-    fetchProductStats();
   };
 
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -113,7 +122,6 @@ const Product = ({ auth }) => {
     restock_point: '',
     category_id: '',
     supplier_id: '',
-    /* stock: 0, */
   });
 
   const handleAddProductInputChange = (e) => {
@@ -174,19 +182,91 @@ const Product = ({ auth }) => {
       product={product}
       key={index}
       list={['Edit', 'Delete']}
-      categories={categories}
-      suppliers={suppliers}
-      update={updateData}
+      onClick={() => onProductClick(product)}
+      className='mx-4 hover:scale-[102%] hover:shadow-md mb-3'
     />
   );
 
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [openViewProductModal, setOpenViewProductModal] = useState(false);
+
+  const onProductClick = (data) => {
+    setSelectedProduct(data);
+    setOpenViewProductModal(true);
+
+    let demands
+    if (data.id === 100000) {
+      demands = generateDemandData(30, 1, 10);
+    } else if (data.id === 100001) {
+      demands = generateDemandData(30, 30, 60);
+    } else if (data.id === 100002) {
+      demands = generateDemandData(30, 50, 100);
+    } else {
+      demands = generateDemandData(30, 1, 100);
+    }
+    getPrediction(data.id, demands, setPrediction);
+  }
+
+  const [openEditProductModal, setOpenEditProductModal] = useState(false);
+
+  const [editProductFormData, setEditProductFormData] = useState({});
+
+  const handleEditProductInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditProductFormData({ ...editProductFormData, [name]: value });
+  };
+
+  const handleEditProductSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.patch(`/product/update/${selectedProduct.id}`, editProductFormData);
+      toast.success(productToastMessages.update.success);
+      setOpenEditProductModal(false);
+    } catch (error) {
+      toast.error(productToastMessages.update.error, error);
+    }
+  };
+
+  const handleDeleteProduct = async (id) => {
+    try {
+      await axios.delete(`/product/delete/${id}}`);
+      update();
+      toast.success(productToastMessages.destroy.success);
+    } catch (error) {
+      toast.error(productToastMessages.destroy.error, error);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedProduct) {
+      setEditProductFormData({
+        name: selectedProduct.name,
+        model: selectedProduct.model,
+        brand: selectedProduct.brand,
+        description: selectedProduct.description,
+        image_url: selectedProduct.image_url,
+        price: selectedProduct.price,
+        restock_point: selectedProduct.restock_point,
+        category_id: selectedProduct.category_id,
+        supplier_id: selectedProduct.supplier_id,
+      })
+    }
+  }, [selectedProduct]);
+
+  const generateReport = () => {
+    if (!response) {
+      prompt(promptBuilder('Product', selectedProduct, instruction), setResponse);
+    }
+    setViewReport(true);
+  }
   return (
     <AuthenticatedLayout
       user={auth.user}
     >
       <Head title="Product" />
 
-      <InventoryLayout user={auth.user} header={<NavHeader headerName="Product"/>}>
+      <InventoryLayout user={auth.user} header={<NavHeader headerName="Product" />}>
         <div className="content">
           <div className='md:items-end mb-2 md:mb-0 md:gap-4 overflow-x-auto snap-mandatory snap-x pb-1 whitespace-nowrap'>
             <Card2 data={productStats?.totalStock} name="Total Stocks" className={cardStyle} Icon={TbPackages} iconColor={feedbackVibrant.info} />
@@ -232,13 +312,6 @@ const Product = ({ auth }) => {
               hidePage={!filteredProducts.length === 0}
             />
           </div>
-
-          {/* ALTERNATIVE LOGIC */}
-          {/* <div className=''>
-            {(filteredProducts && filteredProducts.length > 0 ? filteredProducts : products).map((product, index) => (
-              <ProductCard product={product} key={index} />
-            ))}
-          </div> */}
 
           <Modal show={openAddProductModal} onClose={() => setOpenAddProductModal(false)} maxWidth={'2xl'} name="Add new product">
             <div style={{ color: theme.text }}>
@@ -331,6 +404,134 @@ const Product = ({ auth }) => {
             </div>
           </Modal>
 
+          <Modal name={`${selectedProduct?.name} ${selectedProduct?.model}`} show={openViewProductModal} onClose={() => { setOpenViewProductModal(false); setResponse('') }}>
+            <div>
+              <div className={`relative w-full h-56 rounded-lg overflow-y-auto ${selectedProduct?.image_url ? 'bg-contain bg-no-repeat bg-center' : '[background-size:100%_100%]'}`}
+                style={{ backgroundImage: selectedProduct?.image_url ? `url(${selectedProduct?.image_url})` : `url(${IMAGE_PLACEHOLDER})` }}
+              >
+                <span className='absolute right-4 top-4'>
+                  {selectedProduct?.low_on_stock && selectedProduct?.stock != 0 ? <Badge name='Low on Stock' className='block' color='yellow' /> : null}
+                  {selectedProduct?.stock <= 0 ? <Badge Icon={TbAlertTriangle} name='Out of Stock ' className='block' color='red' /> : null}
+                </span>
+                {response && viewReport &&
+                  <div className='flex flex-col backdrop-blur-2xl bg-white/50 border p-4 rounded-lg overflow-y-auto min-h-full text-justify'>
+                    <p className='mb-2'>{response}</p>
+                    <button onClick={(viewReport) => setViewReport(!viewReport)} className='mt-auto w-fit ml-auto'>close</button>
+                  </div>
+                }
+              </div>
+
+              <div className='w-full flex mt-2 px-1 gap-2'>
+                <div className='w-1/2'>
+                  <p className='truncate'>
+                    <span className='font-medium mr-2 text-lg'>{selectedProduct?.name} {selectedProduct?.model}</span>
+                  </p>
+                  <p className=''>{selectedProduct?.brand}</p>
+                  <p className='text-gray-600 text-sm mt-4'>{selectedProduct?.category_name}</p>
+                  <p className='text-gray-600 font-medium text-sm'>{selectedProduct?.id}</p>
+                  <p className='font-medium text-gray-600 px-1 mt-4'>{selectedProduct?.supplier_name}</p>
+                </div>
+                <div className='w-1/2 flex flex-col'>
+                  <p className='flex justify-between text-xl'>
+                    <span className='font-semibold'><span className='font-medium text-base text-gray-300 mr-2'>Stock</span>{selectedProduct?.stock}</span>
+                    <span className='font-semibold'><span className='font-medium text-base text-gray-300 mr-2'>Restock Point</span>{selectedProduct?.restock_point}</span>
+                  </p>
+
+                  <p className='font-semibold text-xl mt-2 flex'><span className='font-medium text-base text-gray-300'>Safe Stock Level</span><TbSparkles className='mr-2 text-orange-300' /> {prediction}</p>
+                  <button className='border-card w-full mt-auto flex justify-center'
+                    onClick={generateReport}
+                  > Generate Report <TbSparkles size={20} className='ml-2 text-orange-300' /> </button>
+                </div>
+              </div>
+
+              <div className='w-full mt-2 flex gap-2'>
+                <button className='border-card w-full' onClick={() => handleDeleteProduct(selectedProduct?.id)}>Delete</button>
+                <button className='border-card w-full' onClick={() => setOpenEditProductModal(true)}>Edit</button>
+              </div>
+            </div>
+          </Modal>
+
+          <Modal show={openEditProductModal} onClose={() => setOpenEditProductModal(false)} maxWidth={'2xl'} name="Edit Product">
+            <div>
+              <form onSubmit={handleEditProductSubmit}>
+                <div className='flex gap-2 mb-4'>
+                  <div className='w-52 aspect-square border-card overflow-hidden'
+                    style={{ background: `url(${product_image_placeholder})`, backgroundSize: '100%' }}>
+                    {editProductFormData.image_url === ''
+                      ? null
+                      : <img className='w-full h-full' src={editProductFormData.image_url} alt="Can't load image :(" />
+                    }
+                  </div>
+                  <div className='flex flex-col flex-1 gap-2'>
+                    <select className='border-card' name="category_id" id="category_id" onChange={handleEditProductInputChange}>
+                      <option value={null}>Select Category</option>
+                      {categories.map((category, index) => {
+                        return (
+                          <option key={index} value={category.id}>{category.name}</option>
+                        )
+                      })}
+                    </select>
+                    <select className='border-card' name="supplier_id" id="supplier_id" onChange={handleEditProductInputChange}>
+                      <option value={null}>Select Supplier</option>
+                      {suppliers.map((supplier, index) => {
+                        return (
+                          <option key={index} value={supplier.id}>{supplier.name}</option>
+                        )
+                      })}
+                    </select>
+                    <div className='flex gap-2'>
+                      <input type="number" name="price" id="price" placeholder="Price"
+                        className='border-card'
+                        value={editProductFormData.price || 0}
+                        onChange={handleEditProductInputChange}
+                      />
+                      <input type="number" name="restock_point" id="restock_point" placeholder="Restock Point"
+                        className='border-card'
+                        value={editProductFormData.restock_point || 0}
+                        onChange={handleEditProductInputChange}
+                      />
+                    </div>
+                    <input type="text" name="image_url" id="image_url" placeholder="Image URL"
+                      className='border-card'
+                      value={editProductFormData.image_url || ''}
+                      onChange={handleEditProductInputChange}
+                    />
+                  </div>
+                </div>
+                <div className='flex flex-col gap-2'>
+                  <div className='flex gap-2'>
+                    <input type="text" name="name" id="name" placeholder="Name"
+                      className='border-card w-2/3'
+                      value={editProductFormData.name || ''}
+                      onChange={handleEditProductInputChange}
+                    />
+                    <input type="text" name="model" id="model" placeholder="Model"
+                      className='border-card w-1/3'
+                      value={editProductFormData.model || ''}
+                      onChange={handleEditProductInputChange}
+                    />
+                  </div>
+                  <input type="text" name="brand" id="brand" placeholder="Brand"
+                    className='border-card w-full'
+                    value={editProductFormData.brand || ''}
+                    onChange={handleEditProductInputChange}
+                  />
+                  <textarea type="text" name="description" id="description" placeholder="Description"
+                    rows={6}
+                    className='border-card w-full resize-none'
+                    value={editProductFormData.description || ''}
+                    onChange={handleEditProductInputChange}
+                  />
+                  <button
+                    style={{ background: theme.primary, borderColor: theme.border }}
+                    className='border-card p-2 font-medium ml-auto text-white'>
+                    Update
+                  </button>
+                </div>
+              </form>
+            </div>
+          </Modal>
+
         </div>
       </InventoryLayout>
     </AuthenticatedLayout>
@@ -338,3 +539,4 @@ const Product = ({ auth }) => {
 }
 
 export default Product;
+const instruction = 'the json provided will act as your source of information, now your task is make a report according to the given data, give recommendation about the product current stock level if it is overstock or understock. this is an inventory not for sale DO NOT DESCRIBE LIKE YOUR ENUMERATING THE FIELD'
