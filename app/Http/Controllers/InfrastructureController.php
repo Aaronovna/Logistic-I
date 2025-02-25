@@ -13,7 +13,7 @@ class InfrastructureController extends Controller
     public function index()
     {
         $infrastructures = Infrastructure::all();
-        return response()->json($infrastructures);
+        return response()->json(['data' => $infrastructures], 200);
     }
 
     /**
@@ -23,27 +23,17 @@ class InfrastructureController extends Controller
     {
         $validatedData = $request->validate([
             'type' => 'required|integer',
-            'name' => 'required|string|max:500',
-            'address' => 'required|string|max:500',
-            'image_url' => 'required|string|max:500',
+            'name' => 'required|string|max:255|unique:infrastructures,name',
+            'address' => 'required|string',
+            'image_url' => 'nullable|string',
             'access' => 'nullable|json',
             'lat' => 'nullable|numeric|min:-90|max:90',
             'lng' => 'nullable|numeric|min:-180|max:180',
         ]);
-        try {
-            // Create the record
-            $order = Infrastructure::create($validatedData);
 
-            return response()->json([
-                'message' => 'order created successfully',
-                'data' => $order,
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to create order',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+        $infrastructure = Infrastructure::create($validatedData);
+
+        return response()->json(['message' => 'Infrastructure created successfully', 'data' => $infrastructure,], 201);
     }
 
     /**
@@ -65,23 +55,24 @@ class InfrastructureController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $request = $request->validate([
-            'name' => 'required|string|max:500',
-            'address' => 'required|string|max:500',
-            'image_url' => 'required|string|max:500',
+        $infrastructure = Infrastructure::find($id);
+
+        if (!$infrastructure) {
+            return response()->json(['message' => 'Infrastructure not found'], 404);
+        }
+
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255|unique:infrastructures,name',
+            'address' => 'required|string',
+            'image_url' => 'nullable|string',
             'access' => 'nullable|json',
             'lat' => 'nullable|numeric|min:-90|max:90',
             'lng' => 'nullable|numeric|min:-180|max:180',
         ]);
 
-        $infrastructure = Infrastructure::findOrFail($id);
+        $infrastructure->update($validatedData);
 
-        $infrastructure->update($request);
-
-        return response()->json([
-            'message' => 'Infrastructure updated successfully',
-            'infrastructure' => $infrastructure
-        ], 200);
+        return response()->json(['message' => 'Infrastructure updated successfully', 'data' => $infrastructure], 200);
     }
 
     /**
@@ -89,6 +80,14 @@ class InfrastructureController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $infrastructure = Infrastructure::find($id);
+
+        if (!$infrastructure) {
+            return response()->json(['message' => 'Infrastructure not found'], 404);
+        }
+
+        $infrastructure->delete();
+
+        return response()->json(['message' => 'Infrastructure deleted successfully'], 200);
     }
 }

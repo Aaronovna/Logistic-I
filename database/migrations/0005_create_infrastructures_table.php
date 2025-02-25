@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('infrastructures', function (Blueprint $table) {
             $table->id();
-            $table->integer('type')->nullable();
+            $table->integer('type');
             $table->string('name');
-            $table->string('address');
+            $table->text('address');
             $table->json('access')->nullable();
-            $table->string('image_url');
+            $table->text('image_url')->nullable();
             $table->timestamps();
             $table->decimal('lng',10,7)->nullable();
             $table->decimal('lat',10,7)->nullable();

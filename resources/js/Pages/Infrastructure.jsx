@@ -85,10 +85,10 @@ export default function Infrastructure({ auth }) {
         lat: '',
       })
       setOpenAddInfrastructureModal(false);
+      toast.success(response.data.message);
       fetchInfrastructures();
-
     } catch (error) {
-
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   }
 
@@ -96,9 +96,9 @@ export default function Infrastructure({ auth }) {
   const fetchInfrastructures = async () => {
     try {
       const response = await axios.get('/infrastructure/get');
-      setInfrastructures(response.data);
+      setInfrastructures(response.data.data);
     } catch (error) {
-      toast.error(productToastMessages.show.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
