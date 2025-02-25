@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class CategoryController extends Controller
 {
@@ -13,8 +14,7 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::all();
-        return response()->json($categories);
-
+        return response()->json(['data' => $categories], 200);
     }
 
     /**
@@ -22,17 +22,14 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255|unique:categories,name',
             'description' => 'nullable|string',
         ]);
 
-        $category = Category::create([
-            'name' => $request->name,
-            'description' => $request->description,
-        ]);
+        $category = Category::create($validatedData);
 
-        return response()->json($category); // Return the created category as JSON
+        return response()->json(['message' => 'Category created successfully', 'data' => $category], 201);
     }
 
     /**
@@ -40,7 +37,13 @@ class CategoryController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $category = Category::find($id);
+
+        if (!$category) {
+            return response()->json(['message' => 'Category not found'], 404);
+        }
+
+        return response()->json(['data' => $category], 200);
     }
 
     /**
@@ -48,24 +51,20 @@ class CategoryController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
+        $category = Category::find($id);
+
+        if (!$category) {
+            return response()->json(['message' => 'Category not found'], 404);
+        }
+
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255|unique:categories,name,' . $id,
             'description' => 'nullable|string',
         ]);
 
-        // Find the category by its ID
-        $category = Category::findOrFail($id);
+        $category->update($validatedData);
 
-        // Update the category with new data
-        $category->name = $request->input('name');
-        $category->description = $request->input('description');
-        $category->save();
-
-        // Return a success response
-        return response()->json([
-            'message' => 'Category updated successfully',
-            'category' => $category
-        ], 200);
+        return response()->json(['message' => 'Category updated successfully', 'data' => $category], 200);
     }
 
     /**
@@ -73,16 +72,24 @@ class CategoryController extends Controller
      */
     public function destroy(string $id)
     {
-        // Find the category by ID
-        $category = Category::findOrFail($id);
-        // Delete the category
+        $category = Category::find($id);
+
+        if (!$category) {
+            return response()->json(['message' => 'Category not found'], 404);
+        }
+
         $category->delete();
+
+        return response()->json(['message' => 'Category deleted successfully'], 200);
     }
 
-    public function get_count()
+    /**
+     * Get category count with related products.
+     */
+    public function indexWithProductCount()
     {
-        $categorycount = Category::withCount('products')->get();
+        $categoryCount = Category::withCount('products')->get();
 
-        return response()->json($categorycount);
+        return response()->json(['data' => $categoryCount], 200);
     }
 }

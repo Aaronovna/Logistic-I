@@ -91,7 +91,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post('/category/create', [CategoryController::class, 'store'])->name('category.store');
     Route::delete('/category/delete/{id}', [CategoryController::class, 'destroy'])->name('category.destroy');
     Route::patch('category/update/{id}', [CategoryController::class, 'update'])->name('category.update');
-    Route::get('/category/get/count', [CategoryController::class, 'get_count'])->name('category.get_count');
+    Route::get('/category/get/count', [CategoryController::class, 'indexWithProductCount'])->name('category.indexWithProductCount');
 
     Route::get('/position', [PositionController::class, 'index'])->name('position.index');
     Route::post('/position/create', [PositionController::class, 'store'])->name('position.store');

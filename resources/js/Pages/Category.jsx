@@ -100,13 +100,12 @@ const Category = ({ auth }) => {
     e.preventDefault();
     try {
       const response = await axios.post('/category/create', addFormData);
-
       setAddFormData({ name: '', description: '' });
-      toast.success(categoryToastMessages.store.success);
       fetchCategories();
       setOpenAddModal(false);
+      toast.success(response.data.message);
     } catch (error) {
-      toast.error(categoryToastMessages.store.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -115,31 +114,31 @@ const Category = ({ auth }) => {
 
     try {
       const response = await axios.patch(`/category/update/${editFormData.id}`, editFormData);
-
-      toast.success(categoryToastMessages.update.success);
       fetchCategories();
       setOpenEditModal(false);
+      toast.success(response.data.message);
     } catch (error) {
-      toast.error(categoryToastMessages.update.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`/category/delete/${id}`);
+      const response = await axios.delete(`/category/delete/${id}`);
+      console.log(response)
       fetchCategories();
-      toast.success(categoryToastMessages.destroy.success);
+      toast.success(response.data.message);
     } catch (error) {
-      toast.error(categoryToastMessages.destroy.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
   const fetchCategories = async () => {
     try {
       const response = await axios.get('/category/get/count');
-      setCategories(response.data);
+      setCategories(response.data.data);
     } catch (error) {
-      console.error(categoryToastMessages.show.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
