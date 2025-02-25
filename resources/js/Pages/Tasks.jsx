@@ -15,7 +15,7 @@ import { getStatusStep } from '@/Constants/status';
 import { TbPlus } from 'react-icons/tb';
 import axios from 'axios';
 import Status from '@/Components/Status';
-import updateStatus from '@/api/updateStatus';
+import updateStatus from '@/api/useUpdateStatus';
 
 const Tasks = ({ auth }) => {
   if (!hasAccess(auth.user.type, [2050, 2051, 2054, 2055])) {
@@ -53,7 +53,7 @@ const Tasks = ({ auth }) => {
   const fetchAuditors = async () => {
     try {
       const response = await axios.get('/user/get');
-      setAuditors(filterArray(response.data, 'type', [2054, 2055]));
+      setAuditors(filterArray(response.data.data, 'type', [2055]));
     } catch (error) {
       toast.error(error);
     }
@@ -133,15 +133,14 @@ const Tasks = ({ auth }) => {
 
     try {
       // Fetch the auditor ID from the API
-      const { data: assigned_to } = await axios.get('/user/get/auditor/auto');
-
-      // If no auditor is found, handle the error
-      if (!assigned_to) {
+      const response = await axios.get('/user/get/auditor/auto');
+            // If no auditor is found, handle the error
+      if (!response.data.data) {
         throw new Error('No available auditor found.');
       }
 
       // Update the task with the assigned auditor
-      await axios.patch(`/audit/task/update/${id}`, { assigned_to });
+      await axios.patch(`/audit/task/update/${id}`, { assigned_to: response.data.data.id });
 
       // Success feedback (optional)
       console.log(`Task ${id} successfully assigned to auditor ${assigned_to}`);
