@@ -20,6 +20,7 @@ import { TbSparkles } from 'react-icons/tb';
 import useGemini from '@/hooks/useGemini';
 import usePrediction from '@/hooks/usePrediction';
 import { generateDemandData } from './Dev';
+import { product_intruction } from '@/Constants/instructions';
 
 import IMAGE_PLACEHOLDER from "../../../public/assets/images/image-placeholder.png"
 
@@ -256,7 +257,7 @@ const Product = ({ auth }) => {
 
   const generateReport = () => {
     if (!response) {
-      prompt(promptBuilder('Product', selectedProduct, instruction), setResponse);
+      prompt(promptBuilder('Product', selectedProduct, product_intruction), setResponse);
     }
     setViewReport(true);
   }
@@ -539,4 +540,3 @@ const Product = ({ auth }) => {
 }
 
 export default Product;
-const instruction = 'the json provided will act as your source of information, now your task is make a report according to the given data, give recommendation about the product current stock level if it is overstock or understock. this is an inventory not for sale DO NOT DESCRIBE LIKE YOUR ENUMERATING THE FIELD'
