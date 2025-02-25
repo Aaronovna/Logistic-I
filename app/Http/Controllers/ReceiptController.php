@@ -12,17 +12,23 @@ class ReceiptController extends Controller
      */
     public function index()
     {
-        $orders = Receipt::with(['audit_task', 'audit_task.assignedToUser','audit_task.auditReport','warehouse'])->orderBy('created_at', 'desc')->get();
+        $orders = Receipt::with(['audit_task.assignedToUser', 'audit_task.auditReport', 'warehouse'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($order) {
+                $receipt = $order->toArray();
 
-        // Append the assigned user names to each task
-        $orders->each(function ($order) {
-            $order->task_status = $order->audit_task->status ?? 'N/A';
-            $order->task_report_final_comment = $order->audit_task->auditReport->final_comment ?? 'N/A';
-            $order->task_assigned_to_name = $order->audit_task->assignedToUser->name ?? 'N/A';
-            $order->order_warehouse = $order->warehouse->name ?? 'N/A';
-        });
+                $receipt['task_status'] = $order->audit_task->status ?? 'N/A';
+                $receipt['task_report_final_comment'] = $order->audit_task->auditReport->final_comment ?? 'N/A';
+                $receipt['task_assigned_to_name'] = $order->audit_task->assignedToUser->name ?? 'N/A';
+                $receipt['order_warehouse'] = $order->warehouse->name ?? 'N/A';
 
-        return response()->json($orders);
+                unset($receipt['audit_task'], $receipt['warehouse']);
+
+                return $receipt;
+            });
+
+        return response()->json(['data' => $orders], 200);
     }
 
     /**
@@ -40,28 +46,34 @@ class ReceiptController extends Controller
             'warehouse_id' => 'required|exists:infrastructures,id',
             'accepted' => 'required|boolean',
         ]);
-        try {
-            // Create the record
-            $order = Receipt::create($validatedData);
 
-            return response()->json([
-                'message' => 'order created successfully',
-                'data' => $order,
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to create order',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+        $receipt = Receipt::create($validatedData);
+
+        return response()->json(['message' => 'Receipt created successfully', 'data' => $receipt], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id)
     {
-        //
+        $order = Receipt::with(['audit_task.assignedToUser', 'audit_task.auditReport', 'warehouse'])
+            ->find($id);
+
+        if (!$order) {
+            return response()->json(['message' => 'Receipt not found'], 404);
+        }
+
+        $receipt = $order->toArray();
+
+        $receipt['task_status'] = $order->audit_task->status ?? 'N/A';
+        $receipt['task_report_final_comment'] = $order->audit_task->auditReport->final_comment ?? 'N/A';
+        $receipt['task_assigned_to_name'] = $order->audit_task->assignedToUser->name ?? 'N/A';
+        $receipt['order_warehouse'] = $order->warehouse->name ?? 'N/A';
+
+        unset($receipt['audit_task'], $receipt['warehouse']);
+
+        return response()->json(['data' => $receipt], 200);
     }
 
     /**
@@ -69,22 +81,20 @@ class ReceiptController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $receipt = Receipt::find($id);
+
+        if (!$receipt) {
+            return response()->json(['message' => 'Receipt not found'], 404);
+        }
+
         $validatedData = $request->validate([
             'status' => 'sometimes|string',
             'task_id' => 'sometimes|exists:audit_tasks,id'
         ]);
 
-        // Find the category by its ID
-        $receipt = Receipt::findOrFail($id);
+        $receipt->update($validatedData);
 
-        $receipt->fill($validatedData);
-        $receipt->save();
-
-        // Return a success response
-        return response()->json([
-            'message' => 'Updated successfully',
-            'task' => $receipt
-        ], 200);
+        return response()->json(['message' => 'Category updated successfully', 'data' => $receipt], 200);
     }
 
     /**
@@ -92,6 +102,14 @@ class ReceiptController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $receipt = Receipt::find($id);
+
+        if (!$receipt) {
+            return response()->json(['message' => 'Receipt not found'], 404);
+        }
+
+        $receipt->delete();
+
+        return response()->json(['message' => 'Receipt deleted successfully'], 200);
     }
 }

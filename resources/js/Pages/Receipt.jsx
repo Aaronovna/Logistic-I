@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useStateContext } from '@/context/contextProvider';
 import { auditTaskStatus, getStatusStep } from '@/Constants/status';
-import updateStatus from '@/api/updateStatus';
+import useUpdateStatus from '@/api/useUpdateStatus';
 
-import InventoryLayout from '@/Layouts/InventoryLayout';;
+import InventoryLayout from '@/Layouts/InventoryLayout';
 import ReceiptCard from '@/Components/cards/ReceiptCard';
 import { UpcomingShipmentCard } from '@/Components/cards/ReceiptCard';
 import { gradients } from "@/Constants/themes";
@@ -27,7 +27,7 @@ const Receipt = ({ auth }) => {
       <Unauthorized />
     )
   }
-
+  const { updateStatus } = useUpdateStatus();
   const { theme, ordersDummyData } = useStateContext();
   const [OFD, setOFD] = useState([]);
 
@@ -38,7 +38,7 @@ const Receipt = ({ auth }) => {
     try {
       const response = await axios.get('/receipt/get');
 
-      const data = response.data.sort((a, b) => {
+      const data = response.data.data.sort((a, b) => {
         const dateA = a.order_date;
         const dateB = b.order_date;
 
@@ -55,7 +55,7 @@ const Receipt = ({ auth }) => {
       ]));
 
     } catch (error) {
-      console.error('error');
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -88,14 +88,14 @@ const Receipt = ({ auth }) => {
 
   const onReceived = (id) => {
     const url = `/receipt/update/${id}`;
-    updateStatus(url, { status: 'Delivered' })
+    updateStatus(url, { status: 'Delivered' });
     fetchReceivedShipment();
     setOpenShipmentDataModal(false);
   }
 
   const onDelivered = (id) => {
     const url = `/receipt/update/${id}`;
-    updateStatus(url, { status: 'Checked' })
+    updateStatus(url, { status: 'Checked' });
     fetchReceivedShipment();
     setOpenShipmentDataModal(false);
   }
@@ -107,14 +107,16 @@ const Receipt = ({ auth }) => {
         warehouse_id: data.warehouse_id,
         products: data.products,
       });
-      toast.success(response.data.message);
 
-      const url = `/receipt/update/${id}`;
-      updateStatus(url, { status: 'Success' });
-      fetchReceivedShipment();
-      setOpenShipmentDataModal(false);
+      if (response.status == 200) {
+        const url = `/receipt/update/${id}`;
+        updateStatus(url, { status: 'Success' });
+        fetchReceivedShipment();
+        setOpenShipmentDataModal(false);
+        toast.success(response.data.message);
+      }
     } catch (error) {
-      toast.error(error.response?.data?.error || 'An error occurred');
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -150,11 +152,13 @@ const Receipt = ({ auth }) => {
         const url = `/receipt/update/${data.id}`;
         updateStatus(url, { task_id: response.data.data.id, status: 'Auditing on progress' })
       }
+      toast.success(response.data.message);
     } catch (error) {
-
+      toast.error(`${error.status} ${error.response.data.message}`);
+    } finally {
+      fetchReceivedShipment();
+      setOpenShipmentDataModal(false);
     }
-    fetchReceivedShipment();
-    setOpenShipmentDataModal(false);
   }
 
   return (
@@ -162,7 +166,7 @@ const Receipt = ({ auth }) => {
       user={auth.user}
     >
       <Head title="Receipt" />
-      <InventoryLayout user={auth.user} header={<NavHeader headerName="Receipt"/>}>
+      <InventoryLayout user={auth.user} header={<NavHeader headerName="Receipt" />}>
         <div className="content">
           <div
             className='relative rounded-xl p-4 flex h-44 overflow-hidden shadow-xl cursor-pointer hover:shadow-2xl duration-200'

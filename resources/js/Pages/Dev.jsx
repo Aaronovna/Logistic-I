@@ -31,7 +31,7 @@ export default function Dev() {
   const fetchWarehouses = async () => {
     try {
       const response = await axios.get('/infrastructure/get');
-      setWarehouses(filterArray(response.data, 'type', [100]));
+      setWarehouses(filterArray(response.data.data, 'type', [100]));
     } catch (error) {
       console.error('Error fetching suppliers:', error);
     }
