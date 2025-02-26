@@ -17,10 +17,9 @@ export default function Dashboard({ auth }) {
       <Unauthorized />
     )
   }
-  
+
   const { theme } = useStateContext();
   const [productStats, setProductStats] = useState({});
-
 
   const fetchProductStats = async () => {
     try {
@@ -98,32 +97,15 @@ export default function Dashboard({ auth }) {
     >
       <Head title="Dashboard" />
 
-      <InventoryLayout user={auth.user} header={<NavHeader headerName="Dashboard"/>}>
+      <InventoryLayout user={auth.user} header={<NavHeader headerName="Dashboard" />}>
         <div className="content">
           <div className='flex gap-4'>
-            <Chart data={productStats?.productsByCategory} series={pieSeries} legendPosition='right' title='Product Stock' className='border-card w-1/2 shadow-md' />
-            <Chart data={productStats?.productsBySupplier && getTop5(productStats?.productsBySupplier)} series={barSeries} legendPosition='right' title='Supplier Distribution' className='border-card w-1/2 shadow-md' />
+            <Chart data={productStats?.productsByCategory} series={pieSeries} legendPosition='right' title='Product Stock' className='w-1/2' />
+            <Chart data={productStats?.productsBySupplier && getTop5(productStats?.productsBySupplier)} series={barSeries} legendPosition='right' title='Supplier Distribution' className='w-1/2' />
           </div>
 
           <div className='mt-4 flex gap-4 h-80'>
-            <Chart data={data} series={lineSeries} title='Stock Levels' className='border-card w-3/4 shadow-md' />
-            <div className='border-card shadow-md w-1/4 h-80' style={{ background: theme.background, borderColor: theme.border }}>
-              <p className='text-center my-2'>Out of Stock</p>
-              <div className='overflow-y-auto h-60'>
-                {
-                  productStats?.outOfStockProducts?.map((product, index) => {
-                    return (
-                      <div className='p-1' key={index}>
-                        <div className='mb-2 py-2'>
-                          <p className='font-semibold text-lg'>{`${product.name} ${product.model}`}</p>
-                        </div>
-                        <hr />
-                      </div>
-                    )
-                  })
-                }
-              </div>
-            </div>
+            <Chart data={data} series={lineSeries} title='Stock Levels' className='w-full' />
           </div>
 
           <div>
@@ -148,6 +130,23 @@ export default function Dashboard({ auth }) {
                     })
                   }
                 </div>
+              </div>
+            </div>
+            <div className='border-card shadow-md w-1/4 h-80' style={{ background: theme.background, borderColor: theme.border }}>
+              <p className='text-center my-2'>Out of Stock</p>
+              <div className='overflow-y-auto h-60'>
+                {
+                  productStats?.outOfStockProducts?.map((product, index) => {
+                    return (
+                      <div className='p-1' key={index}>
+                        <div className='mb-2 py-2'>
+                          <p className='font-semibold text-lg'>{`${product.name} ${product.model}`}</p>
+                        </div>
+                        <hr />
+                      </div>
+                    )
+                  })
+                }
               </div>
             </div>
           </div>

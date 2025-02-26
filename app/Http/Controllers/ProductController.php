@@ -130,6 +130,63 @@ class ProductController extends Controller
         return response()->json(['message' => 'Product deleted successfully'], 200);
     }
 
+    public function productEachCategory()
+    {
+        $categories = Category::with(['products:id,name,category_id,price'])
+            ->get()
+            ->map(function ($category) {
+                return [
+                    'category_id' => $category->id,
+                    'category_name' => $category->name,
+                    'products' => $category->products
+                ];
+            });
+
+        return response()->json(['data' => $categories], 200);
+    }
+
+    public function productEachSupplier()
+    {
+        $suppliers = Supplier::with(['products:id,name,supplier_id,price'])
+            ->get()
+            ->map(function ($supplier) {
+                return [
+                    'supplier_id' => $supplier->id,
+                    'supplier_name' => $supplier->name,
+                    'products' => $supplier->products
+                ];
+            });
+
+        return response()->json(['data' => $suppliers], 200);
+    }
+
+    public function recentProducts($limit = 5)
+    {
+        $recentProducts = Product::orderBy('created_at', 'desc')
+            ->take($limit)
+            ->get(['id', 'name', 'created_at']);
+
+        return response()->json(['data' => $recentProducts], 200);
+    }
+
+    public function mostExpensiveProducts($limit = 5)
+    {
+        $mostExpensiveProducts = Product::orderBy('price', 'desc')
+            ->take($limit)
+            ->get(['id', 'name', 'price']);
+
+        return response()->json(['data' => $mostExpensiveProducts], 200);
+    }
+
+    public function leastExpensiveProducts($limit = 5)
+    {
+        $leastExpensiveProducts = Product::orderBy('price', 'asc')
+            ->take($limit)
+            ->get(['id', 'name', 'price']);
+
+        return response()->json(['data' => $leastExpensiveProducts], 200);
+    }
+
     public function stats()
     {
         $totalProducts = Product::count();
