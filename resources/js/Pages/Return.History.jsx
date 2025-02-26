@@ -33,7 +33,7 @@ const ReturnHistory = ({ auth }) => {
   const fetchReturns = async () => {
     try {
       const response = await axios.get('/return/request/get');
-      setReturns(response.data);
+      setReturns(response.data.data);
     } catch (error) {
 
     }

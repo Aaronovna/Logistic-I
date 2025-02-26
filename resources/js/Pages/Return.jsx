@@ -3,7 +3,7 @@ import { Card2 } from "@/Components/Cards";
 import { useEffect, useState, useCallback } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { useStateContext } from "@/context/contextProvider";
-import updateStatus from "@/api/updateStatus";
+import useUpdateStatus from "@/api/useUpdateStatus";
 import Status from "@/Components/Status";
 import { returnStatus } from "@/Constants/status";
 import { dateFormatShort, dateTimeFormatShort } from "@/Constants/options";
@@ -18,14 +18,14 @@ const Return = ({ auth }) => {
   }
 
   const { themePreference, debugMode } = useStateContext();
-
+  const { updateStatus } = useUpdateStatus();
   const [returns, setReturns] = useState([]);
   const fetchReturns = async () => {
     try {
       const response = await axios.get('/return/request/get');
-      setReturns(filterArray(response.data, 'status', ['Completed', 'Canceled'], true));
+      setReturns(filterArray(response.data.data, 'status', ['Completed', 'Canceled'], true));
     } catch (error) {
-
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   }
 
@@ -33,9 +33,9 @@ const Return = ({ auth }) => {
   const fetchReturnedMaterials = async () => {
     try {
       const response = await axios.get('/return/get');
-      setReturnedMaterials(response.data);
+      setReturnedMaterials(response.data.data);
     } catch (error) {
-
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   }
 
@@ -60,21 +60,26 @@ const Return = ({ auth }) => {
   const [openDetailSection, setOpenDetailSection] = useState(false);
 
   const acceptReturn = async (id) => {
-    updateStatus(`/return/request/update/${id}`, { status: 'Request Approved' }, () => {
+    const response = await updateStatus(`/return/request/update/${id}`, { status: 'Request Approved' });
+
+    if (response.status === 200) {
       fetchReturns();
       fetchReturnedMaterials();
-    });
+    }
   }
 
   const deliverReturn = async (id) => {
-    updateStatus(`/return/request/update/${id}`, { status: 'Delivered' });
-    fetchReturns();
-    fetchReturnedMaterials();
+    const response = await updateStatus(`/return/request/update/${id}`, { status: 'Delivered' });
+
+    if (response.status === 200) {
+      fetchReturns();
+      fetchReturnedMaterials();
+    }
   }
 
   const onAccept = async (id, data) => {
     const materials = data.map(item => ({
-      return_id: id,  // Ensure return_id is passed for each material
+      return_id: id,
       name: item.name,
       category: item.category,
       quantity: item.quantityType === 'qty' ? item.value : null,
@@ -83,15 +88,20 @@ const Return = ({ auth }) => {
 
     try {
       const response = await axios.post('/return/create/bulk', { materials });
-
       toast.success(response.data.message);
 
-      const url = `/return/request/update/${id}`;
-      updateStatus(url, { status: 'Completed' });
-      fetchReturns();
-      fetchReturnedMaterials();
+      if (response.status === 200) {
+        const url = `/return/request/update/${id}`;
+        const updateResponse = await updateStatus(url, { status: 'Completed' });
+
+        if (updateResponse.status === 200) {
+          fetchReturns();
+          fetchReturnedMaterials();
+        }
+      }
+
     } catch (error) {
-      toast.error(error.response?.data?.error || 'An error occurred');
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
