@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('brand')->nullable();
             $table->string('model')->nullable();
-            $table->string('description')->nullable();
-            $table->string('image_url')->default('')->nullable();
+            $table->mediumText('description')->nullable();
+            $table->mediumText('image_url')->default('')->nullable();
             $table->decimal('price')->nullable();
             $table->integer('restock_point')->nullable();
             $table->timestamps();

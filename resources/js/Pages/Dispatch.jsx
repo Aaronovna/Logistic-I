@@ -27,7 +27,7 @@ const Dispatch = ({ auth }) => {
   const fetchRequests = async () => {
     try {
       const response = await axios.get('/request/get');
-      setRequests(filterArray(response.data, 'status', ['Completed', 'Request Rejected', 'Request Cancelled'], true));
+      setRequests(filterArray(response.data.data, 'status', ['Completed', 'Request Rejected', 'Request Cancelled'], true));
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
     }
@@ -36,7 +36,7 @@ const Dispatch = ({ auth }) => {
   const fetchDepotRequests = async () => {
     try {
       const response = await axios.get('/request/get/infrastructure/depot');
-      setDepotRequests(filterArray(response.data, 'status', ['Completed', 'Request Rejected', 'Request Cancelled'], true));
+      setDepotRequests(filterArray(response.data.data, 'status', ['Completed', 'Request Rejected', 'Request Cancelled'], true));
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
     }
@@ -45,7 +45,7 @@ const Dispatch = ({ auth }) => {
   const fetchTerminalRequests = async () => {
     try {
       const response = await axios.get('/request/get/infrastructure/terminal');
-      setTerminalRequests(filterArray(response.data, 'status', ['Completed', 'Request Rejected', 'Request Cancelled'], true));
+      setTerminalRequests(filterArray(response.data.data, 'status', ['Completed', 'Request Rejected', 'Request Cancelled'], true));
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
     }

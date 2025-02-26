@@ -15,33 +15,22 @@ class ProductController extends Controller
      */
     public function index()
     {
-        // Retrieve all products with related inventory, category, and supplier data
-        $products = Product::with('inventory', 'category', 'supplier')->get();
+        $products = Product::with(['inventory', 'category', 'supplier'])
+            ->get()
+            ->map(function ($product) {
+                $productData = $product->toArray();
 
-        // Map the data to include the total stock per product across all warehouses
-        $products = $products->map(function ($product) {
-            // Sum up the quantities of inventory for each product only if product_id is the same
-            $totalStock = $product->inventory ? $product->inventory->where('product_id', $product->id)->sum('quantity') : 0;
+                $productData['stock'] = $product->inventory ? $product->inventory->where('product_id', $product->id)->sum('quantity') : 0;
+                $productData['category_name'] = $product->category->name ?? 'N/A';
+                $productData['supplier_name'] = $product->supplier->name ?? 'N/A';
+                $productData['low_on_stock'] = $productData['stock'] <= $product->restock_point;
 
-            return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'brand' => $product->brand,
-                'model' => $product->model,
-                'description' => $product->description,
-                'image_url' => $product->image_url,
-                'price' => $product->price,
-                'stock' => $totalStock, // Total stock per product across all warehouses
-                'restock_point' => $product->restock_point,
-                'category_id' => $product->category_id,
-                'supplier_id' => $product->supplier_id,
-                'category_name' => $product->category->name ?? 'N/A',
-                'supplier_name' => $product->supplier->name ?? 'N/A',
-                'low_on_stock' => $totalStock <= $product->restock_point,
-            ];
-        });
+                unset($productData['inventory'], $productData['category'], $productData['supplier']);
 
-        return response()->json($products);
+                return $productData;
+            });
+
+        return response()->json(['data' => $products], 200);
     }
 
     /**
@@ -49,81 +38,11 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate the incoming request data
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255',
-            'brand' => 'sometimes|string|max:255',
-            'model' => 'sometimes|string|max:255',
-            'description' => 'sometimes|string',
-            'image_url' => 'sometimes|string',
-            'price' => 'sometimes|numeric|min:0',
-            'restock_point' => 'sometimes|integer|min:0',
-            'category_id' => 'sometimes|exists:categories,id',
-            'supplier_id' => 'sometimes|exists:suppliers,id',
-        ]);
-
-        $product = Product::create($validatedData);
-
-        return response()->json($product);
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        // Retrieve the product using its ID and load related models
-        $product = Product::with(['inventory.warehouse', 'category', 'supplier'])->find($id);
-
-        if (!$product) {
-            return response()->json(['message' => 'Product not found.'], 404);
-        }
-
-        // Calculate total stock across all warehouses
-        $totalStock = $product->inventory->sum('quantity');
-
-        // Map the inventory to include warehouse-specific stock details
-        $warehouseStockDetails = $product->inventory->map(function ($inventory) {
-            return [
-                'warehouse_id' => $inventory->warehouse->id ?? 'N/A',
-                'warehouse_name' => $inventory->warehouse->name ?? 'N/A',
-                'quantity' => $inventory->quantity,
-            ];
-        });
-
-        // Prepare the response data
-        $response = [
-            'id' => $product->id,
-            'name' => $product->name,
-            'brand' => $product->brand,
-            'model' => $product->model,
-            'description' => $product->description,
-            'image_url' => $product->image_url,
-            'price' => $product->price,
-            'total_stock' => $totalStock, // Total stock across all warehouses
-            'restock_point' => $product->restock_point,
-            'category_id' => $product->category_id,
-            'supplier_id' => $product->supplier_id,
-            'category_name' => $product->category->name ?? 'N/A',
-            'supplier_name' => $product->supplier->name ?? 'N/A',
-            'low_on_stock' => $totalStock <= $product->restock_point, // Based on total stock
-            'warehouse_stock_details' => $warehouseStockDetails, // Stock details for each warehouse
-        ];
-
-        return response()->json($response);
-    }
-
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        $request = $request->validate([
             'name' => 'required|string|max:255',
             'brand' => 'required|string|max:255',
             'model' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             'image_url' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'restock_point' => 'required|integer|min:0',
@@ -131,14 +50,68 @@ class ProductController extends Controller
             'supplier_id' => 'required|exists:suppliers,id',
         ]);
 
-        $product = Product::findOrFail($id);
+        $product = Product::create($validatedData);
 
-        $product->update($request);
+        return response()->json(['message' => 'Task created successfully.', 'data' => $product,], 201);
+    }
 
-        return response()->json([
-            'message' => 'Product updated successfully',
-            'product' => $product
-        ], 200);
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        $product = Product::with(['inventory.warehouse', 'category', 'supplier'])->find($id);
+
+        if (!$product) {
+            return response()->json(['message' => 'Product not found.'], 404);
+        }
+
+        $productData = $product->toArray();
+        $productData['total_stock'] = $product->inventory->sum('quantity');
+
+        $productData['warehouse_stock_details'] = $product->inventory->map(function ($inventory) {
+            return [
+                'warehouse_id' => $inventory->warehouse->id ?? 'N/A',
+                'warehouse_name' => $inventory->warehouse->name ?? 'N/A',
+                'quantity' => $inventory->quantity,
+            ];
+        });
+
+        $productData['category_name'] = $product->category->name ?? 'N/A';
+        $productData['supplier_name'] = $product->supplier->name ?? 'N/A';
+        $productData['low_on_stock'] = $productData['total_stock'] <= $product->restock_point;
+
+        unset($productData['inventory'], $productData['category'], $productData['supplier']);
+
+        return response()->json(['data' => $productData], 200);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json(['message' => 'Product not found'], 404);
+        }
+
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'brand' => 'required|string|max:255',
+            'model' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'image_url' => 'nullable|string',
+            'price' => 'required|numeric|min:0',
+            'restock_point' => 'required|integer|min:0',
+            'category_id' => 'required|exists:categories,id',
+            'supplier_id' => 'required|exists:suppliers,id',
+        ]);
+
+        $product->update($validatedData);
+
+        return response()->json(['message' => 'Product updated successfully', 'product' => $product], 200);
     }
 
     /**
@@ -146,8 +119,15 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::find($id);
+
+        if (!$product) {
+            return response()->json(['message' => 'Product not found'], 404);
+        }
+
         $product->delete();
+
+        return response()->json(['message' => 'Product deleted successfully'], 200);
     }
 
     public function stats()
