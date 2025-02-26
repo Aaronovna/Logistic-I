@@ -47,7 +47,7 @@ const Warehouse = ({ auth }) => {
   const fetchInventory = async () => {
     try {
       const response = await axios.get('/inventory/get');
-      setInventory(response.data);
+      setInventory(response.data.data);
     } catch (error) {
       toast.error(productToastMessages.show.error, error);
     }
@@ -59,7 +59,7 @@ const Warehouse = ({ auth }) => {
       const response = await axios.get('/infrastructure/get');
       setWarehouses(prevWarehouses => [
         ...prevWarehouses,
-        ...filterArray(response.data, 'type', [100])]);
+        ...filterArray(response.data.data, 'type', [100])]);
     } catch (error) {
       toast.error(productToastMessages.show.error, error);
     }
@@ -68,7 +68,7 @@ const Warehouse = ({ auth }) => {
   const fetchInventoryStats = async () => {
     try {
       const response = await axios.get('/inventory/stats');
-      setInventoryStats(response.data);
+      setInventoryStats(response.data.data);
     } catch (error) {
       toast.error(productToastMessages.show.error, error);
     }
@@ -78,7 +78,7 @@ const Warehouse = ({ auth }) => {
   const fetchCategories = async () => {
     try {
       const response = await axios.get('/category/get/count');
-      setCategories(response.data);
+      setCategories(response.data.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
@@ -98,7 +98,7 @@ const Warehouse = ({ auth }) => {
   const fetchProducts = async () => {
     try {
       const response = await axios.get('/product/get');
-      setProducts(response.data);
+      setProducts(response.data.data);
     } catch (error) {
       console.error('Error fetching product:', error);
     }
@@ -108,7 +108,7 @@ const Warehouse = ({ auth }) => {
   const fetchProduct = async (id) => {
     try {
       const response = await axios.get(`/product/get/${id}`);
-      setProduct(response.data);
+      setProduct(response.data.data);
     } catch (error) {
       console.error('Error fetching product:', error);
     }

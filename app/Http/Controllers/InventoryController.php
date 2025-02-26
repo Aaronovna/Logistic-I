@@ -14,36 +14,34 @@ class InventoryController extends Controller
      */
     public function index()
     {
-        $inventory = Inventory::all();
+        $inventory = Inventory::with(['warehouse', 'product'])->get()->map(function ($inventory) {
+            $inventoryData = $inventory->toArray();
 
-        $inventory = $inventory->map(function ($inventory) {
-            return [
-                'id' => $inventory->id,
-                'quantity' => $inventory->quantity,
-                'product_id' => $inventory->product_id,
-                'warehouse_id' => $inventory->warehouse_id,
-                'warehouse_name' => $inventory->warehouse->name,
-                'product_name' => $inventory->product->name ?? 'N/A',
-                'product_model' => $inventory->product->model ?? 'N/A',
-                'product_price' => $inventory->product->price ?? 'N/A',
-                'restock_point' => $inventory->product->restock_point ?? 'N/A',
-            ];
+            $inventoryData['warehouse_name'] = $inventory->warehouse->name ?? 'N/A';
+            $inventoryData['product_name'] = $inventory->product->name ?? 'N/A';
+            $inventoryData['product_model'] = $inventory->product->model ?? 'N/A';
+            $inventoryData['product_price'] = $inventory->product->price ?? 'N/A';
+            $inventoryData['restock_point'] = $inventory->product->restock_point ?? 'N/A';
+
+            unset($inventoryData['warehouse'], $inventoryData['product']);
+
+            return $inventoryData;
         });
 
-        return response()->json($inventory);
+        return response()->json(['data' => $inventory], 200);
     }
 
-    public function groupIndex()
+    public function indexGrouped()
     {
-        // Retrieve all inventories
-        $inventory = Inventory::all();
+        $inventory = Inventory::with('product')->get();
 
-        // Group by product_id and sum quantities for products with the same ID
         $groupedInventory = $inventory->groupBy('product_id')->map(function ($group) {
             $firstItem = $group->first();
+            $inventoryData = $firstItem->toArray();
+
             return [
-                'id' => $firstItem->id,
-                'product_id' => $firstItem->product_id,
+                'id' => $inventoryData['id'],
+                'product_id' => $inventoryData['product_id'],
                 'product_name' => $firstItem->product->name ?? 'N/A',
                 'product_model' => $firstItem->product->model ?? 'N/A',
                 'product_price' => $firstItem->product->price ?? 'N/A',
@@ -52,30 +50,30 @@ class InventoryController extends Controller
             ];
         });
 
-        return response()->json($groupedInventory->values());
+        return response()->json(['data' => $groupedInventory->values()], 200);
     }
+
 
     public function indexByWarehouse($warehouseId)
     {
-        // Retrieve inventories for the specified warehouse ID
-        $inventory = Inventory::where('warehouse_id', $warehouseId)->get();
+        $inventory = Inventory::with(['warehouse', 'product'])
+            ->where('warehouse_id', $warehouseId)
+            ->get()
+            ->map(function ($inventory) {
+                $inventoryData = $inventory->toArray();
 
-        // Map the data to include necessary details
-        $inventory = $inventory->map(function ($inventory) {
-            return [
-                'id' => $inventory->id,
-                'quantity' => $inventory->quantity,
-                'product_id' => $inventory->product_id,
-                'warehouse_id' => $inventory->warehouse_id,
-                'warehouse_name' => $inventory->warehouse->name,
-                'product_name' => $inventory->product->name ?? 'N/A',
-                'product_model' => $inventory->product->model ?? 'N/A',
-                'product_price' => $inventory->product->price ?? 'N/A',
-                'restock_point' => $inventory->product->restock_point ?? 'N/A',
-            ];
-        });
+                $inventoryData['warehouse_name'] = $inventory->warehouse->name ?? 'N/A';
+                $inventoryData['product_name'] = $inventory->product->name ?? 'N/A';
+                $inventoryData['product_model'] = $inventory->product->model ?? 'N/A';
+                $inventoryData['product_price'] = $inventory->product->price ?? 'N/A';
+                $inventoryData['restock_point'] = $inventory->product->restock_point ?? 'N/A';
 
-        return response()->json($inventory);
+                unset($inventoryData['warehouse'], $inventoryData['product']);
+
+                return $inventoryData;
+            });
+
+        return response()->json(['data' => $inventory], 200);
     }
 
 
@@ -138,18 +136,17 @@ class InventoryController extends Controller
      */
     public function show(string $id)
     {
-        // Retrieve the inventory for the given product ID, including related warehouses and products
-        $inventories = Inventory::with('warehouse', 'product')->where('product_id', $id)->get();
+        $inventories = Inventory::with(['warehouse', 'product'])->where('product_id', $id)->get();
 
         if ($inventories->isEmpty()) {
             return response()->json(['message' => 'Product not found or no inventory available.'], 404);
         }
 
-        // Calculate the total quantity across all warehouses
-        $totalQuantity = $inventories->sum('quantity');
+        $product = $inventories->first()->product;
+        $productData = $product->toArray();
 
-        // Map the data for each warehouse
-        $inventoryData = $inventories->map(function ($inventory) {
+        $productData['total_quantity'] = $inventories->sum('quantity');
+        $productData['warehouses'] = $inventories->map(function ($inventory) {
             return [
                 'warehouse_id' => $inventory->warehouse_id,
                 'warehouse_name' => $inventory->warehouse->name ?? 'N/A',
@@ -157,22 +154,11 @@ class InventoryController extends Controller
             ];
         });
 
-        // Use the first inventory item to fetch product details
-        $product = $inventories->first()->product;
+        unset($productData['inventory']);
 
-        // Prepare the response data
-        $response = [
-            'product_id' => $id,
-            'product_name' => $product->name ?? 'N/A',
-            'product_model' => $product->model ?? 'N/A',
-            'product_price' => $product->price ?? 'N/A',
-            'restock_point' => $product->restock_point ?? 'N/A',
-            'total_quantity' => $totalQuantity,
-            'warehouses' => $inventoryData,
-        ];
-
-        return response()->json($response);
+        return response()->json(['data' => $productData], 200);
     }
+
 
 
     /**
@@ -261,7 +247,7 @@ class InventoryController extends Controller
             ]);
         });
 
-        return response()->json(['message' => 'Stock updated successfully']);
+        return response()->json(['message' => 'Stock updated successfully'], 200);
     }
 
     /**
@@ -269,7 +255,15 @@ class InventoryController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $inventory = Inventory::find($id);
+
+        if (!$inventory) {
+            return response()->json(['message' => 'Inventory not found'], 404);
+        }
+
+        $inventory->delete();
+
+        return response()->json(['message' => 'Inventory deleted successfully'], 200);
     }
 
     public function stats()
@@ -366,7 +360,7 @@ class InventoryController extends Controller
             return response()->json(['message' => 'Products successfully added to inventory'], 200);
         } catch (\Exception $e) {
             DB::rollBack(); // Roll back the transaction on error
-            return response()->json(['error' => 'An error occurred', 'details' => $e->getMessage()], 500);
+            return response()->json(['message' => 'An error occurred', 'details' => $e->getMessage()], 500);
         }
     }
 }

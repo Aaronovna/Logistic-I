@@ -109,7 +109,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post('/inventory/create', [InventoryController::class, 'store'])->name('inventory.store');
     Route::patch('/inventory/update/{id}', [InventoryController::class, 'update'])->name('inventory.update');
     Route::delete('/inventory/delete/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
-    Route::get('/inventory/get/warehouse/group', [InventoryController::class, 'groupIndex'])->name('inventory.groupIndex');
+    Route::get('/inventory/get/warehouse/group', [InventoryController::class, 'indexGrouped'])->name('inventory.indexGrouped');
     Route::get('/inventory/get/warehouse/{id}', [InventoryController::class, 'indexByWarehouse'])->name('inventory.indexByWarehouse');
     Route::get('/inventory/stats', [InventoryController::class, 'stats'])->name('inventory.stats');
     Route::patch('/inventory/stock/update/{id}', [InventoryController::class, 'updateStock'])->name('inventory.updateStock');
