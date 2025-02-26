@@ -167,7 +167,7 @@ const Depot = ({ auth }) => {
       user_id: auth.user.id,
       infrastructure_id: selectedDepot.id,
       type: requestMaterialFormData.type,
-      items: JSON.stringify(requestMaterialFormData.items), // Still converting to a string as per your logic
+      items: JSON.stringify(requestMaterialFormData.items),
     };
 
     try {
