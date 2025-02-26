@@ -115,7 +115,7 @@ const ReportsView = ({ auth }) => {
             <p className="font-medium text-xl mt-8 mb-2 ml-1">Report's Summary</p>
             <div className="bg-gray-100 p-4 rounded-md">
               <p className="font-semibold text-lg">{report?.location}</p>
-              <p>Submmited on {new Date(report?.task_created_at).toLocaleString(undefined, dateTimeFormatLong)}</p>
+              <p>Submmited on {new Date(report?.created_at).toLocaleString(undefined, dateTimeFormatLong)}</p>
               <p className="mt-8">{report?.details}</p>
               <p className="mt-4">{report?.final_comment}</p>
 

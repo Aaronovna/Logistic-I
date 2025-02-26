@@ -140,6 +140,8 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post('/dispatch/create', [DispatchMaterialController::class, 'store'])->name('dispatch.store');
     Route::patch('/dispatch/update/{id}', [DispatchMaterialController::class, 'update'])->name('dispatch.update');
 
+    Route::post('/dispatch/trail/create/{id}', [DispatchMaterialController::class, 'createDispatchTrail'])->name('dispatch.createDispatchTrail');
+
     // Route for all dispatch trails
     Route::get('/dispatch/trails/get', [DispatchMaterialController::class, 'getAllDispatches'])->name('dispatch.getAllDispatches');
 

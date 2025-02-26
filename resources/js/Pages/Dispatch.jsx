@@ -6,7 +6,7 @@ import RequestsFolder from '@/Components/cards/RequestsFolder';
 import RequestCard from '@/Components/cards/RequestCard';
 import { Card2 } from '@/Components/Cards';
 import { filterArray } from '@/functions/filterArray';
-import updateStatus from '@/api/useUpdateStatus';
+import useUpdateStatus from '@/api/useUpdateStatus';
 import { dateTimeFormatLong } from '@/Constants/options';
 import Status from '@/Components/Status';
 import { getStatusStep, requestStatus } from '@/Constants/status';
@@ -19,7 +19,7 @@ const Dispatch = ({ auth }) => {
   }
 
   const { theme, debugMode } = useStateContext();
-
+  const { updateStatus } = useUpdateStatus();
   const [depotRequests, setDepotRequests] = useState();
   const [terminalRequests, setTerminalRequests] = useState();
   const [requests, setRequests] = useState();
@@ -107,7 +107,6 @@ const Dispatch = ({ auth }) => {
       const response = await axios.patch(`/request/update/${id}`, payload)
       fetchAllRequests();
       setOpenRequestModal(false);
-      toast.success(response.data.message);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
     }
@@ -244,13 +243,16 @@ const Dispatch = ({ auth }) => {
 
   const CompleteDeliver = async (id) => {
     const url = `/request/update/${id}`;
-    updateStatus(url, { status: 'Delivered' });
+    const updateResponse = await updateStatus(url, { status: 'Delivered' });
 
-    try {
-      const response = await axios.post(`/dispatch/trail/create/${id}`);
-    } catch (error) {
-
+    if (updateResponse.status === 200) {
+      try {
+        const response = await axios.post(`/dispatch/trail/create/${id}`);
+      } catch (error) {
+        toast.error(`${error.status} ${error.response.data.message}`);
+      }
     }
+
 
     fetchAllRequests();
     setOpenRequestModal(false);
@@ -407,7 +409,7 @@ const Dispatch = ({ auth }) => {
                 disabled={requestData?.status === 'Request Created' ? false : true}
                 className="border border-green-300 bg-green-50 text-green-600 px-4 py-2 rounded-md hover:bg-green-100 transition"
                 onClick={() => {
-                  handleAccept(requestData?.id); // Define `handleAccept` function
+                  handleAccept(requestData?.id);
                   createDispatch(requestData);
                 }}
               >

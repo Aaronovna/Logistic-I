@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('brand')->nullable();
             $table->string('model')->nullable();
             $table->mediumText('description')->nullable();
-            $table->mediumText('image_url')->default('')->nullable();
+            $table->mediumText('image_url')->nullable();
             $table->decimal('price')->nullable();
             $table->integer('restock_point')->nullable();
             $table->timestamps();

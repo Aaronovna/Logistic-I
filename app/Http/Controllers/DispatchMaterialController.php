@@ -99,7 +99,7 @@ class DispatchMaterialController extends Controller
         // Loop through items and insert them into the dispatch_trails table
         foreach ($items as $item) {
             DB::table('dispatch_trails')->insert([
-                'request_id' => $request->id,
+                'request_id' => $id,
                 'product_id' => $item['product_id'],
                 'quantity' => $item['quantity'],
                 'created_at' => now(),

@@ -38,7 +38,7 @@ const ReceiptHistory = ({ auth }) => {
   const fetchReceivedShipment = async () => {
     try {
       const response = await axios.get('/receipt/get');
-      setReceivedShipment(response.data);
+      setReceivedShipment(response.data.data);
     } catch (error) {
       console.error('error');
     }

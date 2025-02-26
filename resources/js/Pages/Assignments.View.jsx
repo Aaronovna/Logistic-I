@@ -102,7 +102,7 @@ const AssignmentsView = ({ auth }) => {
       });
 
       if (fileUploadResponse.status === 201) {
-        const uploadedFiles = fileUploadResponse.data.files;
+        const uploadedFiles = fileUploadResponse.data.data;
         const fileIds = uploadedFiles.map(file => file.id);
 
         const reportPayload = {
@@ -121,11 +121,13 @@ const AssignmentsView = ({ auth }) => {
 
           const updateResponse = await axios.patch(`/audit/task/update/${id}`, payload);
 
-          fetchAssignment(id);
+          if (updateResponse.status === 200) {
+            fetchAssignment(id);
+          }
         }
       }
     } catch (error) {
-      toast.error(`${error.status} ${error.response.data.message}`);
+      toast.error(`${error?.status} ${error?.response?.data?.message}`);
     } finally {
       setFiles([]);
     }

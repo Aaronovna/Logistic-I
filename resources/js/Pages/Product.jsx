@@ -224,6 +224,8 @@ const Product = ({ auth }) => {
       const response = await axios.patch(`/product/update/${selectedProduct.id}`, editProductFormData);
       toast.success(productToastMessages.update.success);
       setOpenEditProductModal(false);
+      setOpenViewProductModal(false);
+      fetchProducts();
     } catch (error) {
       toast.error(productToastMessages.update.error, error);
     }
@@ -232,8 +234,9 @@ const Product = ({ auth }) => {
   const handleDeleteProduct = async (id) => {
     try {
       await axios.delete(`/product/delete/${id}}`);
-      update();
       toast.success(productToastMessages.destroy.success);
+      setOpenViewProductModal(false);
+      fetchProducts();
     } catch (error) {
       toast.error(productToastMessages.destroy.error, error);
     }
