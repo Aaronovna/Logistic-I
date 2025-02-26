@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('requested_by_id')->constrained('users');
             $table->foreignId('infrastructure_id')->constrained('infrastructures');
             $table->json('items')->nullable();
-            $table->string('comment')->nullable();
+            $table->text('comment')->nullable();
             $table->string('status')->default('Waiting for Approval');
             $table->timestamps();
         });

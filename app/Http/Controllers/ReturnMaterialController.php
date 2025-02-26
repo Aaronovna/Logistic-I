@@ -14,7 +14,7 @@ class ReturnMaterialController extends Controller
     public function index()
     {
         $materials = ReturnMaterial::all();
-        return response()->json($materials);
+        return response()->json(['data' => $materials], 200);
     }
 
     /**
@@ -22,7 +22,7 @@ class ReturnMaterialController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $validatedData = $request->validate([
             'return_id' => 'required|exists:return_requests,id',
             'name' => 'required|string',
             'quantity' => 'required|integer',
@@ -30,28 +30,37 @@ class ReturnMaterialController extends Controller
             'category' => 'required|string',
         ]);
 
-        $material = ReturnMaterial::create($validated);
+        $material = ReturnMaterial::create($validatedData);
 
-        return response()->json([
-            'message' => 'Return material created successfully!',
-            'data' => $material
-        ], 201);
+        return response()->json(['message' => 'Return material created successfully', 'data' => $material], 201);
     }
 
     /**
      * Display the specified return material.
      */
-    public function show(ReturnMaterial $returnMaterial)
+    public function show(string $id)
     {
-        return response()->json($returnMaterial);
+        $material = ReturnMaterial::find($id);
+
+        if (!$material) {
+            return response()->json(['message' => 'Return material not found'], 404);
+        }
+
+        return response()->json(['data' => $material], 200);
     }
 
     /**
      * Update the specified return material in storage.
      */
-    public function update(Request $request, ReturnMaterial $returnMaterial)
+    public function update(Request $request, string $id)
     {
-        $validated = $request->validate([
+        $material = ReturnMaterial::find($id);
+
+        if (!$material) {
+            return response()->json(['message' => 'Return material not found'], 404);
+        }
+
+        $validatedData = $request->validate([
             'return_id' => 'required|exists:return_requests,id',
             'name' => 'nullable|string',
             'quantity' => 'nullable|integer',
@@ -59,29 +68,30 @@ class ReturnMaterialController extends Controller
             'category' => 'nullable|string',
         ]);
 
-        $returnMaterial->update($validated);
+        $material->update($validatedData);
 
-        return response()->json([
-            'message' => 'Return material updated successfully!',
-            'data' => $returnMaterial
-        ]);
+        return response()->json(['message' => 'Return material updated successfully', 'data' => $material], 200);
     }
 
     /**
      * Remove the specified return material from storage.
      */
-    public function destroy(ReturnMaterial $returnMaterial)
+    public function destroy(string $id)
     {
-        $returnMaterial->delete();
+        $material = ReturnMaterial::find($id);
 
-        return response()->json([
-            'message' => 'Return material deleted successfully!'
-        ]);
+        if (!$material) {
+            return response()->json(['message' => 'Return material not found'], 404);
+        }
+
+        $material->delete();
+
+        return response()->json(['message' => 'Return material deleted successfully'], 200);
     }
 
-    public function storeBulkReturnMaterials(Request $request)
+    public function storeBulk(Request $request)
     {
-        $validated = $request->validate([
+        $validatedData = $request->validate([
             'materials' => 'required|array',
             'materials.*.return_id' => 'required|integer|exists:return_requests,id',
             'materials.*.name' => 'nullable|string',
@@ -93,21 +103,21 @@ class ReturnMaterialController extends Controller
         try {
             DB::beginTransaction(); // Start a transaction
 
-            foreach ($validated['materials'] as $materialData) {
+            foreach ($validatedData['materials'] as $materialData) {
                 ReturnMaterial::create([
                     'return_id' => $materialData['return_id'],
                     'name' => $materialData['name'] ?? '',
-                    'quantity' => $materialData['quantity'] ?? null, // Allow nullable values
-                    'unit' => $materialData['unit'] ?? null,    // Allow nullable values
+                    'quantity' => $materialData['quantity'] ?? null,
+                    'unit' => $materialData['unit'] ?? null,
                     'category' => $materialData['category'] ?? '',
                 ]);
             }
 
-            DB::commit(); // Commit the transaction
+            DB::commit();
             return response()->json(['message' => 'Materials successfully added'], 200);
         } catch (\Exception $e) {
-            DB::rollBack(); // Roll back the transaction on error
-            return response()->json(['error' => 'An error occurred', 'details' => $e->getMessage()], 500);
+            DB::rollBack();
+            return response()->json(['message' => 'An error occurred', 'details' => $e->getMessage()], 500);
         }
     }
 }

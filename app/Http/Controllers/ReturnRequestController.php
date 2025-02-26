@@ -12,14 +12,19 @@ class ReturnRequestController extends Controller
      */
     public function index()
     {
-        $returnMaterials = ReturnRequest::with(['user', 'infrastructure'])->get();
+        $requests = ReturnRequest::with(['user', 'infrastructure'])->get()
+            ->map(function ($I) {
+                $request = $I->toArray();
 
-        $returnMaterials->map(function ($return) {
-            $return->requested_by_name = $return->user->name ?? 'N/A';
-            $return->infrastructure_name = $return->infrastructure->name ?? 'N/A';
-        });
+                $request['requested_by_name'] = $I->user->name ?? 'N/A';
+                $request['infrastructure_name'] = $I->infrastructure->name ?? 'N/A';
 
-        return response()->json($returnMaterials);
+                unset($request['user'], $request['infrastructure']);
+
+                return $request;
+            });
+
+        return response()->json(['data' => $requests], 200);
     }
 
     /**
@@ -27,7 +32,7 @@ class ReturnRequestController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $validatedData = $request->validate([
             'items' => 'required|json',
             'comment' => 'required|string',
             'status' => 'reqired|string',
@@ -35,12 +40,9 @@ class ReturnRequestController extends Controller
             'infrastructure_id' => 'required|exists:infrastructures,id',
         ]);
 
-        $returnMaterial = ReturnRequest::create($validated);
+        $returnRequest = ReturnRequest::create($validatedData);
 
-        return response()->json([
-            'message' => 'Return material request created successfully.',
-            'data' => $returnMaterial
-        ], 201);
+        return response()->json(['message' => 'Return request created successfully.', 'data' => $returnRequest], 201);
     }
 
     /**
@@ -48,13 +50,19 @@ class ReturnRequestController extends Controller
      */
     public function show(string $id)
     {
-        $returnMaterial = ReturnRequest::find($id);
+        $selectedRequest = ReturnRequest::with(['user', 'infrastructure'])->find($id);
 
-        if (!$returnMaterial) {
-            return response()->json(['message' => 'Return material not found.'], 404);
+        if (!$selectedRequest) {
+            return response()->json(['error' => 'Return request not found'], 404);
         }
+        $request = $selectedRequest->toArray();
 
-        return response()->json($returnMaterial);
+        $request['requested_by_name'] = $selectedRequest->user->name ?? 'N/A';
+        $request['infrastructure_name'] = $selectedRequest->infrastructure->name ?? 'N/A';
+
+        unset($request['user'], $request['infrastructure']);
+
+        return response()->json(['data' => $request], 200);
     }
 
     /**
@@ -62,22 +70,19 @@ class ReturnRequestController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $returnMaterial = ReturnRequest::find($id);
+        $returnRequest = ReturnRequest::find($id);
 
-        if (!$returnMaterial) {
-            return response()->json(['message' => 'Return material not found.'], 404);
+        if (!$returnRequest) {
+            return response()->json(['message' => 'Return request not found.'], 404);
         }
 
-        $validated = $request->validate([
+        $validatedData = $request->validate([
             'status' => 'required|string',
         ]);
 
-        $returnMaterial->update($validated);
+        $returnRequest->update($validatedData);
 
-        return response()->json([
-            'message' => 'Return material updated successfully.',
-            'data' => $returnMaterial
-        ]);
+        return response()->json(['message' => 'Return request updated successfully.', 'data' => $returnRequest], 200);
     }
 
     /**
@@ -85,14 +90,14 @@ class ReturnRequestController extends Controller
      */
     public function destroy(string $id)
     {
-        $returnMaterial = ReturnRequest::find($id);
+        $returnRequest = ReturnRequest::find($id);
 
-        if (!$returnMaterial) {
-            return response()->json(['message' => 'Return material not found.'], 404);
+        if (!$returnRequest) {
+            return response()->json(['message' => 'Return request not found.'], 404);
         }
 
-        $returnMaterial->delete();
+        $returnRequest->delete();
 
-        return response()->json(['message' => 'Return material deleted successfully.']);
+        return response()->json(['message' => 'Return request deleted successfully.'], 200);
     }
 }

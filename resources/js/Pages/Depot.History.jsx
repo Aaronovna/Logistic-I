@@ -26,7 +26,7 @@ const DepotHistory = ({ auth }) => {
   const fetchRequest = async () => {
     try {
       const response = await axios.get('/request/get/infrastructure/depot');
-      setRequests(filterArray(response.data, 'status', ['Completed', 'Request Canceled', 'Request Rejected']));
+      setRequests(filterArray(response.data.data, 'status', ['Completed', 'Request Canceled', 'Request Rejected']));
     } catch (error) {
       toast.error(productToastMessages.show.error, error);
     }
@@ -36,7 +36,7 @@ const DepotHistory = ({ auth }) => {
   const fetchReturns = async () => {
     try {
       const response = await axios.get('/return/request/get');
-      setReturns(filterArray(response.data, 'status', ['Completed', 'Canceled']));
+      setReturns(filterArray(response.data.data, 'status', ['Completed', 'Canceled']));
     } catch (error) {
       toast.error(productToastMessages.show.error, error);
     }

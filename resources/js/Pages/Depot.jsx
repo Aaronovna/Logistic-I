@@ -4,7 +4,7 @@ import { AgGridReact } from 'ag-grid-react';
 
 import InfrastructureLayout from '@/Layouts/InfrastructureLayout';
 import Status from '@/Components/Status';
-import updateStatus from '@/api/updateStatus';
+import useUpdateStatus from '@/api/useUpdateStatus';
 import { handleInputChange } from '@/functions/handleInputChange';
 import { filterArray } from '@/functions/filterArray';
 import { requestStatus } from '@/Constants/status';
@@ -23,6 +23,7 @@ const Depot = ({ auth }) => {
       <Unauthorized />
     )
   }
+  const { updateStatus } = useUpdateStatus();
 
   const { theme, themePreference } = useStateContext();
 
@@ -30,9 +31,9 @@ const Depot = ({ auth }) => {
   const fetchInfrastructures = async () => {
     try {
       const response = await axios.get('/infrastructure/get');
-      setDepots(filterArray(response.data, 'type', [101]));
+      setDepots(filterArray(response.data.data, 'type', [101]));
     } catch (error) {
-      toast.error(productToastMessages.show.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -42,7 +43,7 @@ const Depot = ({ auth }) => {
       const response = await axios.get('/product/get');
       setProducts(response.data);
     } catch (error) {
-      toast.error(productToastMessages.show.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -105,15 +106,14 @@ const Depot = ({ auth }) => {
       const productExists = prevItems.some((item) => item.id === product.id);
 
       if (productExists) {
-        return prevItems; // If the product already exists, return the existing array
+        return prevItems;
       }
 
-      // Add the product to both `requestedItems` and `requestMaterialFormData.items`
       const updatedItems = [...prevItems, product];
 
       setRequestMaterialFormData((prevData) => ({
         ...prevData,
-        items: [...prevData.items, { product_id: product.id, product_name: product.name, quantity: '', filled: false }], // Initialize quantity to 0
+        items: [...prevData.items, { product_id: product.id, product_name: product.name, quantity: '', filled: false }],
       }));
 
       return updatedItems;
@@ -127,7 +127,6 @@ const Depot = ({ auth }) => {
     setRequestedItems((prevItems) => {
       const updatedItems = prevItems.filter((item) => item.id !== id);
 
-      // Remove the corresponding item from `requestMaterialFormData.items`
       setRequestMaterialFormData((prevData) => ({
         ...prevData,
         items: prevData.items.filter((item) => item.product_id !== id),
@@ -138,14 +137,12 @@ const Depot = ({ auth }) => {
   };
 
   const handleQuantityChange = (id, value) => {
-    // Update quantity in `requestedItems`
     setRequestedItems((prevItems) =>
       prevItems.map((item) =>
         item.id === id ? { ...item, quantity: value } : item
       )
     );
 
-    // Update quantity in `requestMaterialFormData.items`
     setRequestMaterialFormData((prevData) => ({
       ...prevData,
       items: prevData.items.map((item) =>
@@ -157,7 +154,6 @@ const Depot = ({ auth }) => {
   const handleAddRequestSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate that all items have a quantity
     const hasInvalidQuantity = requestMaterialFormData.items.some(
       (item) => !item.quantity || item.quantity <= 0
     );
@@ -178,10 +174,9 @@ const Depot = ({ auth }) => {
       const response = await axios.post('/request/create', data);
       fetchRequest();
       setOpenRequestModal(false);
-      toast.success("Request submitted successfully.");
+      toast.success(response.data.message);
     } catch (error) {
-      toast.error("Failed to submit the request.");
-      console.error(error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -195,9 +190,9 @@ const Depot = ({ auth }) => {
   const fetchRequest = async () => {
     try {
       const response = await axios.get('/request/get/infrastructure/depot');
-      setRequests(filterArray(response.data, 'status', ['Completed', 'Request Canceled'], true));
+      setRequests(filterArray(response.data.data, 'status', ['Completed', 'Request Canceled'], true));
     } catch (error) {
-      toast.error(productToastMessages.show.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -222,11 +217,11 @@ const Depot = ({ auth }) => {
     setItems([
       ...items,
       { category: '', name: '', assoc_product: '', quantityType: 'qty', value: '' }
-    ]); // Add a new empty item with quantityType defaulted to 'qty'
+    ]);
   };
 
   const handleRemoveItem = (index) => {
-    const newItems = items.filter((_, i) => i !== index); // Remove the item at the given index
+    const newItems = items.filter((_, i) => i !== index);
     setItems(newItems);
   };
 
@@ -234,12 +229,11 @@ const Depot = ({ auth }) => {
     e.preventDefault();
 
     const fixUnitSpacing = (value) => {
-      // Insert a space between the number and unit if it’s missing (e.g., "1cm" -> "1 cm")
       return value.replace(/(\d)([a-zA-Z]+)/, '$1 $2');
     };
 
     const validateUnit = (value) => {
-      const fixedValue = fixUnitSpacing(value); // Fix the spacing before validation
+      const fixedValue = fixUnitSpacing(value);
 
       const unitPattern = simpleFlatUnits
         .map(unit => `(${unit.abbreviation}|${unit.name.replace(/ /g, '\\s')})`)
@@ -251,15 +245,17 @@ const Depot = ({ auth }) => {
 
     const validatedItems = items.map(item => {
       if (!item.category || !item.name || !item.quantityType || item.value === undefined) {
-        throw new Error('All fields must be populated except for assoc_product.');
+        toast.error('All fields must be populated except for Associated Products.');
+        throw new Error('All fields must be populated except for Associated Products.');
       }
 
       if (item.quantityType === "unit") {
         const validValue = validateUnit(item.value);
         if (!validValue) {
-          throw new Error(`Value "${item.value}" must end with a valid unit abbreviation or name (e.g., mm, cm, kg, meter, etc.).`);
+          toast.error(`"${item.name}" value must end with a valid unit abbreviation or name (e.g., mm, cm, kg, meter, etc.).`);
+          throw new Error(`"${item.name}" value must end with a valid unit abbreviation or name (e.g., mm, cm, kg, meter, etc.).`);
         }
-        item.value = validValue; // Replace the value with the fixed one
+        item.value = validValue;
       }
 
       return item;
@@ -274,11 +270,11 @@ const Depot = ({ auth }) => {
 
     try {
       const response = await axios.post('/return/request/create', payload);
-      toast.success('Return request submitted successfully!');
       fetchReturns();
       setReturnModal(false);
+      toast.success(response.data.message);
     } catch (error) {
-      toast.error('Failed to submit the return request.');
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -286,9 +282,9 @@ const Depot = ({ auth }) => {
   const fetchReturns = async () => {
     try {
       const response = await axios.get('/return/request/get');
-      setReturns(filterArray(response.data, 'status', ['Completed', 'Canceled'], true));
+      setReturns(filterArray(response.data.data, 'status', ['Completed', 'Canceled'], true));
     } catch (error) {
-      toast.error(productToastMessages.show.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -325,22 +321,32 @@ const Depot = ({ auth }) => {
     setOpenReturnMaterialDetailSection(true);
   };
 
-  const CompleteOrder = (id) => {
+  const CompleteOrder = async (id) => {
     const url = `/request/update/${id}`;
-    updateStatus(url, { status: 'Completed' }, fetchRequest)
+    const response = await updateStatus(url, { status: 'Completed' });
+
+    if (response.status === 200) {
+      fetchRequest();
+    }
   }
 
-  const CancelOrder = (id) => {
+  const CancelOrder = async (id) => {
     const url = `/request/update/${id}`;
-    updateStatus(url, { status: 'Request Canceled' }, fetchRequest)
+    const response = await updateStatus(url, { status: 'Request Canceled' });
+
+    if (response.status === 200) {
+      fetchRequest();
+    }
   }
 
-  const CancelReturn = (id) => {
+  const CancelReturn = async (id) => {
     const url = `/return/request/update/${id}`;
-    updateStatus(url, { status: 'Canceled' }, () => {
+    const response = await updateStatus(url, { status: 'Canceled' });
+
+    if (response.status === 200) {
       fetchReturns();
       setReturnModal(false);
-    })
+    }
   }
 
   const [weather, setWeather] = useState(null);
@@ -350,9 +356,13 @@ const Depot = ({ auth }) => {
       const data = await response.json();
       if (response.ok) {
         setWeather(data);
-      } else setWeather(null);
+      } else {
+        setWeather(null);
+        toast.error(`failed to fetch weather data`);
+        //toast.error(`${data.cod} ${data.message}`);
+      }
     } catch (error) {
-
+      toast.error(`failed to fetch weather data`);
     }
   }
 

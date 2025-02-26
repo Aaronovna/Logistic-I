@@ -130,8 +130,8 @@ Route::middleware(["auth", "verified"])->group(function () {
 
     Route::get('/request/get', [RequestMaterialController::class, 'index'])->name('request.index');
     Route::get('/request/get/{id}', [RequestMaterialController::class, 'show'])->name('request.show');
-    Route::get('/request/get/infrastructure/depot', [RequestMaterialController::class, 'indexByDepot'])->name('request.indexByDepot');
-    Route::get('/request/get/infrastructure/terminal', [RequestMaterialController::class, 'indexByTerminal'])->name('request.indexByTerminal');
+    Route::get('/request/get/infrastructure/depot', [RequestMaterialController::class, 'indexDepot'])->name('request.indexDepot');
+    Route::get('/request/get/infrastructure/terminal', [RequestMaterialController::class, 'indexTerminal'])->name('request.indexTerminal');
     Route::post('/request/create', [RequestMaterialController::class, 'store'])->name('request.store');
     Route::patch('/request/update/{id}', [RequestMaterialController::class, 'update'])->name('request.update');
     Route::delete('/request/delete/{id}', [RequestMaterialController::class, 'destroy'])->name('request.destroy');
@@ -179,7 +179,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post('/return/create', [ReturnMaterialController::class, 'store'])->name('return.store');
     Route::patch('/return/update/{id}', [ReturnMaterialController::class, 'update'])->name('return.update');
     Route::delete('/return/delete/{id}', [ReturnMaterialController::class, 'destroy'])->name('return.destroy');
-    Route::post('/return/create/bulk', [ReturnMaterialController::class, 'storeBulkReturnMaterials'])->name('return.storeBulkReturnMaterials');
+    Route::post('/return/create/bulk', [ReturnMaterialController::class, 'storeBulk'])->name('return.storeBulk');
 
     Route::get('/file/get', [FileController::class, 'index']);
     Route::get('/file/get/{id}', [FileController::class, 'show']);

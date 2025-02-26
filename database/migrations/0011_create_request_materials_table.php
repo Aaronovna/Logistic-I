@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('infrastructure_id')->constrained('infrastructures')->onDelete('restrict');
             $table->foreignId('user_id')->constrained('users')->onDelete('restrict');
-            $table->string('status');
+            $table->string('status')->default('Request Created');
             $table->string('type');
             $table->json('items')->nullable();
             $table->timestamps();

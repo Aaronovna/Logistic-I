@@ -12,73 +12,19 @@ class RequestMaterialController extends Controller
      */
     public function index()
     {
-        $requests = RequestMaterial::with('user', 'infrastructure')->get();
+        $requestMaterials = RequestMaterial::with('user', 'infrastructure')->get()
+            ->map(function ($selectedRequest) {
+                $request = $selectedRequest->toArray();
 
-        $requests = $requests->map(function ($request) {
-            return [
-                'id' => $request->id,
-                'type' => $request->type,
-                'status' => $request->status,
-                'user_id' => $request->user_id,
-                'user_name' => $request->user->name ?? 'N/A',
-                'infrastructure_id' => $request->infrastructure_id,
-                'infrastructure_name' => $request->infrastructure->name ?? 'N/A',
-                'items' => $request->items,
-                'created_at' => $request->created_at,
-            ];
-        });
+                $request['user_name'] = $selectedRequest->user->name ?? 'N/A';
+                $request['infrastructure_name'] = $selectedRequest->infrastructure->name ?? 'N/A';
 
-        return response()->json($requests);
-    }
+                unset($request['user'], $request['infrastructure']);
 
-    public function indexByDepot()
-    {
-        $requests = RequestMaterial::with('user', 'infrastructure')
-            ->whereHas('infrastructure', function ($query) {
-                $query->where('type', 101);  // Filter by infrastructure type equal to 101
-            })
-            ->get();
+                return $request;
+            });
 
-        $requests = $requests->map(function ($request) {
-            return [
-                'id' => $request->id,
-                'type' => $request->type,
-                'status' => $request->status,
-                'user_id' => $request->user_id,
-                'user_name' => $request->user->name ?? 'N/A',
-                'infrastructure_id' => $request->infrastructure_id,
-                'infrastructure_name' => $request->infrastructure->name ?? 'N/A',
-                'items' => $request->items,
-                'created_at' => $request->created_at,
-            ];
-        });
-
-        return response()->json($requests);
-    }
-
-    public function indexByTerminal()
-    {
-        $requests = RequestMaterial::with('user', 'infrastructure')
-            ->whereHas('infrastructure', function ($query) {
-                $query->where('type', 102);  // Filter by infrastructure type equal to 101
-            })
-            ->get();
-
-        $requests = $requests->map(function ($request) {
-            return [
-                'id' => $request->id,
-                'type' => $request->type,
-                'status' => $request->status,
-                'user_id' => $request->user_id,
-                'user_name' => $request->user->name ?? 'N/A',
-                'infrastructure_id' => $request->infrastructure_id,
-                'infrastructure_name' => $request->infrastructure->name ?? 'N/A',
-                'items' => $request->items,
-                'created_at' => $request->created_at,
-            ];
-        });
-
-        return response()->json($requests);
+        return response()->json(['data' => $requestMaterials], 200);
     }
 
     /**
@@ -93,21 +39,9 @@ class RequestMaterialController extends Controller
             'items' => 'required|json'
         ]);
 
-        $validatedData['status'] = $validatedData['status'] ?? 'Request Created';
+        $requestMaterial = RequestMaterial::create($validatedData);
 
-        try {
-            $order = RequestMaterial::create($validatedData);
-
-            return response()->json([
-                'message' => 'request created successfully',
-                'data' => $order,
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to create request',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+        return response()->json(['message' => 'Request created successfully.', 'data' => $requestMaterial,], 201);
     }
 
     /**
@@ -115,7 +49,20 @@ class RequestMaterialController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $selectedRequestMaterial = RequestMaterial::with(['assignedToUser', 'assignedByUser'])->find($id);
+
+        if (!$selectedRequestMaterial) {
+            return response()->json(['error' => 'Request not found'], 404);
+        }
+
+        $requestMaterial = $selectedRequestMaterial->toArray();
+
+        $requestMaterial['user_name'] = $selectedRequestMaterial->user->name ?? 'N/A';
+        $requestMaterial['infrastructure_name'] = $selectedRequestMaterial->infrastructure->name ?? 'N/A';
+
+        unset($requestMaterial['user'], $requestMaterial['infrastructure']);
+
+        return response()->json(['data' => $requestMaterial], 200);
     }
 
     /**
@@ -123,38 +70,77 @@ class RequestMaterialController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        // Validate the request
-        $validatedData = $request->validate([
-            'status' => 'required|string',
-            'items' => 'sometimes|json', // Ensure 'items' is valid JSON
-        ]);
-
-        // Find the record by ID
         $requestMaterial = RequestMaterial::find($id);
 
-        // Check if the record exists
         if (!$requestMaterial) {
             return response()->json(['message' => 'Request material not found.'], 404);
         }
 
-        // Update only the fields that are present in the request
-        $requestMaterial->fill($validatedData);
-        $requestMaterial->save();
-
-        return response()->json([
-            'message' => 'Request material updated successfully.',
-            'data' => $requestMaterial,
+        $validatedData = $request->validate([
+            'status' => 'required|string',
+            'items' => 'sometimes|json',
         ]);
+
+        $requestMaterial->update($validatedData);
+
+        return response()->json(['message' => 'Request updated successfully', 'data' => $requestMaterial], 200);
     }
-
-
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        $request = RequestMaterial::findOrFail($id);
-        $request->delete();
+        $requestMaterial = RequestMaterial::find($id);
+
+        if (!$requestMaterial) {
+            return response()->json(['message' => 'Request not found'], 404);
+        }
+
+        $requestMaterial->delete();
+
+        return response()->json(['message' => 'Request deleted successfully'], 200);
+    }
+
+    public function indexDepot()
+    {
+        $requestMaterials = RequestMaterial::with('user', 'infrastructure')
+            ->whereHas('infrastructure', function ($query) {
+                $query->where('type', 101);
+            })
+            ->get()
+            ->map(function ($selectedRequest) {
+                $request = $selectedRequest->toArray();
+
+                $request['user_name'] = $selectedRequest->user->name ?? 'N/A';
+                $request['infrastructure_name'] = $selectedRequest->infrastructure->name ?? 'N/A';
+
+                unset($request['user'], $request['infrastructure']);
+
+                return $request;
+            });
+
+        return response()->json(['data' => $requestMaterials], 200);
+    }
+
+    public function indexTerminal()
+    {
+        $requestMaterials = RequestMaterial::with('user', 'infrastructure')
+            ->whereHas('infrastructure', function ($query) {
+                $query->where('type', 102);
+            })
+            ->get()
+            ->map(function ($selectedRequest) {
+                $request = $selectedRequest->toArray();
+
+                $request['user_name'] = $selectedRequest->user->name ?? 'N/A';
+                $request['infrastructure_name'] = $selectedRequest->infrastructure->name ?? 'N/A';
+
+                unset($request['user'], $request['infrastructure']);
+
+                return $request;
+            });
+
+        return response()->json(['data' => $requestMaterials], 200);
     }
 }
