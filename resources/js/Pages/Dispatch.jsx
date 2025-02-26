@@ -77,7 +77,7 @@ const Dispatch = ({ auth }) => {
         const availabilityPromises = items.map(async (item) => {
           try {
             const response = await axios.get(`/product/get/${item.product_id}`);
-            const stockCount = response.data?.total_stock || 0;
+            const stockCount = response.data.data?.total_stock || 0;
             return {
               ...item,
               available: stockCount >= item.quantity,

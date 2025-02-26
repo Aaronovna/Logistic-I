@@ -81,7 +81,7 @@ class ProductController extends Controller
         $productData['supplier_name'] = $product->supplier->name ?? 'N/A';
         $productData['low_on_stock'] = $productData['total_stock'] <= $product->restock_point;
 
-        unset($productData['inventory'], $productData['category'], $productData['supplier']);
+        unset($productData['inventory'], $productData['category'], $productData['supplier'], $productData['warehouse_stock_details']);
 
         return response()->json(['data' => $productData], 200);
     }
