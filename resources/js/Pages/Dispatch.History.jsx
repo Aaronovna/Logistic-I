@@ -23,7 +23,7 @@ const DispatchHistory = ({ auth }) => {
   const fetchRequests = async () => {
     try {
       const response = await axios.get('/request/get');
-      setRequests(response.data);
+      setRequests(response.data.data);
     } catch (error) {
     }
   };
