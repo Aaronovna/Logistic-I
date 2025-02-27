@@ -19,12 +19,13 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\AuditReportController;
 use App\Http\Controllers\ReturnMaterialController;
 use App\Http\Controllers\ReturnRequestController;
+use App\Http\Middleware\PreventBackHistory;
 
 Route::redirect('/', 'login');
 
 //? START: PAGES ROUTES ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Route::middleware(["auth", "verified"])->group(function () {
+Route::middleware(["auth", "verified", PreventBackHistory::class])->group(function () {
     Route::get('/dashboard', fn() => Inertia::render('Dashboard'))->name('dashboard');
     Route::get('/category', fn() => Inertia::render('Category'))->name('category');
     Route::get('/user', fn() => Inertia::render('User'))->name('user');
@@ -71,7 +72,7 @@ Route::middleware(["auth", "verified"])->group(function () {
 //! END: PAGES ROUTES //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // REQUEST ROUTES
-Route::middleware(["auth", "verified"])->group(function () {
+Route::middleware(["auth", "verified", "throttle:60,1"])->group(function () {
 
     //? START: PRODUCT REQUEST /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -188,17 +189,17 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::delete('/file/delete/{id}', [FileController::class, 'destroy']);
 });
 
-    // Route for all dispatch trails
-    Route::get('/dispatch/trails/get', [DispatchMaterialController::class, 'getAllDispatches'])->name('dispatch.getAllDispatches');
+// Route for all dispatch trails
+Route::get('/dispatch/trails/get', [DispatchMaterialController::class, 'getAllDispatches'])->name('dispatch.getAllDispatches');
 
-    // Route for dispatch trails by product ID
-    Route::get('/dispatch/trails/get/product/{productId}', [DispatchMaterialController::class, 'getDispatchByProduct']);
+// Route for dispatch trails by product ID
+Route::get('/dispatch/trails/get/product/{productId}', [DispatchMaterialController::class, 'getDispatchByProduct']);
 
-    // Route for quantities by product ID
-    Route::get('/dispatch/trails/get/product/{productId}/quantities', [DispatchMaterialController::class, 'getQuantitiesByProduct']);
+// Route for quantities by product ID
+Route::get('/dispatch/trails/get/product/{productId}/quantities', [DispatchMaterialController::class, 'getQuantitiesByProduct']);
 
-    // Route for quantities by product ID and days range
-    Route::get('/dispatch/trails/get/product/{productId}/quantities/days/{days}', [DispatchMaterialController::class, 'getQuantitiesByProductAndDays']);
+// Route for quantities by product ID and days range
+Route::get('/dispatch/trails/get/product/{productId}/quantities/days/{days}', [DispatchMaterialController::class, 'getQuantitiesByProductAndDays']);
 
 
 Route::middleware('auth')->group(function () {
