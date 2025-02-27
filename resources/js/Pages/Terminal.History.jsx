@@ -3,18 +3,15 @@ import { router } from "@inertiajs/react";
 import { AgGridReact } from 'ag-grid-react';
 import { useStateContext } from "@/context/contextProvider";
 
-import InfrastructureLayout from "@/Layouts/InfrastructureLayout";
+import useRole from "@/hooks/useRole";
 import Status from "@/Components/Status";
 import { filterArray } from "@/functions/filterArray";
 import { requestStatus } from "@/Constants/status";
 import { returnStatus } from "@/Constants/status";
 
 const TerminalHistory = ({ auth }) => {
-  if (!hasAccess(auth.user.type, [2050, 2051, 2053])) {
-    return (
-      <Unauthorized />
-    )
-  }
+  const { hasAccess, getLayout } = useRole();
+  const Layout = getLayout(auth.user.type);
 
   const { themePreference } = useStateContext();
 
@@ -47,7 +44,7 @@ const TerminalHistory = ({ auth }) => {
     <AuthenticatedLayout user={auth.user}>
 
       <Head title="Terminal History" />
-      <InfrastructureLayout
+      <Layout
         user={auth.user}
         header={<BreadCrumbsHeader
           headerNames={["Terminal", "History"]}
@@ -58,28 +55,30 @@ const TerminalHistory = ({ auth }) => {
         />
         }
       >
-        <div className="content">
-          <p className="font-medium text-xl mb-2" id="request-section">Request History</p>
-          <div className={`w-full h-96 ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`}>
-            <AgGridReact
-              rowData={requests}
-              columnDefs={colDefs}
-              rowSelection='single'
-              pagination={true}
-            />
-          </div>
+        {!hasAccess(auth.user.type, [2050, 2053]) ? <Unauthorized /> :
+          <div className="content">
+            <p className="font-medium text-xl mb-2" id="request-section">Request History</p>
+            <div className={`w-full h-96 ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`}>
+              <AgGridReact
+                rowData={requests}
+                columnDefs={colDefs}
+                rowSelection='single'
+                pagination={true}
+              />
+            </div>
 
-          <p className="font-medium text-xl mb-2 mt-6" id="return-section">Return History</p>
-          <div className={`w-full h-96 ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`}>
-            <AgGridReact
-              rowData={returns}
-              columnDefs={returnColDef}
-              rowSelection='single'
-              pagination={true}
-            />
+            <p className="font-medium text-xl mb-2 mt-6" id="return-section">Return History</p>
+            <div className={`w-full h-96 ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`}>
+              <AgGridReact
+                rowData={returns}
+                columnDefs={returnColDef}
+                rowSelection='single'
+                pagination={true}
+              />
+            </div>
           </div>
-        </div>
-      </InfrastructureLayout>
+        }
+      </Layout>
     </AuthenticatedLayout>
   )
 }

@@ -1,4 +1,4 @@
-import InventoryLayout from "@/Layouts/InventoryLayout";
+import useRole from "@/hooks/useRole";
 import { Card2 } from "@/Components/Cards";
 import { useEffect, useState, useCallback } from "react";
 import { AgGridReact } from "ag-grid-react";
@@ -11,11 +11,8 @@ import { TbX } from "react-icons/tb";
 import { filterArray } from "@/functions/filterArray";
 
 const Return = ({ auth }) => {
-  if (!hasAccess(auth.user.type, [2050, 2051, 2052])) {
-    return (
-      <Unauthorized />
-    )
-  }
+  const { hasAccess, getLayout } = useRole();
+  const Layout = getLayout(auth.user.type);
 
   const { themePreference, debugMode } = useStateContext();
   const { updateStatus } = useUpdateStatus();
@@ -108,100 +105,102 @@ const Return = ({ auth }) => {
   return (
     <AuthenticatedLayout user={auth.user}>
       <Head title="Return" />
-      <InventoryLayout user={auth.user} header={<NavHeader headerName="Return" />}>
-        <div className="content">
-          <div>
-            <Card2 name="Return Requests" data={returns?.length} className="w-fit" />
-          </div>
+      <Layout user={auth.user} header={<NavHeader headerName="Return" />}>
+        {!hasAccess(auth.user.type, [2050, 2052]) ? <Unauthorized /> :
+          <div className="content">
+            <div>
+              <Card2 name="Return Requests" data={returns?.length} className="w-fit" />
+            </div>
 
-          <div className='mt-8 flex items-end'>
-            <p className='font-medium text-2xl'>Return Requests</p>
-            <Link
-              className='ml-auto font-medium border-card'
-              href={route('return-history')}
-            >
-              View History
-            </Link>
-          </div>
+            <div className='mt-8 flex items-end'>
+              <p className='font-medium text-2xl'>Return Requests</p>
+              <Link
+                className='ml-auto font-medium border-card'
+                href={route('return-history')}
+              >
+                View History
+              </Link>
+            </div>
 
-          <div className="flex gap-4 mt-2">
-            <div className={`h-[508px] ${openDetailSection ? 'w-4/6' : 'w-full'} ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} >
+            <div className="flex gap-4 mt-2">
+              <div className={`h-[508px] ${openDetailSection ? 'w-4/6' : 'w-full'} ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} >
+                <AgGridReact
+                  rowData={returns}
+                  columnDefs={colDefs}
+                  rowSelection='single'
+                  pagination={true}
+                  onGridReady={onGridReady}
+                  onSelectionChanged={onSelectionChanged}
+                  getRowStyle={() => ({
+                    cursor: "pointer",
+                  })}
+                />
+              </div>
+
+              <div className={`w-2/6 border-card flex-1 p-4 ${openDetailSection ? 'block' : 'hidden'} flex flex-col shadow-lg`}>
+                <div className="flex items-start">
+                  <p className="text-gray-600">{new Date(selectedData?.created_at).toLocaleString(undefined, dateTimeFormatShort)}</p>
+                  <button className="ml-auto" onClick={() => setOpenDetailSection(false)}><TbX size={20} /></button>
+                </div>
+                <div className="mt-8">
+                  <div className="flex justify-between mb-4 text-sm">
+                    <p className="text-lg font-medium">Items List</p>
+                    <Status statusArray={returnStatus} status={selectedData?.status} />
+                  </div>
+
+                  <div className="max-h-64 overflow-y-auto">
+                    {selectedData && JSON.parse(selectedData.items).map((item, index) => {
+                      return (
+                        <div key={index} className="w-full flex flex-col border mb-2 rounded-md">
+                          <div className="w-full flex justify-between px-2 pt-1">
+                            <p className="font-medium">{item.name}</p>
+                            <p className="text-right font-medium text-gray-600 text-sm">
+                              {item.quantityType === 'qty' ? `${item.value} pcs.` : `${item.value}`}
+                            </p>
+                          </div>
+                          <p className="bg-gray-100 text-sm px-2 pb-1 text-gray-600">{item.category}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <p className="text-sm italic p-1 mt-2">{selectedData?.comment}</p>
+                </div>
+                <div className="mt-auto">
+                  {
+                    selectedData?.status === 'Waiting for Approval' ?
+                      <button onClick={() => acceptReturn(selectedData?.id)} className="leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-green-100 text-green-600 outline outline-1 outline-green-300" >
+                        Accept
+                      </button> : null
+                  }
+                  {
+                    debugMode && selectedData?.status === 'Request Approved' ?
+                      <button onClick={() => deliverReturn(selectedData?.id)} className="italic leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-green-100 text-green-600 outline outline-1 outline-green-300" >
+                        Mark as delivered
+                      </button> : null
+                  }
+                  {
+                    selectedData?.status === 'Delivered' ?
+                      <button onClick={() => onAccept(selectedData?.id, JSON.parse(selectedData?.items))} className="leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-green-100 text-green-600 outline outline-1 outline-green-300" >
+                        Complete
+                      </button> : null
+                  }
+                </div>
+              </div>
+            </div>
+
+            <p className="mt-6 text-xl font-semibold">Returned Materials</p>
+
+            <div className={`mt-2 ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} style={{ height: '508px' }} >
               <AgGridReact
-                rowData={returns}
-                columnDefs={colDefs}
+                rowData={returnedMaterials}
+                columnDefs={returnedMaterialColDefs}
                 rowSelection='single'
                 pagination={true}
-                onGridReady={onGridReady}
-                onSelectionChanged={onSelectionChanged}
-                getRowStyle={() => ({
-                  cursor: "pointer",
-                })}
               />
             </div>
-
-            <div className={`w-2/6 border-card flex-1 p-4 ${openDetailSection ? 'block' : 'hidden'} flex flex-col shadow-lg`}>
-              <div className="flex items-start">
-                <p className="text-gray-600">{new Date(selectedData?.created_at).toLocaleString(undefined, dateTimeFormatShort)}</p>
-                <button className="ml-auto" onClick={() => setOpenDetailSection(false)}><TbX size={20} /></button>
-              </div>
-              <div className="mt-8">
-                <div className="flex justify-between mb-4 text-sm">
-                  <p className="text-lg font-medium">Items List</p>
-                  <Status statusArray={returnStatus} status={selectedData?.status} />
-                </div>
-
-                <div className="max-h-64 overflow-y-auto">
-                  {selectedData && JSON.parse(selectedData.items).map((item, index) => {
-                    return (
-                      <div key={index} className="w-full flex flex-col border mb-2 rounded-md">
-                        <div className="w-full flex justify-between px-2 pt-1">
-                          <p className="font-medium">{item.name}</p>
-                          <p className="text-right font-medium text-gray-600 text-sm">
-                            {item.quantityType === 'qty' ? `${item.value} pcs.` : `${item.value}`}
-                          </p>
-                        </div>
-                        <p className="bg-gray-100 text-sm px-2 pb-1 text-gray-600">{item.category}</p>
-                      </div>
-                    )
-                  })}
-                </div>
-                <p className="text-sm italic p-1 mt-2">{selectedData?.comment}</p>
-              </div>
-              <div className="mt-auto">
-                {
-                  selectedData?.status === 'Waiting for Approval' ?
-                    <button onClick={() => acceptReturn(selectedData?.id)} className="leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-green-100 text-green-600 outline outline-1 outline-green-300" >
-                      Accept
-                    </button> : null
-                }
-                {
-                  debugMode && selectedData?.status === 'Request Approved' ?
-                    <button onClick={() => deliverReturn(selectedData?.id)} className="italic leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-green-100 text-green-600 outline outline-1 outline-green-300" >
-                      Mark as delivered
-                    </button> : null
-                }
-                {
-                  selectedData?.status === 'Delivered' ?
-                    <button onClick={() => onAccept(selectedData?.id, JSON.parse(selectedData?.items))} className="leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-green-100 text-green-600 outline outline-1 outline-green-300" >
-                      Complete
-                    </button> : null
-                }
-              </div>
-            </div>
           </div>
-
-          <p className="mt-6 text-xl font-semibold">Returned Materials</p>
-
-          <div className={`mt-2 ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} style={{ height: '508px' }} >
-            <AgGridReact
-              rowData={returnedMaterials}
-              columnDefs={returnedMaterialColDefs}
-              rowSelection='single'
-              pagination={true}
-            />
-          </div>
-        </div>
-      </InventoryLayout>
+        }
+      </Layout>
     </AuthenticatedLayout>
   )
 }

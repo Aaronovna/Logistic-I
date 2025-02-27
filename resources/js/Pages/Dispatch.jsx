@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useStateContext } from '@/context/contextProvider';
 
-import InventoryLayout from '@/Layouts/InventoryLayout';
+import useRole from '@/hooks/useRole';
 import RequestsFolder from '@/Components/cards/RequestsFolder';
 import RequestCard from '@/Components/cards/RequestCard';
 import { Card2 } from '@/Components/Cards';
@@ -12,11 +12,8 @@ import Status from '@/Components/Status';
 import { getStatusStep, requestStatus } from '@/Constants/status';
 
 const Dispatch = ({ auth }) => {
-  if (!hasAccess(auth.user.type, [2050, 2051, 2052])) {
-    return (
-      <Unauthorized />
-    )
-  }
+  const { hasAccess, getLayout } = useRole();
+  const Layout = getLayout(auth.user.type);
 
   const { theme, debugMode } = useStateContext();
   const { updateStatus } = useUpdateStatus();
@@ -264,189 +261,189 @@ const Dispatch = ({ auth }) => {
     >
       <Head title="Dispatch" />
 
-      <InventoryLayout user={auth.user} header={<NavHeader headerName="Dispatch" />}>
-        <div className="content flex flex-col h-screen">
-          <div className='flex gap-4 mb-8'>
-            <Card2 name='Total Requests' data={requests?.length} className='w-1/2' />
-            <Card2 name='Total Deliveries' className='w-1/2' data={requests && filterArray(requests, 'status', ["In Transit", "Delivered"]).length} />
-          </div>
+      <Layout user={auth.user} header={<NavHeader headerName="Dispatch" />}>
+        {!hasAccess(auth.user.type, [2050, 2052]) ? <Unauthorized /> :
+          <div className="content flex flex-col h-screen">
+            <div className='flex gap-4 mb-8'>
+              <Card2 name='Total Requests' data={requests?.length} className='w-1/2' />
+              <Card2 name='Total Deliveries' className='w-1/2' data={requests && filterArray(requests, 'status', ["In Transit", "Delivered"]).length} />
+            </div>
 
-          <div className='flex mt-8 mb-4 items-baseline justify-between'>
-            <p className='font-medium text-xl' style={{ color: theme.text }}>Requests</p>
-            <Link href={route('dispatch-history')}>
-              View History
-            </Link>
-          </div>
+            <div className='flex mt-8 mb-4 items-baseline justify-between'>
+              <p className='font-medium text-xl' style={{ color: theme.text }}>Requests</p>
+              <Link href={route('dispatch-history')}>
+                View History
+              </Link>
+            </div>
 
-          <div className='grid gap-4 grid-cols-3'>
-            <RequestsFolder total={depotRequests?.length} name='Depot'>
-              {
-                depotRequests && depotRequests.map((request, index) => {
-                  return (
-                    <RequestsFolder.Request request={request} key={index} onClick={() => handleOpenRequestModal(request)} />
-                  )
-                })
-              }
-            </RequestsFolder>
-            <RequestsFolder total={terminalRequests?.length} name='Terminal'>
-              {
-                terminalRequests && terminalRequests.map((request, index) => {
-                  return (
-                    <RequestsFolder.Request request={request} key={index} onClick={() => handleOpenRequestModal(request)} />
-                  )
-                })
-              }
-            </RequestsFolder>
-            <RequestsFolder data={undefined} name='Other' />
-          </div>
+            <div className='grid gap-4 grid-cols-3'>
+              <RequestsFolder total={depotRequests?.length} name='Depot'>
+                {
+                  depotRequests && depotRequests.map((request, index) => {
+                    return (
+                      <RequestsFolder.Request request={request} key={index} onClick={() => handleOpenRequestModal(request)} />
+                    )
+                  })
+                }
+              </RequestsFolder>
+              <RequestsFolder total={terminalRequests?.length} name='Terminal'>
+                {
+                  terminalRequests && terminalRequests.map((request, index) => {
+                    return (
+                      <RequestsFolder.Request request={request} key={index} onClick={() => handleOpenRequestModal(request)} />
+                    )
+                  })
+                }
+              </RequestsFolder>
+              <RequestsFolder data={undefined} name='Other' />
+            </div>
 
-          {!requests?.length ?
-            <div className='flex-1 flex justify-center items-center'>
-              <p className='text-xl text-gray-300'>No Material Requests Available</p>
-            </div> : null
-          }
+            {!requests?.length ?
+              <div className='flex-1 flex justify-center items-center'>
+                <p className='text-xl text-gray-300'>No Material Requests Available</p>
+              </div> : null
+            }
 
-          <div className='mt-8 grid gap-4 grid-cols-3'>
-            {requests?.map((request, index) => {
-              return (
-                <div key={index} onClick={() => handleOpenRequestModal(request)}>
-                  <RequestCard data={request} />
+            <div className='mt-8 grid gap-4 grid-cols-3'>
+              {requests?.map((request, index) => {
+                return (
+                  <div key={index} onClick={() => handleOpenRequestModal(request)}>
+                    <RequestCard data={request} />
+                  </div>
+                )
+              })}
+            </div>
+            <Modal
+              show={openRequestModal}
+              name={`Request from ${requestData?.infrastructure_name || "Unknown Infrastructure"}`}
+              onClose={() => {
+                setOpenRequestModal(false);
+                setItemAvailability([]);
+              }}
+            >
+
+              <div className="mt-4">
+                <div className='flex justify-between mb-2'>
+                  <p>{new Date(requestData?.created_at).toLocaleString(undefined, dateTimeFormatLong)}</p>
+                  <Status statusArray={requestStatus} status={requestData?.status} />
                 </div>
-              )
-            })}
-          </div>
-        </div>
 
-        <Modal
-          show={openRequestModal}
-          name={`Request from ${requestData?.infrastructure_name || "Unknown Infrastructure"}`}
-          onClose={() => {
-            setOpenRequestModal(false);
-            setItemAvailability([]);
-          }}
-        >
+                <div className='mb-2'>
+                  <p><span className="font-medium">{`Request from: `}</span>{requestData?.infrastructure_name || "Unknown"}</p>
+                  <p><span className="font-medium">{`Purpose: `}</span>{requestData?.type || "N/A"}</p>
+                </div>
+              </div>
 
-          <div className="mt-4">
-            <div className='flex justify-between mb-2'>
-              <p>{new Date(requestData?.created_at).toLocaleString(undefined, dateTimeFormatLong)}</p>
-              <Status statusArray={requestStatus} status={requestData?.status} />
-            </div>
-
-            <div className='mb-2'>
-              <p><span className="font-medium">{`Request from: `}</span>{requestData?.infrastructure_name || "Unknown"}</p>
-              <p><span className="font-medium">{`Purpose: `}</span>{requestData?.type || "N/A"}</p>
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <p className="font-medium mb-2">Requested Products</p>
-            <ul className="space-y-2 max-h-96 overflow-y-auto">
-              {itemAvailability.map((item, index) => (
-                <li
-                  key={index}
-                  className="flex items-center justify-between bg-gray-100 px-3 py-2 rounded-md border border-gray-200"
-                >
-                  <span>
-                    <span className="text-sm text-gray-600 mr-2">{item.product_id}</span>
-                    <span className="font-medium">{item.product_name}</span>
-                  </span>
-
-                  {requestData && (getStatusStep(requestStatus, requestData?.status) === 1 ||
-                    getStatusStep(requestStatus, requestData?.status) === 3 ||
-                    getStatusStep(requestStatus, requestData?.status) === 6 ||
-                    getStatusStep(requestStatus, requestData?.status) === 7) &&
-                    <span className="text-sm text-gray-700 flex items-center">
-                      Qty: {item.quantity}
-                    </span>
-                  }
-
-                  {requestData && getStatusStep(requestStatus, requestData?.status) === 1 &&
-                    <span
-                      className={`ml-3 px-2 py-1 text-xs rounded ${item.available
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                        }`}
+              <div className="mt-4">
+                <p className="font-medium mb-2">Requested Products</p>
+                <ul className="space-y-2 max-h-96 overflow-y-auto">
+                  {itemAvailability.map((item, index) => (
+                    <li
+                      key={index}
+                      className="flex items-center justify-between bg-gray-100 px-3 py-2 rounded-md border border-gray-200"
                     >
-                      {item.available
-                        ? `Available (Stock: ${item.stockCount})`
-                        : `Out of Stock (Stock: ${item.stockCount})`}
-                    </span>
-                  }
+                      <span>
+                        <span className="text-sm text-gray-600 mr-2">{item.product_id}</span>
+                        <span className="font-medium">{item.product_name}</span>
+                      </span>
 
-                  {requestData && getStatusStep(requestStatus, requestData?.status) === 2 && (
-                    item.filled ? (
-                      <button
-                        className="ml-4 px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
-                        onClick={() => handleCancelFill(item.product_id, item.quantity, index)}
-                      >
-                        Cancel Fill
-                      </button>
-                    ) : (
-                      <button
-                        className="ml-4 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
-                        onClick={() => handleFillStock(item.product_id, item.quantity, index)}
-                      >
-                        Fill Stock
-                      </button>
-                    ))}
-                </li>
-              ))}
-            </ul>
-          </div>
+                      {requestData && (getStatusStep(requestStatus, requestData?.status) === 1 ||
+                        getStatusStep(requestStatus, requestData?.status) === 3 ||
+                        getStatusStep(requestStatus, requestData?.status) === 6 ||
+                        getStatusStep(requestStatus, requestData?.status) === 7) &&
+                        <span className="text-sm text-gray-700 flex items-center">
+                          Qty: {item.quantity}
+                        </span>
+                      }
 
-          {requestData && getStatusStep(requestStatus, requestData?.status) === 1 &&
-            <div className={`justify-end gap-2 mt-4`}>
-              <button
-                disabled={requestData?.status === 'Request Created' ? false : true}
-                className="border border-red-300 bg-red-50 text-red-600 px-4 py-2 rounded-md hover:bg-red-100 transition"
-                onClick={() => {
-                  handleReject(requestData?.id); // Define `handleReject` function
-                }}
-              >
-                Reject
-              </button>
-              <button
-                disabled={requestData?.status === 'Request Created' ? false : true}
-                className="border border-green-300 bg-green-50 text-green-600 px-4 py-2 rounded-md hover:bg-green-100 transition"
-                onClick={() => {
-                  handleAccept(requestData?.id);
-                  createDispatch(requestData);
-                }}
-              >
-                Accept
-              </button>
-            </div>
-          }
+                      {requestData && getStatusStep(requestStatus, requestData?.status) === 1 &&
+                        <span
+                          className={`ml-3 px-2 py-1 text-xs rounded ${item.available
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                            }`}
+                        >
+                          {item.available
+                            ? `Available (Stock: ${item.stockCount})`
+                            : `Out of Stock (Stock: ${item.stockCount})`}
+                        </span>
+                      }
 
-          {requestData && getStatusStep(requestStatus, requestData?.status) === 2 &&
-            <div className={`justify-end gap-2 mt-4`}>
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded"
-                onClick={handleRejectAllFill}
-              >
-                Reject All Fills
-              </button>
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded"
-                onClick={handlePrepareForDelivery}
-              >
-                Prepare for Delivery
-              </button>
-            </div>
-          }
+                      {requestData && getStatusStep(requestStatus, requestData?.status) === 2 && (
+                        item.filled ? (
+                          <button
+                            className="ml-4 px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+                            onClick={() => handleCancelFill(item.product_id, item.quantity, index)}
+                          >
+                            Cancel Fill
+                          </button>
+                        ) : (
+                          <button
+                            className="ml-4 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
+                            onClick={() => handleFillStock(item.product_id, item.quantity, index)}
+                          >
+                            Fill Stock
+                          </button>
+                        ))}
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-          {requestData && getStatusStep(requestStatus, requestData?.status) === 3 &&
-            <div className={`justify-end gap-2 mt-4 ${requestData?.status === 'Materials Fulfilled' ? 'flex' : 'hidden'}`}>
-              {
-                debugMode ? <button className='border-card italic' onClick={() => CompleteDeliver(requestData?.id)}>Make Delivered</button> : null
+              {requestData && getStatusStep(requestStatus, requestData?.status) === 1 &&
+                <div className={`justify-end gap-2 mt-4`}>
+                  <button
+                    disabled={requestData?.status === 'Request Created' ? false : true}
+                    className="border border-red-300 bg-red-50 text-red-600 px-4 py-2 rounded-md hover:bg-red-100 transition"
+                    onClick={() => {
+                      handleReject(requestData?.id); // Define `handleReject` function
+                    }}
+                  >
+                    Reject
+                  </button>
+                  <button
+                    disabled={requestData?.status === 'Request Created' ? false : true}
+                    className="border border-green-300 bg-green-50 text-green-600 px-4 py-2 rounded-md hover:bg-green-100 transition"
+                    onClick={() => {
+                      handleAccept(requestData?.id);
+                      createDispatch(requestData);
+                    }}
+                  >
+                    Accept
+                  </button>
+                </div>
               }
-              <p className='italic'>Waiting for Transport</p>
-            </div>
-          }
 
-        </Modal>
+              {requestData && getStatusStep(requestStatus, requestData?.status) === 2 &&
+                <div className={`justify-end gap-2 mt-4`}>
+                  <button
+                    className="bg-red-500 text-white px-4 py-2 rounded"
+                    onClick={handleRejectAllFill}
+                  >
+                    Reject All Fills
+                  </button>
+                  <button
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                    onClick={handlePrepareForDelivery}
+                  >
+                    Prepare for Delivery
+                  </button>
+                </div>
+              }
 
-      </InventoryLayout>
+              {requestData && getStatusStep(requestStatus, requestData?.status) === 3 &&
+                <div className={`justify-end gap-2 mt-4 ${requestData?.status === 'Materials Fulfilled' ? 'flex' : 'hidden'}`}>
+                  {
+                    debugMode ? <button className='border-card italic' onClick={() => CompleteDeliver(requestData?.id)}>Make Delivered</button> : null
+                  }
+                  <p className='italic'>Waiting for Transport</p>
+                </div>
+              }
+
+            </Modal>
+          </div>
+        }
+      </Layout>
     </AuthenticatedLayout>
   );
 }

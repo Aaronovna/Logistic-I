@@ -1,4 +1,4 @@
-import DefaultLayout from '@/Layouts/InventoryLayout';
+import useRole from '@/hooks/useRole';
 import { Head } from '@inertiajs/react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
@@ -45,6 +45,9 @@ const dummyEmployeesData = [
 ]
 
 export default function User({ auth }) {
+  const { hasAccess, getLayout } = useRole();
+  const Layout = getLayout(auth.user.type);
+
   const { theme, themePreference, userPermissions } = useStateContext();
 
   const [users, setUsers] = useState(null);
@@ -322,236 +325,237 @@ export default function User({ auth }) {
       user={auth.user}
     >
       <Head title="Users" />
-      <DefaultLayout user={auth.user} header={<NavHeader headerName="User" />}>
-        <div className='content flex flex-col'>
+      <Layout user={auth.user} header={<NavHeader headerName="User" />}>
+        {!hasAccess(auth.user.type, [2050, 2051]) ? <Unauthorized /> :
+          <div className='content flex flex-col'>
 
-          <div className='flex items-center gap-6'>
-            <Card data={users ? users.length : "-"} name="Users" Icon={TbUser} />
-            <Card data={positions ? positions.length : "-"} name="Positions" Icon={TbBriefcase} />
-          </div>
-
-          <div className="w-full realtive mb-4">
-            <span className='flex justify-between h-14 items-center'>
-              <p className='text-xl font-semibold h-fit' style={{ color: theme.text }}>Users</p>
-
-              <button style={{ background: theme.accent, color: theme.background }}
-                disabled={userPermissions === '000' ? true : false}
-                className='m-2 mr-0 p-2 rounded-md flex items-center gap-1'
-                onClick={() => setOpenAddUserModal(true)}>
-                <TbUserPlus />
-                <p className='md:block hidden'>Add Users</p>
-              </button>
-
-            </span>
-            <div className={`h-96 ${themePreference === 'light' ? 'ag-theme-quartz ' : 'ag-theme-quartz-dark'}`}>
-              <AgGridReact
-                rowData={users}
-                columnDefs={userColDefs}
-                rowSelection='single'
-                onGridReady={onGridReady}
-                onSelectionChanged={onUserSelectionChanged}
-              />
+            <div className='flex items-center gap-6'>
+              <Card data={users ? users.length : "-"} name="Users" Icon={TbUser} />
+              <Card data={positions ? positions.length : "-"} name="Positions" Icon={TbBriefcase} />
             </div>
 
-          </div>
-          <div className='w-full flex gap-4'>
-            <div className='w-2/3' style={{ borderColor: theme.border }}>
-              <span className='flex justify-between h-14 ml-1 items-center'>
-                <p className='text-xl font-semibold h-fit' style={{ color: theme.text }}>User Information</p>
-              </span>
-              <div className='border-card h-96 p-4 relative overflow-hidden flex flex-col'>
-                {!userSelectedData || userSelectedData.email_verified_at === null ? (
-                  <div className='absolute top-0 left-0 w-full h-full bg-black/10 backdrop-blur-md z-10 flex items-center justify-center'>
-                    {userSelectedData ? (
-                      <p className='text-2xl font-medium tracking-wider text-gray-500'>User not verified yet</p>
-                    ) : (
-                      <p className='text-2xl font-medium tracking-wider text-gray-500'>Select a user first</p>
-                    )}
-                  </div>
-                ) : null}
-                <p className='text-lg font-medium ml-1' style={{ color: theme.text }}>{userSelectedData ? userSelectedData.name : '-'}</p>
-                <p className='text-gray-600 ml-1'>{userSelectedData?.position?.name ? userSelectedData.position?.name : 'No position set yet'}</p>
-                <div className='my-2 relative border-card grid grid-cols-2 h-56 overflow-y-auto p-2'>
-                  {selectedUserPermissions &&
-                    permissions.map((permission, index) => {
-                      const permissionValue = selectedUserPermissions[index][permission.code]; // Get true/false using key
-
-                      return (
-                        <p key={index} className='capitalize flex gap-1 items-center hover:bg-gray-300 rounded'>
-                          <span>{permissionValue ? <TbCheck size={22} color='lime' /> : <TbX size={22} color='red' />}</span> {/* Display based on value */}
-                          <span>{permission.alias.replace(/_/g, " ")}</span>
-                        </p>
-                      );
-                    })}
-                </div>
-
-                <form className='flex gap-2 mt-auto' onSubmit={submitSetUserPosition}>
-                  <select name="su_position" id="su_position" className='border-card flex-1' onChange={changePermission}>
-                    <option value={null} className='text-sm text-gray-400'>Select Position</option>
-                    {
-                      positions && positions.map((position, index) => {
-                        return (
-                          <option value={position.id} key={index} className='text-sm'>{position.name}</option>
-                        )
-                      })
-                    }
-                  </select>
-                  <button className='border-card'>Save</button>
-                </form>
-              </div>
-            </div>
-
-            <div className="w-1/3 relative">
+            <div className="w-full realtive mb-4">
               <span className='flex justify-between h-14 items-center'>
-                <p className='text-xl font-semibold h-fit' style={{ color: theme.text }}>Positions</p>
-                <button
+                <p className='text-xl font-semibold h-fit' style={{ color: theme.text }}>Users</p>
+
+                <button style={{ background: theme.accent, color: theme.background }}
+                  disabled={userPermissions === '000' ? true : false}
                   className='m-2 mr-0 p-2 rounded-md flex items-center gap-1'
-                  style={{ background: theme.accent, color: theme.background }}
-                  onClick={() => setOpenAddPositionModal(true)}>
-                  <TbPlus size={24} />
+                  onClick={() => setOpenAddUserModal(true)}>
+                  <TbUserPlus />
+                  <p className='md:block hidden'>Add Users</p>
                 </button>
+
               </span>
               <div className={`h-96 ${themePreference === 'light' ? 'ag-theme-quartz ' : 'ag-theme-quartz-dark'}`}>
                 <AgGridReact
-                  rowData={positions}
-                  columnDefs={positionColDefs}
+                  rowData={users}
+                  columnDefs={userColDefs}
                   rowSelection='single'
                   onGridReady={onGridReady}
-                  onSelectionChanged={onPositionSelectionChanged}
-                  onRowClicked={() => setOpenEditPositionModal(true)}
+                  onSelectionChanged={onUserSelectionChanged}
                 />
               </div>
 
-              {/* MODAL FOR ADD POSITION */}
-              <div className={`z-10 absolute h-full w-full top-0 left-0 p-1 backdrop-blur-sm duration-300 rounded-md ${openAddPositionModal ? 'visible opacity-100' : 'invisible opacity-0'} ${themePreference === 'light' ? 'l-t-grad' : 'd-t-grad'}`}>
-                <span className='h-14 flex justify-end items-center rounded-md'>
-                  <button className='font-semibold m-2 mr-0 p-2 rounded-md flex' style={{ color: theme.background, background: theme.danger }}
-                    onClick={() => setOpenAddPositionModal(false)}
-                  >
-                    <TbX size={24} />
-                  </button>
+            </div>
+            <div className='w-full flex gap-4'>
+              <div className='w-2/3' style={{ borderColor: theme.border }}>
+                <span className='flex justify-between h-14 ml-1 items-center'>
+                  <p className='text-xl font-semibold h-fit' style={{ color: theme.text }}>User Information</p>
                 </span>
-                <form onSubmit={handleAddPositionSubmit} className='flex flex-col p-2 border-card' style={{ borderColor: theme.border }}>
-                  <p style={{ color: theme.text }} className='font-semibold text-2xl inline-block h-fit w-full text-center mb-2'>Add Position</p>
-                  <input
-                    className='border-card'
-                    type="text"
-                    name="name"
-                    id="name"
-                    value={addPositionName}
-                    onChange={(e) => setAddPositionName(e.target.value)}
-                  />
-                  <button className='p-2 mt-2 font-semibold border-card' style={{ background: theme.primary, text: theme.text, borderColor: theme.border }}>Create</button>
-                </form>
+                <div className='border-card h-96 p-4 relative overflow-hidden flex flex-col'>
+                  {!userSelectedData || userSelectedData.email_verified_at === null ? (
+                    <div className='absolute top-0 left-0 w-full h-full bg-black/10 backdrop-blur-md z-10 flex items-center justify-center'>
+                      {userSelectedData ? (
+                        <p className='text-2xl font-medium tracking-wider text-gray-500'>User not verified yet</p>
+                      ) : (
+                        <p className='text-2xl font-medium tracking-wider text-gray-500'>Select a user first</p>
+                      )}
+                    </div>
+                  ) : null}
+                  <p className='text-lg font-medium ml-1' style={{ color: theme.text }}>{userSelectedData ? userSelectedData.name : '-'}</p>
+                  <p className='text-gray-600 ml-1'>{userSelectedData?.position?.name ? userSelectedData.position?.name : 'No position set yet'}</p>
+                  <div className='my-2 relative border-card grid grid-cols-2 h-56 overflow-y-auto p-2'>
+                    {selectedUserPermissions &&
+                      permissions.map((permission, index) => {
+                        const permissionValue = selectedUserPermissions[index][permission.code]; // Get true/false using key
+
+                        return (
+                          <p key={index} className='capitalize flex gap-1 items-center hover:bg-gray-300 rounded'>
+                            <span>{permissionValue ? <TbCheck size={22} color='lime' /> : <TbX size={22} color='red' />}</span> {/* Display based on value */}
+                            <span>{permission.alias.replace(/_/g, " ")}</span>
+                          </p>
+                        );
+                      })}
+                  </div>
+
+                  <form className='flex gap-2 mt-auto' onSubmit={submitSetUserPosition}>
+                    <select name="su_position" id="su_position" className='border-card flex-1' onChange={changePermission}>
+                      <option value={null} className='text-sm text-gray-400'>Select Position</option>
+                      {
+                        positions && positions.map((position, index) => {
+                          return (
+                            <option value={position.id} key={index} className='text-sm'>{position.name}</option>
+                          )
+                        })
+                      }
+                    </select>
+                    <button className='border-card'>Save</button>
+                  </form>
+                </div>
               </div>
 
-              {/* MODAL FOR EDITING AND DELETING POSITION */}
-              <div className={`z-10 absolute h-full w-full top-0 left-0 p-1 backdrop-blur-sm duration-300 ${openEditPositionModal ? 'visible opacity-100' : 'invisible opacity-0'} ${themePreference === 'light' ? 'l-t-grad' : 'd-t-grad'}`}>
-                <span className='h-14 flex justify-end items-center rounded-md'>
-                  <button className='font-semibold m-2 mr-0 p-2 rounded-md flex' style={{ color: theme.background, background: theme.danger }}
-                    onClick={() => setOpenEditPositionModal(false)}
-                  >
-                    <TbX size={24} />
+              <div className="w-1/3 relative">
+                <span className='flex justify-between h-14 items-center'>
+                  <p className='text-xl font-semibold h-fit' style={{ color: theme.text }}>Positions</p>
+                  <button
+                    className='m-2 mr-0 p-2 rounded-md flex items-center gap-1'
+                    style={{ background: theme.accent, color: theme.background }}
+                    onClick={() => setOpenAddPositionModal(true)}>
+                    <TbPlus size={24} />
                   </button>
                 </span>
-                <form onSubmit={handleEditPositionSubmit} className='flex flex-col p-2 border-card' style={{ borderColor: theme.border }}>
-                  <p className='font-semibold text-2xl inline-block h-fit w-full text-center mb-2' style={{ color: theme.text }}>Edit Position</p>
-                  <input
-                    className='border-card'
-                    type="text"
-                    name="name"
-                    id="name"
-                    placeholder={positionSelectedData ? positionSelectedData.name : ''}
-                    value={editPositionName}
-                    onChange={(e) => setEditPositionName(e.target.value)}
+                <div className={`h-96 ${themePreference === 'light' ? 'ag-theme-quartz ' : 'ag-theme-quartz-dark'}`}>
+                  <AgGridReact
+                    rowData={positions}
+                    columnDefs={positionColDefs}
+                    rowSelection='single'
+                    onGridReady={onGridReady}
+                    onSelectionChanged={onPositionSelectionChanged}
+                    onRowClicked={() => setOpenEditPositionModal(true)}
                   />
-                  <span className='flex gap-2'>
-                    <button type='button' className='flex-1 p-2 mt-2 font-medium text-white border-card'
-                      style={{ color: theme.background, borderColor: theme.border, background: theme.danger }}
-                      onClick={() => handleDeletePosition(positionSelectedData.id)}>
-                      Remove
-                    </button>
-                    <button type='submit' className='flex-1 p-2 mt-2 font-medium border-card'
-                      style={{ background: theme.primary, color: theme.background, borderColor: theme.border }}>
-                      Update
+                </div>
+
+                {/* MODAL FOR ADD POSITION */}
+                <div className={`z-10 absolute h-full w-full top-0 left-0 p-1 backdrop-blur-sm duration-300 rounded-md ${openAddPositionModal ? 'visible opacity-100' : 'invisible opacity-0'} ${themePreference === 'light' ? 'l-t-grad' : 'd-t-grad'}`}>
+                  <span className='h-14 flex justify-end items-center rounded-md'>
+                    <button className='font-semibold m-2 mr-0 p-2 rounded-md flex' style={{ color: theme.background, background: theme.danger }}
+                      onClick={() => setOpenAddPositionModal(false)}
+                    >
+                      <TbX size={24} />
                     </button>
                   </span>
-                  <button type='button' onClick={() => setOpenEditPositionPermissionsModal(true)}
-                    className='p-2 mt-2 font-medium border-card'
-                    style={{ background: theme.secondary, color: theme.text, borderColor: theme.border }}>Edit Permissions</button>
-                </form>
+                  <form onSubmit={handleAddPositionSubmit} className='flex flex-col p-2 border-card' style={{ borderColor: theme.border }}>
+                    <p style={{ color: theme.text }} className='font-semibold text-2xl inline-block h-fit w-full text-center mb-2'>Add Position</p>
+                    <input
+                      className='border-card'
+                      type="text"
+                      name="name"
+                      id="name"
+                      value={addPositionName}
+                      onChange={(e) => setAddPositionName(e.target.value)}
+                    />
+                    <button className='p-2 mt-2 font-semibold border-card' style={{ background: theme.primary, text: theme.text, borderColor: theme.border }}>Create</button>
+                  </form>
+                </div>
+
+                {/* MODAL FOR EDITING AND DELETING POSITION */}
+                <div className={`z-10 absolute h-full w-full top-0 left-0 p-1 backdrop-blur-sm duration-300 ${openEditPositionModal ? 'visible opacity-100' : 'invisible opacity-0'} ${themePreference === 'light' ? 'l-t-grad' : 'd-t-grad'}`}>
+                  <span className='h-14 flex justify-end items-center rounded-md'>
+                    <button className='font-semibold m-2 mr-0 p-2 rounded-md flex' style={{ color: theme.background, background: theme.danger }}
+                      onClick={() => setOpenEditPositionModal(false)}
+                    >
+                      <TbX size={24} />
+                    </button>
+                  </span>
+                  <form onSubmit={handleEditPositionSubmit} className='flex flex-col p-2 border-card' style={{ borderColor: theme.border }}>
+                    <p className='font-semibold text-2xl inline-block h-fit w-full text-center mb-2' style={{ color: theme.text }}>Edit Position</p>
+                    <input
+                      className='border-card'
+                      type="text"
+                      name="name"
+                      id="name"
+                      placeholder={positionSelectedData ? positionSelectedData.name : ''}
+                      value={editPositionName}
+                      onChange={(e) => setEditPositionName(e.target.value)}
+                    />
+                    <span className='flex gap-2'>
+                      <button type='button' className='flex-1 p-2 mt-2 font-medium text-white border-card'
+                        style={{ color: theme.background, borderColor: theme.border, background: theme.danger }}
+                        onClick={() => handleDeletePosition(positionSelectedData.id)}>
+                        Remove
+                      </button>
+                      <button type='submit' className='flex-1 p-2 mt-2 font-medium border-card'
+                        style={{ background: theme.primary, color: theme.background, borderColor: theme.border }}>
+                        Update
+                      </button>
+                    </span>
+                    <button type='button' onClick={() => setOpenEditPositionPermissionsModal(true)}
+                      className='p-2 mt-2 font-medium border-card'
+                      style={{ background: theme.secondary, color: theme.text, borderColor: theme.border }}>Edit Permissions</button>
+                  </form>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </DefaultLayout>
-
-      <Modal show={openAddUserModal} onClose={() => setOpenAddUserModal(false)} maxWidth={'2xl'} name="Create User">
-        <div style={{ color: theme.text }}>
-          <form onSubmit={handleAddUserSubmit} className='flex flex-col gap-2'>
-            <div className='relative w-full'>
-              <input
-                type="text"
-                placeholder="Search an employee..."
-                className='border-card w-full mb-2 bg-transparent'
-                value={searchedEmployee}
-                onChange={handleSearchEmployee}
-                onClick={() => setOpenEmployeeDropdown(!openEmployeeDropdown)}
-                style={{ borderColor: theme.border }}
-              />
-              {openEmployeeDropdown &&
-                <div
-                  ref={employeeDropdownRef}
-                  className="absolute w-full rounded-md max-h-36 overflow-y-auto z-50 backdrop-blur border-card"
-                >
-                  {searchedEmployee.trim() === ""
-                    ? <p className="p-2">Search Employee</p>
-                    : filteredEmployees.length > 0
-                      ? filteredEmployees.map((employee, index) =>
-                        <button key={index} className="block p-2 hover:bg-gray-300/50 w-full text-left" onClick={() => { handleSelectEmployee(employee.fname); handleAddUserInput(employee); }}>
-                          {`${employee.fname} ${employee.sname}`}
-                        </button>)
-                      : <p className="p-2 text-[#FF9E8D]">No Employee Found</p>
-                  }
-                </div>}
-            </div>
-            <div className='w-full mt-10'>
-              <input readOnly={true} value={addUserFormData.name} className='border-card w-3/5 mb-2 bg-transparent' style={{ borderColor: theme.border }} type="text" name="name" id="name" placeholder='Name' />
-              <input readOnly={true} value={addUserFormData.email} className='border-card w-3/5 mb-2 bg-transparent' style={{ borderColor: theme.border }} type="email" name='email' id='email' placeholder='Email' />
-              <input readOnly={true} value={addUserFormData.password} className='border-card w-3/5 mb-2 bg-transparent' style={{ borderColor: theme.border }} type="text" name='password' id='password' placeholder='Password' />
-              <button type="submit" className="block ml-auto text-white font-medium p-2 rounded-md" style={{ background: theme.primary }}>Submit</button>
-            </div>
-          </form>
-        </div>
-      </Modal>
-
-      <Modal show={openEditPositionPermissionsModal} onClose={() => setOpenEditPositionPermissionsModal(false)} maxWidth={'4xl'}
-        name={`Edit ${positionSelectedData && `${positionSelectedData.name}'s`} Permissions`}
-      >
-        <div style={{ color: theme.text }}>
-          <form onSubmit={handleEditPositionPermissionsSubmit} className='flex flex-col gap-2'>
-            <div className='my-2 relative border-card p-1 grid grid-cols-3 max-h-96 overflow-y-auto' style={{ color: theme.text, borderColor: theme.border }}>
-              {permissions.map((role, index) => {
-                return (
-                  <label htmlFor={`position-${role.code}`} className='flex m-1 w-fit h-fit gap-2 items-center select-none cursor-pointer' key={`position-${index}`}>
+            <Modal show={openAddUserModal} onClose={() => setOpenAddUserModal(false)} maxWidth={'2xl'} name="Create User">
+              <div style={{ color: theme.text }}>
+                <form onSubmit={handleAddUserSubmit} className='flex flex-col gap-2'>
+                  <div className='relative w-full'>
                     <input
-                      type="checkbox"
-                      className={`h-0 w-0 absolute block invisible overflow-hidden ${themePreference === 'light' ? 'l' : 'd'}`}
-                      name={role.alias}
-                      id={`position-${role.code}`}
-                      checked={selectPositionPermissionsForm[index][role.code]}
-                      onChange={(e) => handlePositionPermissionsCheckBoxesChange(e, index, role)}
+                      type="text"
+                      placeholder="Search an employee..."
+                      className='border-card w-full mb-2 bg-transparent'
+                      value={searchedEmployee}
+                      onChange={handleSearchEmployee}
+                      onClick={() => setOpenEmployeeDropdown(!openEmployeeDropdown)}
+                      style={{ borderColor: theme.border }}
                     />
-                    <span className='check w-4 h-4 inline-block rounded border' style={{ borderColor: theme.border }}></span>
-                    <p className='capitalize text-sm'>{role.alias.replace(/_/g, " ")}</p>
-                  </label>
-                )
-              })}
-            </div>
-            <button type="submit" className="block ml-auto text-white font-medium p-2 rounded-md" style={{ background: theme.primary }}>Submit</button>
-          </form>
-        </div>
-      </Modal>
+                    {openEmployeeDropdown &&
+                      <div
+                        ref={employeeDropdownRef}
+                        className="absolute w-full rounded-md max-h-36 overflow-y-auto z-50 backdrop-blur border-card"
+                      >
+                        {searchedEmployee.trim() === ""
+                          ? <p className="p-2">Search Employee</p>
+                          : filteredEmployees.length > 0
+                            ? filteredEmployees.map((employee, index) =>
+                              <button key={index} className="block p-2 hover:bg-gray-300/50 w-full text-left" onClick={() => { handleSelectEmployee(employee.fname); handleAddUserInput(employee); }}>
+                                {`${employee.fname} ${employee.sname}`}
+                              </button>)
+                            : <p className="p-2 text-[#FF9E8D]">No Employee Found</p>
+                        }
+                      </div>}
+                  </div>
+                  <div className='w-full mt-10'>
+                    <input readOnly={true} value={addUserFormData.name} className='border-card w-3/5 mb-2 bg-transparent' style={{ borderColor: theme.border }} type="text" name="name" id="name" placeholder='Name' />
+                    <input readOnly={true} value={addUserFormData.email} className='border-card w-3/5 mb-2 bg-transparent' style={{ borderColor: theme.border }} type="email" name='email' id='email' placeholder='Email' />
+                    <input readOnly={true} value={addUserFormData.password} className='border-card w-3/5 mb-2 bg-transparent' style={{ borderColor: theme.border }} type="text" name='password' id='password' placeholder='Password' />
+                    <button type="submit" className="block ml-auto text-white font-medium p-2 rounded-md" style={{ background: theme.primary }}>Submit</button>
+                  </div>
+                </form>
+              </div>
+            </Modal>
+
+            <Modal show={openEditPositionPermissionsModal} onClose={() => setOpenEditPositionPermissionsModal(false)} maxWidth={'4xl'}
+              name={`Edit ${positionSelectedData && `${positionSelectedData.name}'s`} Permissions`}
+            >
+              <div style={{ color: theme.text }}>
+                <form onSubmit={handleEditPositionPermissionsSubmit} className='flex flex-col gap-2'>
+                  <div className='my-2 relative border-card p-1 grid grid-cols-3 max-h-96 overflow-y-auto' style={{ color: theme.text, borderColor: theme.border }}>
+                    {permissions.map((role, index) => {
+                      return (
+                        <label htmlFor={`position-${role.code}`} className='flex m-1 w-fit h-fit gap-2 items-center select-none cursor-pointer' key={`position-${index}`}>
+                          <input
+                            type="checkbox"
+                            className={`h-0 w-0 absolute block invisible overflow-hidden ${themePreference === 'light' ? 'l' : 'd'}`}
+                            name={role.alias}
+                            id={`position-${role.code}`}
+                            checked={selectPositionPermissionsForm[index][role.code]}
+                            onChange={(e) => handlePositionPermissionsCheckBoxesChange(e, index, role)}
+                          />
+                          <span className='check w-4 h-4 inline-block rounded border' style={{ borderColor: theme.border }}></span>
+                          <p className='capitalize text-sm'>{role.alias.replace(/_/g, " ")}</p>
+                        </label>
+                      )
+                    })}
+                  </div>
+                  <button type="submit" className="block ml-auto text-white font-medium p-2 rounded-md" style={{ background: theme.primary }}>Submit</button>
+                </form>
+              </div>
+            </Modal>
+          </div>
+        }
+      </Layout>
     </AuthenticatedLayout>
   );
 }

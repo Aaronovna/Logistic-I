@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import { usePage } from "@inertiajs/react";
 import { router } from "@inertiajs/react";
-import { useStateContext } from "@/context/contextProvider";
 import Status from "@/Components/Status";
-
-import AuditLayout from "@/Layouts/AuditLayout";
+import useRole from "@/hooks/useRole";
 import { auditTaskStatus } from "@/Constants/status";
 import { handleInputChange } from "@/functions/handleInputChange";
 import { dateFormatLong, dateTimeFormatShort } from "@/Constants/options";
@@ -14,11 +12,8 @@ import { TbX } from "react-icons/tb";
 import useUpdateStatus from "@/api/useUpdateStatus";
 
 const AssignmentsView = ({ auth }) => {
-  if (!hasAccess(auth.user.type, [2050, 2051, 2054, 2055])) {
-    return (
-      <Unauthorized />
-    )
-  }
+  const { hasAccess, getLayout } = useRole();
+  const Layout = getLayout(auth.user.type);
 
   const { updateStatus } = useUpdateStatus();
   const { props } = usePage();
@@ -181,7 +176,7 @@ const AssignmentsView = ({ auth }) => {
   return (
     <AuthenticatedLayout user={auth.user}>
       <Head title="My Tasks" />
-      <AuditLayout user={auth.user}
+      <Layout user={auth.user}
         header={<BreadCrumbsHeader
           headerNames={["Assignments", "View"]}
           onClickHandlers={[
@@ -190,137 +185,139 @@ const AssignmentsView = ({ auth }) => {
           ]} />
         }
       >
-        <div className="content">
-          <div className="border-card p-8">
-            <div className="flex items-end">
-              <p className="text-lg font-semibold">{task?.title}</p>
-              <Status statusArray={auditTaskStatus} status={task?.status} className="ml-auto" />
-            </div>
-            <p className="font-medium text-gray-600 mt-1">
-              {`${new Date(task?.startdate).toLocaleString(undefined, dateTimeFormatShort)} - ${new Date(task?.deadline).toLocaleString(undefined, dateTimeFormatShort)}`}
-            </p>
-            <p className="mt-8 font-semibold">{task?.type}</p>
-            <p className="text-gray-600 text-sm">Assigned by {task?.assigned_by_name}</p>
-            <p className="font-medium mt-6">Scope: {task?.scope}</p>
-            <p className="my-2 text-gray-600">{task?.description}</p>
-
-            <div className="flex">
-              {
-                task?.status !== 'Pending' ? null :
-                  <button disabled={task?.status !== 'Pending' ? true : false} onClick={() => handleAccept(task?.id)} className="ml-auto border-card">Accept</button>
-              }
-            </div>
-          </div>
-
-          {task?.status === "Pending" || loading ? null :
-            <div className="border-card p-8 mt-4">
-              <div className="flex mb-6">
-                {
-                  task?.status === "In Progress" ?
-                    <p className="text-xl" >Create Report</p> :
-                    <p className="text-xl" >Summary Report</p>
-                }
-                <p className="ml-auto font-meidum text-lg">{new Date().toLocaleDateString(undefined, dateFormatLong)}</p>
+        {!hasAccess(auth.user.type, [2050, 2054, 2055]) ? <Unauthorized /> :
+          <div className="content">
+            <div className="border-card p-8">
+              <div className="flex items-end">
+                <p className="text-lg font-semibold">{task?.title}</p>
+                <Status statusArray={auditTaskStatus} status={task?.status} className="ml-auto" />
               </div>
-              <form className="flex flex-col mt-4" onSubmit={handleReportSubmit}>
-                <div className="flex gap-2">
-                  <input type="text" name="type" id="type" readOnly value={'Type: ' + task?.type || ''} className="text-gray-600 font-medium flex-1 cursor-not-allowed border-card" />
-                  <input type="text" name="scope" id="scope" readOnly value={'Scope: ' + task?.scope || ''} className="text-gray-600 font-medium  flex-1 cursor-not-allowed border-card" />
-                </div>
+              <p className="font-medium text-gray-600 mt-1">
+                {`${new Date(task?.startdate).toLocaleString(undefined, dateTimeFormatShort)} - ${new Date(task?.deadline).toLocaleString(undefined, dateTimeFormatShort)}`}
+              </p>
+              <p className="mt-8 font-semibold">{task?.type}</p>
+              <p className="text-gray-600 text-sm">Assigned by {task?.assigned_by_name}</p>
+              <p className="font-medium mt-6">Scope: {task?.scope}</p>
+              <p className="my-2 text-gray-600">{task?.description}</p>
 
-                <input
-                  type="text" name="location" id="location" placeholder="Location"
-                  className="border-card mt-4"
-                  disabled={task?.status === "In Progress" ? false : true}
-                  value={task?.status === "In Progress" ? reportFormData.location : report?.location || ''}
-                  onChange={(e) => handleInputChange(e, setReportFormData)}
-                />
-                <textarea
-                  name="details" id="details" rows="6" placeholder="Details"
-                  className="border-card mt-2 resize-none"
-                  disabled={task?.status === "In Progress" ? false : true}
-                  value={task?.status === "In Progress" ? reportFormData.details : report?.details || ''}
-                  onChange={(e) => handleInputChange(e, setReportFormData)}
-                />
-                <textarea
-                  name="final_comment" id="final_comment" rows="3" placeholder="Final Comment"
-                  className="border-card mt-2 resize-none"
-                  disabled={task?.status === "In Progress" ? false : true}
-                  value={task?.status === "In Progress" ? reportFormData.final_comment : report?.final_comment || ''}
-                  onChange={(e) => handleInputChange(e, setReportFormData)}
-                />
-
-                <p className="my-2 text-xl">Evidences</p>
+              <div className="flex">
                 {
-                  task?.status === "Pending Review" || task?.status === "Completed" ?
-                    <div className="mt-2">
-                      {evidences.map((file, index) => {
-                        return (
-                          <div key={index} className="w-fit mb-2 text-sm group">
-                            {/* Handle Image Files */}
-                            {file.type === "image/png" || file.type === "image/jpeg" ? (
-                              <div>
-                                <a href={file.url} target="_blank" rel="noopener noreferrer">
-                                  <img src={file.url} alt={file.name} className="border-card p-0 w-72" />
-                                </a>
-                                <p className="text-nowrap italic group-hover:underline">
-                                  {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                                </p>
-                              </div>
-                            ) : null}
-
-                            {/* Handle Video Files */}
-                            {file.type === "video/mp4" ? (
-                              <div>
-                                <video controls className="w-72 border-card">
-                                  <source src={file.url} type="video/mp4" />
-                                  Your browser does not support the video tag.
-                                </video>
-                                <p className="text-nowrap italic group-hover:underline">
-                                  {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                                </p>
-                              </div>
-                            ) : null}
-                          </div>
-                        );
-                      })}
-                    </div>
-                    :
-                    <div className="mb-4">
-                      <input
-                        type="file"
-                        accept="image/*,video/*"
-                        id="file"
-                        onChange={handleFileChange}
-                        className="hidden"
-                      />
-                      <label
-                        htmlFor="file"
-                        className="flex border-card cursor-pointer font-medium items-center gap-2 w-fit mt-2"
-                      >
-                        <TbCloudUpload size={20} />
-                        Upload File
-                      </label>
-                      <p className="mt-2 font-medium">Selected Files</p>
-                      <ul>
-                        {files.map((file, index) => (
-                          <li key={index} className="flex italic ml-2">
-                            {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                            <button type="button" onClick={() => removeFile(index)} className="text-red-600"><TbX /></button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                  task?.status !== 'Pending' ? null :
+                    <button disabled={task?.status !== 'Pending' ? true : false} onClick={() => handleAccept(task?.id)} className="ml-auto border-card">Accept</button>
                 }
-
-                {
-                  task?.status === 'In Progress' ? <button type="submit" className="border-card w-fit ml-auto">Submit</button> : null
-                }
-              </form>
+              </div>
             </div>
-          }
-        </div>
-      </AuditLayout>
+
+            {task?.status === "Pending" || loading ? null :
+              <div className="border-card p-8 mt-4">
+                <div className="flex mb-6">
+                  {
+                    task?.status === "In Progress" ?
+                      <p className="text-xl" >Create Report</p> :
+                      <p className="text-xl" >Summary Report</p>
+                  }
+                  <p className="ml-auto font-meidum text-lg">{new Date().toLocaleDateString(undefined, dateFormatLong)}</p>
+                </div>
+                <form className="flex flex-col mt-4" onSubmit={handleReportSubmit}>
+                  <div className="flex gap-2">
+                    <input type="text" name="type" id="type" readOnly value={'Type: ' + task?.type || ''} className="text-gray-600 font-medium flex-1 cursor-not-allowed border-card" />
+                    <input type="text" name="scope" id="scope" readOnly value={'Scope: ' + task?.scope || ''} className="text-gray-600 font-medium  flex-1 cursor-not-allowed border-card" />
+                  </div>
+
+                  <input
+                    type="text" name="location" id="location" placeholder="Location"
+                    className="border-card mt-4"
+                    disabled={task?.status === "In Progress" ? false : true}
+                    value={task?.status === "In Progress" ? reportFormData.location : report?.location || ''}
+                    onChange={(e) => handleInputChange(e, setReportFormData)}
+                  />
+                  <textarea
+                    name="details" id="details" rows="6" placeholder="Details"
+                    className="border-card mt-2 resize-none"
+                    disabled={task?.status === "In Progress" ? false : true}
+                    value={task?.status === "In Progress" ? reportFormData.details : report?.details || ''}
+                    onChange={(e) => handleInputChange(e, setReportFormData)}
+                  />
+                  <textarea
+                    name="final_comment" id="final_comment" rows="3" placeholder="Final Comment"
+                    className="border-card mt-2 resize-none"
+                    disabled={task?.status === "In Progress" ? false : true}
+                    value={task?.status === "In Progress" ? reportFormData.final_comment : report?.final_comment || ''}
+                    onChange={(e) => handleInputChange(e, setReportFormData)}
+                  />
+
+                  <p className="my-2 text-xl">Evidences</p>
+                  {
+                    task?.status === "Pending Review" || task?.status === "Completed" ?
+                      <div className="mt-2">
+                        {evidences.map((file, index) => {
+                          return (
+                            <div key={index} className="w-fit mb-2 text-sm group">
+                              {/* Handle Image Files */}
+                              {file.type === "image/png" || file.type === "image/jpeg" ? (
+                                <div>
+                                  <a href={file.url} target="_blank" rel="noopener noreferrer">
+                                    <img src={file.url} alt={file.name} className="border-card p-0 w-72" />
+                                  </a>
+                                  <p className="text-nowrap italic group-hover:underline">
+                                    {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                                  </p>
+                                </div>
+                              ) : null}
+
+                              {/* Handle Video Files */}
+                              {file.type === "video/mp4" ? (
+                                <div>
+                                  <video controls className="w-72 border-card">
+                                    <source src={file.url} type="video/mp4" />
+                                    Your browser does not support the video tag.
+                                  </video>
+                                  <p className="text-nowrap italic group-hover:underline">
+                                    {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                                  </p>
+                                </div>
+                              ) : null}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      :
+                      <div className="mb-4">
+                        <input
+                          type="file"
+                          accept="image/*,video/*"
+                          id="file"
+                          onChange={handleFileChange}
+                          className="hidden"
+                        />
+                        <label
+                          htmlFor="file"
+                          className="flex border-card cursor-pointer font-medium items-center gap-2 w-fit mt-2"
+                        >
+                          <TbCloudUpload size={20} />
+                          Upload File
+                        </label>
+                        <p className="mt-2 font-medium">Selected Files</p>
+                        <ul>
+                          {files.map((file, index) => (
+                            <li key={index} className="flex italic ml-2">
+                              {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                              <button type="button" onClick={() => removeFile(index)} className="text-red-600"><TbX /></button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                  }
+
+                  {
+                    task?.status === 'In Progress' ? <button type="submit" className="border-card w-fit ml-auto">Submit</button> : null
+                  }
+                </form>
+              </div>
+            }
+          </div>
+        }
+      </Layout>
     </AuthenticatedLayout>
   )
 }

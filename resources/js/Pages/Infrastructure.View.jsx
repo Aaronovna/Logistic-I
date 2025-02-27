@@ -1,4 +1,4 @@
-import InventoryLayout from '@/Layouts/InventoryLayout';
+import useRole from '@/hooks/useRole';
 import { usePage, router } from '@inertiajs/react';
 import { useStateContext } from '@/context/contextProvider';
 import { useState, useEffect } from 'react';
@@ -8,11 +8,8 @@ import { WeatherCloudChip, WeatherHumidityWindChip, WeatherTempChip } from '@/Co
 const OPENWEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
 export default function Infrastructure_View({ auth }) {
-  if (!hasAccess(auth.user.type, [2050, 2051])) {
-    return (
-      <Unauthorized />
-    )
-  }
+  const { hasAccess, getLayout } = useRole();
+  const Layout = getLayout(auth.user.type);
 
   const { theme } = useStateContext();
   const { props } = usePage();
@@ -118,7 +115,7 @@ export default function Infrastructure_View({ auth }) {
       user={auth.user}
     >
       <Head title="View Infrastructure" />
-      <InventoryLayout user={auth.user}
+      <Layout user={auth.user}
         header={<BreadCrumbsHeader
           headerNames={["Infrastructure", "View"]}
           onClickHandlers={[
@@ -126,74 +123,75 @@ export default function Infrastructure_View({ auth }) {
             () => handleClick2(id)
           ]} />}
       >
-
-        <div className="content">
-          <div className='relative w-full border-card h-72 bg-cover bg-center flex' style={{ backgroundImage: `url(${infrastructure?.image_url ? infrastructure?.image_url : ''})` }}>
-            <div className='h-fit'>
-              <WeatherCloudChip data={weather} />
-              <WeatherHumidityWindChip data={weather} className='mt-4' />
+        {!hasAccess(auth.user.type, [2050, 2051]) ? <Unauthorized /> :
+          <div className="content">
+            <div className='relative w-full border-card h-72 bg-cover bg-center flex' style={{ backgroundImage: `url(${infrastructure?.image_url ? infrastructure?.image_url : ''})` }}>
+              <div className='h-fit'>
+                <WeatherCloudChip data={weather} />
+                <WeatherHumidityWindChip data={weather} className='mt-4' />
+              </div>
+              <WeatherTempChip temp={weather?.main.temp} className='absolute bottom-2 left-2 bg-white/80' />
+              <span onClick={() => setOpenEditInfrastructureModal(true)}
+                className='absolute bottom-2 right-2 p-3 rounded-full shadow-lg hover:scale-105 duration-200 cursor-pointer'
+                style={{ background: theme.accent, color: theme.background }}
+              >
+                <TbEdit size={24} />
+              </span>
             </div>
-            <WeatherTempChip temp={weather?.main.temp} className='absolute bottom-2 left-2 bg-white/80' />
-            <span onClick={() => setOpenEditInfrastructureModal(true)}
-              className='absolute bottom-2 right-2 p-3 rounded-full shadow-lg hover:scale-105 duration-200 cursor-pointer'
-              style={{ background: theme.accent, color: theme.background }}
-            >
-              <TbEdit size={24} />
-            </span>
-          </div>
 
-          <div style={{ color: theme.text }}>
-            <p className='text-xl font-medium mt-4'>{infrastructure?.name}</p>
-            <p>{infrastructure?.address}</p>
-
-            <p className='text-xl font-semibold mt-4' >Access</p>
-            <div className='my-2'>
-              {
-                infrastructure?.access && JSON.parse(infrastructure?.access).map((a, index) => {
-                  return (
-                    <p key={index}>{a}</p>
-                  )
-                })
-              }
-            </div>
-          </div>
-
-          <Modal show={openEditInfrastructureModal} onClose={() => setOpenEditInfrastructureModal(false)} name='Edit Infrastructure Information'>
             <div style={{ color: theme.text }}>
-              <form onSubmit={handleEditInfrastructureSubmit}>
-                <input type="text" name="name" id="name" placeholder='Name'
-                  className='border-card bg-transparent w-full mb-2'
-                  style={{ borderColor: theme.border }}
-                  value={editInfrustructureFormData.name}
-                  onChange={handleEditInventoryInputChange}
-                />
-                <input type="text" name="address" id="address" placeholder='Address'
-                  className='border-card bg-transparent w-full mb-2'
-                  style={{ borderColor: theme.border }}
-                  value={editInfrustructureFormData.address}
-                  onChange={handleEditInventoryInputChange}
-                />
-                <input type="text" name="image_url" id="image_url" placeholder='Image Url'
-                  className='border-card bg-transparent w-full mb-2'
-                  style={{ borderColor: theme.border }}
-                  value={editInfrustructureFormData.image_url}
-                  onChange={handleEditInventoryInputChange}
-                />
-                <textarea type="text" name="access" id="access" placeholder='Access'
-                  className='border-card bg-transparent w-full resize-none'
-                  rows={4}
-                  style={{ borderColor: theme.border }}
-                  value={editInfrustructureFormData.access}
-                  onChange={handleEditInventoryInputChange}
-                />
-                <div className='flex'>
-                  <button className='border-card ml-auto'>Save Changes</button>
-                </div>
-              </form>
+              <p className='text-xl font-medium mt-4'>{infrastructure?.name}</p>
+              <p>{infrastructure?.address}</p>
+
+              <p className='text-xl font-semibold mt-4' >Access</p>
+              <div className='my-2'>
+                {
+                  infrastructure?.access && JSON.parse(infrastructure?.access).map((a, index) => {
+                    return (
+                      <p key={index}>{a}</p>
+                    )
+                  })
+                }
+              </div>
             </div>
-          </Modal>
-        </div>
-      </InventoryLayout>
+
+            <Modal show={openEditInfrastructureModal} onClose={() => setOpenEditInfrastructureModal(false)} name='Edit Infrastructure Information'>
+              <div style={{ color: theme.text }}>
+                <form onSubmit={handleEditInfrastructureSubmit}>
+                  <input type="text" name="name" id="name" placeholder='Name'
+                    className='border-card bg-transparent w-full mb-2'
+                    style={{ borderColor: theme.border }}
+                    value={editInfrustructureFormData.name}
+                    onChange={handleEditInventoryInputChange}
+                  />
+                  <input type="text" name="address" id="address" placeholder='Address'
+                    className='border-card bg-transparent w-full mb-2'
+                    style={{ borderColor: theme.border }}
+                    value={editInfrustructureFormData.address}
+                    onChange={handleEditInventoryInputChange}
+                  />
+                  <input type="text" name="image_url" id="image_url" placeholder='Image Url'
+                    className='border-card bg-transparent w-full mb-2'
+                    style={{ borderColor: theme.border }}
+                    value={editInfrustructureFormData.image_url}
+                    onChange={handleEditInventoryInputChange}
+                  />
+                  <textarea type="text" name="access" id="access" placeholder='Access'
+                    className='border-card bg-transparent w-full resize-none'
+                    rows={4}
+                    style={{ borderColor: theme.border }}
+                    value={editInfrustructureFormData.access}
+                    onChange={handleEditInventoryInputChange}
+                  />
+                  <div className='flex'>
+                    <button className='border-card ml-auto'>Save Changes</button>
+                  </div>
+                </form>
+              </div>
+            </Modal>
+          </div>
+        }
+      </Layout>
     </AuthenticatedLayout>
   );
 }

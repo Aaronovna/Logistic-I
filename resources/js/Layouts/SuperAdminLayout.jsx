@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { useStateContext } from "@/context/contextProvider";
 
-import InventorySidebar from "@/Components/sidebars/InventorySidebar";
+import AdminSidebar from "@/Components/sidebars/AdminSidebar";
 import Dropdown from '@/Components/Dropdown';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
-import useRole from "@/hooks/useRole";
 
 import { TbChevronDown } from "react-icons/tb";
 import { TbMenu2 } from "react-icons/tb";
 import { TbX } from "react-icons/tb";
+import useRole from "@/hooks/useRole";
 
-const InventoryLayout = ({ user, header, children }) => {
+const SuperAdminLayout = ({ user, header, children }) => {
   const { getPages } = useRole();
   const pages = getPages(user.type);
   const { theme } = useStateContext();
@@ -21,8 +21,8 @@ const InventoryLayout = ({ user, header, children }) => {
     <div className="flex h-screen relative">
       <div className='w-full h-4 absolute z-30 -left-2' style={{ background: theme.background }}></div>
       <div className='w-full h-4 absolute z-30 bottom-0 -left-2' style={{ background: theme.background }}></div>
-      
-      <InventorySidebar />
+
+      <AdminSidebar />
 
       <div className='relative flex flex-col w-full h-screen overflow-y-scroll overflow-hidden'>
         <nav className='sticky w-auto top-4 z-20 backdrop-blur-sm border-card m-4 h-fit'
@@ -47,7 +47,7 @@ const InventoryLayout = ({ user, header, children }) => {
                       style={{ color: theme.text }}
                       className="inline-flex items-center px-3 py-2 font-medium transition ease-in-out duration-150"
                     >
-                      {`${user.name} (Inventory)`}
+                      {`${user.name} (Super Admin)`}
                       <TbChevronDown size={22} />
                     </button>
                   </span>
@@ -107,4 +107,4 @@ const InventoryLayout = ({ user, header, children }) => {
   )
 }
 
-export default InventoryLayout;
+export default SuperAdminLayout;

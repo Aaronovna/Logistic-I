@@ -1,15 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { useStateContext } from '@/context/contextProvider';
 import Dev from '@/Pages/Dev';
 import Modal from '@/Components/Modal';
+import useRole from '@/hooks/useRole';
 
 const AuthenticatedLayout = ({ user, children }) => {
-  const { setUserPermissions, theme } = useStateContext();
-
-  /* useEffect(() => {
-    setUserPermissions(JSON.parse(user.permissions));
-  }, []); */
+  const { theme } = useStateContext();
+  const { hasAccess } = useRole();
 
   const [openDev, setOpenDev] = useState(false);
 

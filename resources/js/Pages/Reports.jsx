@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useStateContext } from '@/context/contextProvider';
 import { router } from '@inertiajs/react';
 
-import AuditLayout from '@/Layouts/AuditLayout';
+import useRole from '@/hooks/useRole';
 import AuditReportCard from '@/Components/cards/AuditReportCard';
 import { filterArray } from '@/functions/filterArray';
 
@@ -27,11 +26,8 @@ const Card = ({ name = "name", data = 0, Icon }) => {
 }
 
 const Reports = ({ auth }) => {
-  if (!hasAccess(auth.user.type, [2050, 2051, 2054, 2055])) {
-    return (
-      <Unauthorized />
-    )
-  }
+  const { hasAccess, getLayout } = useRole();
+  const Layout = getLayout(auth.user.type);
 
   const [users, setUsers] = useState([]);
   const fetchUsers = async () => {
@@ -78,40 +74,42 @@ const Reports = ({ auth }) => {
       user={auth.user}
     >
       <Head title="Reports" />
-      <AuditLayout user={auth.user} header={<NavHeader headerName="Reports"/>}>
-        <div className="content">
-          <div className='flex gap-4'>
-            <div className='overflow-hidden border-card p-0 w-1/2 h-64 flex flex-col shadow-md hover:shadow-xl hover:scale-[101%] duration-200 cursor-pointer pattern1 bg-cover' onClick={() => handleReportClick(reports[0]?.id)}>
-              <div className='flex m-4'>
-                <p className='text-xl font-medium text-white'>Recent Report</p>
-                <p className='text-lg font-medium ml-auto text-white'>{new Date(reports[0]?.created_at).toLocaleDateString(undefined, dateFormatShort)}</p>
+      <Layout user={auth.user} header={<NavHeader headerName="Reports" />}>
+        {!hasAccess(auth.user.type, [2050, 2054, 2055]) ? <Unauthorized /> :
+          <div className="content">
+            <div className='flex gap-4'>
+              <div className='overflow-hidden border-card p-0 w-1/2 h-64 flex flex-col shadow-md hover:shadow-xl hover:scale-[101%] duration-200 cursor-pointer pattern1 bg-cover' onClick={() => handleReportClick(reports[0]?.id)}>
+                <div className='flex m-4'>
+                  <p className='text-xl font-medium text-white'>Recent Report</p>
+                  <p className='text-lg font-medium ml-auto text-white'>{new Date(reports[0]?.created_at).toLocaleDateString(undefined, dateFormatShort)}</p>
+                </div>
+                <div className='bg-white mt-16 px-4 py-2 shadow-lg'>
+                  <p>{reports[0]?.task_assigned_to_name}</p>
+                  <p className='font-medium text-lg drop-shadow-lg'>{reports[0]?.task_title}</p>
+                </div>
+                <p className='mt-auto font-medium text-lg text-white m-4'>{reports[0]?.task_type}</p>
               </div>
-              <div className='bg-white mt-16 px-4 py-2 shadow-lg'>
-                <p>{reports[0]?.task_assigned_to_name}</p>
-                <p className='font-medium text-lg drop-shadow-lg'>{reports[0]?.task_title}</p>
+
+              <div className='w-1/2 gap-4 h-64 flex flex-wrap'>
+                <Card name='Auditors' data={users?.length} Icon={TbUserSearch} />
+                <Card name='Tasks' data={tasks?.length} Icon={TbClipboardList} />
+                <Card name='Reports' data={reports?.length} Icon={TbReport} />
               </div>
-              <p className='mt-auto font-medium text-lg text-white m-4'>{reports[0]?.task_type}</p>
             </div>
 
-            <div className='w-1/2 gap-4 h-64 flex flex-wrap'>
-              <Card name='Auditors' data={users?.length} Icon={TbUserSearch} />
-              <Card name='Tasks' data={tasks?.length} Icon={TbClipboardList} />
-              <Card name='Reports' data={reports?.length} Icon={TbReport} />
+            <p className='font-semibold text-xl mt-8 mb-4'>Pending Reviews</p>
+            <div className='flex flex-col gap-2'>
+              {
+                reports && reports.map((report, index) => {
+                  return (
+                    <AuditReportCard data={report} key={index} onClick={() => handleReportClick(report.id)} />
+                  )
+                })
+              }
             </div>
           </div>
-
-          <p className='font-semibold text-xl mt-8 mb-4'>Pending Reviews</p>
-          <div className='flex flex-col gap-2'>
-            {
-              reports && reports.map((report, index) => {
-                return (
-                  <AuditReportCard data={report} key={index} onClick={() => handleReportClick(report.id)} />
-                )
-              })
-            }
-          </div>
-        </div>
-      </AuditLayout>
+        }
+      </Layout>
     </AuthenticatedLayout>
   );
 }

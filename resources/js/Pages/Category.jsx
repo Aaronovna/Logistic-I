@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useStateContext } from '@/context/contextProvider';
 import { AgGridReact } from 'ag-grid-react';
 
-import InventoryLayout from '@/Layouts/InventoryLayout';
+import useRole from '@/hooks/useRole';
 import { Card } from '@/Components/Cards';
 
 import "ag-grid-community/styles/ag-grid.css";
@@ -14,11 +14,8 @@ import { TbEdit } from "react-icons/tb";
 import { TbX } from "react-icons/tb";
 
 const Category = ({ auth }) => {
-  if (!hasAccess(auth.user.type, [2050, 2051, 2052])) {
-    return (
-      <Unauthorized />
-    )
-  }
+  const { hasAccess, getLayout } = useRole();
+  const Layout = getLayout(auth.user.type);
 
   const { theme, themePreference } = useStateContext();
 
@@ -151,102 +148,100 @@ const Category = ({ auth }) => {
     >
       <Head title="Category" />
 
-      <InventoryLayout user={auth.user} header={<NavHeader headerName="Category"/>}>
-        <div className="content">
-          <div className='flex flex-col gap-4'>
-            <div className='flex items-end'>
-              <Card data={categories ? categories.length : "-"} name="Categories" Icon={TbCategory} />
-              <button
-                onClick={() => setOpenAddModal(true)}
-                className='rounded-lg h-fit py-2 px-2 ml-auto hover:scale-105 hover:shadow-xl duration-200 flex items-center'
-                style={{ background: theme.accent, color: theme.background }}
-              >
-                <TbPlus size={18} />
-                <p className='ml-1'>Add Category</p>
-              </button>
-            </div>
+      <Layout user={auth.user} header={<NavHeader headerName="Category" />}>
+        {!hasAccess(auth.user.type, [2050, 2052]) ? <Unauthorized /> :
+          <div className="content">
+            <div className='flex flex-col gap-4'>
+              <div className='flex items-end'>
+                <Card data={categories ? categories.length : "-"} name="Categories" Icon={TbCategory} />
+                <button
+                  onClick={() => setOpenAddModal(true)}
+                  className='rounded-lg h-fit py-2 px-2 ml-auto hover:scale-105 hover:shadow-xl duration-200 flex items-center'
+                  style={{ background: theme.accent, color: theme.background }}
+                >
+                  <TbPlus size={18} />
+                  <p className='ml-1'>Add Category</p>
+                </button>
+              </div>
 
-            <div>
-              <div className={`${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} style={{ height: '508px' }} >
-                <AgGridReact
-                  rowData={categories}
-                  columnDefs={colDefs}
-                  rowSelection='single'
-                  pagination={true}
-                  onGridReady={onGridReady}
-                  onSelectionChanged={onSelectionChanged}
+              <div>
+                <div className={`${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} style={{ height: '508px' }} >
+                  <AgGridReact
+                    rowData={categories}
+                    columnDefs={colDefs}
+                    rowSelection='single'
+                    pagination={true}
+                    onGridReady={onGridReady}
+                    onSelectionChanged={onSelectionChanged}
+                  />
+                </div>
+              </div>
+
+              {selectedData ?
+                <div className='border-card p-4' style={{ color: theme.text }}>
+                  <span className='flex mb-2'>
+                    <p className='text-gray-300/50 mr-2'>{selectedData.id}</p>
+                    <p className='font-semibold'>{selectedData.name}</p>
+                  </span>
+                  <p>{selectedData.description}</p>
+                </div>
+                : null}
+            </div>
+            <Modal show={openAddModal} onClose={() => setOpenAddModal(false)} maxWidth='lg' name="Add New Category">
+              <form onSubmit={handleAddSubmit} style={{ color: theme.text }}>
+                <input
+                  type="text"
+                  name="name"
+                  id="name"
+                  value={addFormData.name}
+                  onChange={handleAddInputChange}
+                  placeholder="Category Name"
+                  className="mb-2 p-2 border rounded w-full bg-transparent"
+                  style={{ borderColor: theme.border }}
                 />
-              </div>
-            </div>
-
-            {selectedData ?
-              <div className='border-card p-4' style={{ color: theme.text }}>
-                <span className='flex mb-2'>
-                  <p className='text-gray-300/50 mr-2'>{selectedData.id}</p>
-                  <p className='font-semibold'>{selectedData.name}</p>
-                </span>
-                <p>{selectedData.description}</p>
-              </div>
-              : null}
+                <textarea
+                  type="text"
+                  name="description"
+                  id="description"
+                  rows={4}
+                  value={addFormData.description}
+                  onChange={handleAddInputChange}
+                  placeholder="Category Description"
+                  className="mb-2 p-2 border rounded w-full resize-none bg-transparent"
+                  style={{ borderColor: theme.border }}
+                />
+                <button type="submit" className="p-2 border-card font-medium text-white block ml-auto" style={{ background: theme.primary, borderColor: theme.border }}>Submit</button>
+              </form>
+            </Modal>
+            <Modal show={openEditModal} onClose={() => setOpenEditModal(false)} name="Edit Category">
+              <form onSubmit={handleEditSubmit} style={{ color: theme.text }}>
+                <input
+                  type="text"
+                  name="name"
+                  id="name"
+                  value={editFormData.name}
+                  onChange={handleEditInputChange}
+                  placeholder="Category Name"
+                  className="mb-2 p-2 border rounded w-full bg-transparent"
+                  style={{ borderColor: theme.border }}
+                />
+                <textarea
+                  type="text"
+                  name="description"
+                  id="description"
+                  rows={4}
+                  value={editFormData.description}
+                  onChange={handleEditInputChange}
+                  placeholder="Category Description"
+                  className="mb-2 p-2 border rounded w-full bg-transparent resize-none"
+                  style={{ borderColor: theme.border }}
+                />
+                <button type="submit" className="p-2 border-card font-medium text-white block ml-auto" style={{ background: theme.primary, borderColor: theme.border }}>Update</button>
+              </form>
+            </Modal>
           </div>
-        </div>
-      </InventoryLayout>
-
-      {/* MODAL FOR CREATING NEW CATEGORY */}
-      <Modal show={openAddModal} onClose={() => setOpenAddModal(false)} maxWidth='lg' name="Add New Category">
-        <form onSubmit={handleAddSubmit} style={{ color: theme.text }}>
-          <input
-            type="text"
-            name="name"
-            id="name"
-            value={addFormData.name}
-            onChange={handleAddInputChange}
-            placeholder="Category Name"
-            className="mb-2 p-2 border rounded w-full bg-transparent"
-            style={{ borderColor: theme.border }}
-          />
-          <textarea
-            type="text"
-            name="description"
-            id="description"
-            rows={4}
-            value={addFormData.description}
-            onChange={handleAddInputChange}
-            placeholder="Category Description"
-            className="mb-2 p-2 border rounded w-full resize-none bg-transparent"
-            style={{ borderColor: theme.border }}
-          />
-          <button type="submit" className="p-2 border-card font-medium text-white block ml-auto" style={{ background: theme.primary, borderColor: theme.border }}>Submit</button>
-        </form>
-      </Modal>
-
-      {/* MODAL FOR EDITING EXISTING CATEGORY */}
-      <Modal show={openEditModal} onClose={() => setOpenEditModal(false)} name="Edit Category">
-        <form onSubmit={handleEditSubmit} style={{ color: theme.text }}>
-          <input
-            type="text"
-            name="name"
-            id="name"
-            value={editFormData.name}
-            onChange={handleEditInputChange}
-            placeholder="Category Name"
-            className="mb-2 p-2 border rounded w-full bg-transparent"
-            style={{ borderColor: theme.border }}
-          />
-          <textarea
-            type="text"
-            name="description"
-            id="description"
-            rows={4}
-            value={editFormData.description}
-            onChange={handleEditInputChange}
-            placeholder="Category Description"
-            className="mb-2 p-2 border rounded w-full bg-transparent resize-none"
-            style={{ borderColor: theme.border }}
-          />
-          <button type="submit" className="p-2 border-card font-medium text-white block ml-auto" style={{ background: theme.primary, borderColor: theme.border }}>Update</button>
-        </form>
-      </Modal>
+        }
+      </Layout>
     </AuthenticatedLayout>
   );
 }

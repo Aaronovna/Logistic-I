@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useStateContext } from '@/context/contextProvider';
 
-import InventoryLayout from '@/Layouts/InventoryLayout';
 import Chart from '@/Components/Chart';
 import { generateRandomNumber } from '@/functions/numberGenerator';
+import useRole from '@/hooks/useRole';
 
 function getTop5(data) {
   return data
@@ -12,11 +12,8 @@ function getTop5(data) {
 }
 
 export default function Dashboard({ auth }) {
-  if (!hasAccess(auth.user.type, [2050, 2051, 2052])) {
-    return (
-      <Unauthorized />
-    )
-  }
+  const { hasAccess, getLayout } = useRole();
+  const Layout = getLayout(auth.user.type);
 
   const { theme } = useStateContext();
   const [productStats, setProductStats] = useState({});
@@ -97,32 +94,51 @@ export default function Dashboard({ auth }) {
     >
       <Head title="Dashboard" />
 
-      <InventoryLayout user={auth.user} header={<NavHeader headerName="Dashboard" />}>
-        <div className="content">
-          <div className='flex gap-4'>
-            <Chart data={productStats?.productsByCategory} series={pieSeries} legendPosition='right' title='Product Stock' className='w-1/2' />
-            <Chart data={productStats?.productsBySupplier && getTop5(productStats?.productsBySupplier)} series={barSeries} legendPosition='right' title='Supplier Distribution' className='w-1/2' />
-          </div>
+      <Layout user={auth.user} header={<NavHeader headerName="Dashboard" />}>
+        {!hasAccess(auth.user.type, [2050, 2052]) ? <Unauthorized /> :
+          <div className="content">
+            <div className='flex gap-4'>
+              <Chart data={productStats?.productsByCategory} series={pieSeries} legendPosition='right' title='Product Stock' className='w-1/2' />
+              <Chart data={productStats?.productsBySupplier && getTop5(productStats?.productsBySupplier)} series={barSeries} legendPosition='right' title='Supplier Distribution' className='w-1/2' />
+            </div>
 
-          <div className='mt-4 flex gap-4 h-80'>
-            <Chart data={data} series={lineSeries} title='Stock Levels' className='w-full' />
-          </div>
+            <div className='mt-4 flex gap-4 h-80'>
+              <Chart data={data} series={lineSeries} title='Stock Levels' className='w-full' />
+            </div>
 
-          <div>
-            <div className='flex gap-2'>
-              <div className='border-card shadow-md mt-4 w-1/2' style={{ background: theme.background, borderColor: theme.border }}>
-                <p className='text-center my-4'>Low on Stock</p>
-                <div className='overflow-y-auto h-80'>
+            <div>
+              <div className='flex gap-2'>
+                <div className='border-card shadow-md mt-4 w-1/2' style={{ background: theme.background, borderColor: theme.border }}>
+                  <p className='text-center my-4'>Low on Stock</p>
+                  <div className='overflow-y-auto h-80'>
+                    {
+                      productStats?.lowStockProducts?.map((product, index) => {
+                        return (
+                          <div className='p-1' key={index}>
+                            <div className='mb-2 py-2'>
+                              <p className='font-semibold text-lg'>{`${product.name} ${product.model}`}</p>
+                              <span className='flex justify-between'>
+                                <p>restock point <span className='font-semibold'>{product.restock_point}</span></p>
+                                <p>stock <span className='font-semibold'>{product.stock}</span></p>
+                              </span>
+                            </div>
+                            <hr />
+                          </div>
+                        )
+                      })
+                    }
+                  </div>
+                </div>
+              </div>
+              <div className='border-card shadow-md w-1/4 h-80' style={{ background: theme.background, borderColor: theme.border }}>
+                <p className='text-center my-2'>Out of Stock</p>
+                <div className='overflow-y-auto h-60'>
                   {
-                    productStats?.lowStockProducts?.map((product, index) => {
+                    productStats?.outOfStockProducts?.map((product, index) => {
                       return (
                         <div className='p-1' key={index}>
                           <div className='mb-2 py-2'>
                             <p className='font-semibold text-lg'>{`${product.name} ${product.model}`}</p>
-                            <span className='flex justify-between'>
-                              <p>restock point <span className='font-semibold'>{product.restock_point}</span></p>
-                              <p>stock <span className='font-semibold'>{product.stock}</span></p>
-                            </span>
                           </div>
                           <hr />
                         </div>
@@ -132,26 +148,9 @@ export default function Dashboard({ auth }) {
                 </div>
               </div>
             </div>
-            <div className='border-card shadow-md w-1/4 h-80' style={{ background: theme.background, borderColor: theme.border }}>
-              <p className='text-center my-2'>Out of Stock</p>
-              <div className='overflow-y-auto h-60'>
-                {
-                  productStats?.outOfStockProducts?.map((product, index) => {
-                    return (
-                      <div className='p-1' key={index}>
-                        <div className='mb-2 py-2'>
-                          <p className='font-semibold text-lg'>{`${product.name} ${product.model}`}</p>
-                        </div>
-                        <hr />
-                      </div>
-                    )
-                  })
-                }
-              </div>
-            </div>
           </div>
-        </div>
-      </InventoryLayout>
+        }
+      </Layout>
 
     </AuthenticatedLayout>
   );

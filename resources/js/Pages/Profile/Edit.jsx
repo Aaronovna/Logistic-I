@@ -5,14 +5,13 @@ import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 import { Head } from '@inertiajs/react';
 import { useStateContext } from '@/context/contextProvider';
-import DefaultLayout from '@/Layouts/InventoryLayout';
+import useRole from '@/hooks/useRole';
 
 export default function Edit({ auth, mustVerifyEmail, status }) {
-  const { theme, userType } = useStateContext();
-
-  let Layout;
-
-  Layout = userType === 2050 ? DefaultLayout : React.Fragment;
+  const { theme } = useStateContext();
+  const { getLayout } = useRole();
+  
+  const Layout = getLayout(auth.user.type);
 
   return (
     <AuthenticatedLayout

@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useStateContext } from '@/context/contextProvider';
 
-import InventoryLayout from '@/Layouts/InventoryLayout';
 import { AgGridReact } from 'ag-grid-react';
 import { router } from '@inertiajs/react';
 import { dateTimeFormatShort } from '@/Constants/options';
 import Status from '@/Components/Status';
 import { shipmentStatus } from '@/Constants/status';
+import useRole from '@/hooks/useRole';
 
 const filterOrdersByStatuses = (orders, statuses) => {
   return orders.filter(order => statuses.includes(order?.status));
@@ -24,12 +24,8 @@ const options = {
 };
 
 const ReceiptHistory = ({ auth }) => {
-  if (!hasAccess(auth.user.type, [2050, 2051, 2052])) {
-    return (
-      <Unauthorized />
-    )
-  }
-
+  const { hasAccess, getLayout } = useRole();
+  const Layout = getLayout(auth.user.type);
 
   const { theme, themePreference } = useStateContext();
   const [history, setHistory] = useState([]);
@@ -59,7 +55,7 @@ const ReceiptHistory = ({ auth }) => {
       user={auth.user}
     >
       <Head title="Receipt History" />
-      <InventoryLayout
+      <Layout
         user={auth.user}
         header={<BreadCrumbsHeader
           headerNames={["Receipt", "History"]}
@@ -69,18 +65,20 @@ const ReceiptHistory = ({ auth }) => {
           ]}
         />
         }
-      >
-        <div className="content flex-1">
-          <div className={`h-full ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} >
-            <AgGridReact
-              rowData={history}
-              columnDefs={colDefs}
-              rowSelection='single'
-              pagination={true}
-            />
+      > 
+        {!hasAccess(auth.user.type, [2050, 2052]) ? <Unauthorized /> :
+          <div className="content flex-1">
+            <div className={`h-full ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} >
+              <AgGridReact
+                rowData={history}
+                columnDefs={colDefs}
+                rowSelection='single'
+                pagination={true}
+              />
+            </div>
           </div>
-        </div>
-      </InventoryLayout>
+        }
+      </Layout>
     </AuthenticatedLayout>
   );
 }
