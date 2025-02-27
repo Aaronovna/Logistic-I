@@ -190,7 +190,7 @@ const Terminal = ({ auth }) => {
       const response = await axios.get('/request/get/infrastructure/terminal');
       setRequests(filterArray(response.data.data, 'status', ['Completed', 'Request Canceled'], true));
     } catch (error) {
-      toast.error(productToastMessages.show.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 

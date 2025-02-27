@@ -8,7 +8,6 @@ import Status from "@/Components/Status";
 import { filterArray } from "@/functions/filterArray";
 import { requestStatus } from "@/Constants/status";
 import { returnStatus } from "@/Constants/status";
-import { productToastMessages } from "@/Constants/toastMessages";
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
@@ -28,7 +27,7 @@ const DepotHistory = ({ auth }) => {
       const response = await axios.get('/request/get/infrastructure/depot');
       setRequests(filterArray(response.data.data, 'status', ['Completed', 'Request Canceled', 'Request Rejected']));
     } catch (error) {
-      toast.error(productToastMessages.show.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -38,7 +37,7 @@ const DepotHistory = ({ auth }) => {
       const response = await axios.get('/return/request/get');
       setReturns(filterArray(response.data.data, 'status', ['Completed', 'Canceled']));
     } catch (error) {
-      toast.error(productToastMessages.show.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 

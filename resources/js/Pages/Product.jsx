@@ -6,7 +6,6 @@ import Pagination from '@/Components/Pagination';
 import { Card2 } from '@/Components/Cards';
 import { ProductCard } from '@/Components/cards/ProductCard';
 import { feedbackVibrant } from "@/Constants/themes";
-import { productToastMessages } from '@/Constants/toastMessages';
 import { Badge } from '@/Components/Status';
 
 import { TbPlus } from "react-icons/tb";
@@ -63,7 +62,7 @@ const Product = ({ auth }) => {
       const response = await axios.get('/product/get');
       setProducts(response.data.data);
     } catch (error) {
-      toast.error(productToastMessages.show.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -134,13 +133,12 @@ const Product = ({ auth }) => {
     e.preventDefault();
     try {
       const response = await axios.post('/product/store', addProductFormData);
-
-      toast.success(productToastMessages.store.success);
       fetchProducts();
       fetchProductStats();
       setOpenAddProductModal(false);
+      toast.success(response.data.message);
     } catch (error) {
-      toast.error(productToastMessages.store.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -222,23 +220,23 @@ const Product = ({ auth }) => {
 
     try {
       const response = await axios.patch(`/product/update/${selectedProduct.id}`, editProductFormData);
-      toast.success(productToastMessages.update.success);
+      toast.success(response.data.message);
       setOpenEditProductModal(false);
       setOpenViewProductModal(false);
       fetchProducts();
     } catch (error) {
-      toast.error(productToastMessages.update.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
   const handleDeleteProduct = async (id) => {
     try {
-      await axios.delete(`/product/delete/${id}}`);
-      toast.success(productToastMessages.destroy.success);
+      const response = await axios.delete(`/product/delete/${id}}`);
+      toast.success(response.data.message);
       setOpenViewProductModal(false);
       fetchProducts();
     } catch (error) {
-      toast.error(productToastMessages.destroy.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 

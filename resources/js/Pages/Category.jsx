@@ -4,7 +4,6 @@ import { AgGridReact } from 'ag-grid-react';
 
 import InventoryLayout from '@/Layouts/InventoryLayout';
 import { Card } from '@/Components/Cards';
-import { categoryToastMessages } from '@/Constants/toastMessages';
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";

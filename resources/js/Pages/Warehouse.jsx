@@ -5,7 +5,6 @@ import { AgGridReact } from 'ag-grid-react';
 import InventoryLayout from '@/Layouts/InventoryLayout';
 import { Card2 } from '@/Components/Cards';
 import { filterArray } from '@/functions/filterArray';
-import { inventoryToastMessages } from '@/Constants/toastMessages';
 
 import { TbBox } from "react-icons/tb";
 import { TbCurrencyPeso } from "react-icons/tb";
@@ -49,7 +48,7 @@ const Warehouse = ({ auth }) => {
       const response = await axios.get('/inventory/get');
       setInventory(response.data.data);
     } catch (error) {
-      toast.error(productToastMessages.show.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -61,7 +60,7 @@ const Warehouse = ({ auth }) => {
         ...prevWarehouses,
         ...filterArray(response.data.data, 'type', [100])]);
     } catch (error) {
-      toast.error(productToastMessages.show.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -70,7 +69,7 @@ const Warehouse = ({ auth }) => {
       const response = await axios.get('/inventory/stats');
       setInventoryStats(response.data.data);
     } catch (error) {
-      toast.error(productToastMessages.show.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -147,12 +146,12 @@ const Warehouse = ({ auth }) => {
         warehouse_id: addInventoryFormData.warehouse_id,
       });
 
-      toast.success(inventoryToastMessages.store.success);
+      toast.success(response.data.message);
       fetchInventoryStats();
       fetchInventory();
       setOpenAddInventoryModal(false);
     } catch (error) {
-      toast.error(inventoryToastMessages.store.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -247,12 +246,12 @@ const Warehouse = ({ auth }) => {
         operation: null,
       });
 
-      toast.success(inventoryToastMessages.update.success);
+      toast.success(response.data.message);
       fetchInventoryStats();
       fetchInventory();
       setOpenEditInventoryModal(false);
     } catch (error) {
-      toast.error(inventoryToastMessages.update.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 

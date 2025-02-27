@@ -8,7 +8,6 @@ import Status from "@/Components/Status";
 import { filterArray } from "@/functions/filterArray";
 import { requestStatus } from "@/Constants/status";
 import { returnStatus } from "@/Constants/status";
-import { productToastMessages } from "@/Constants/toastMessages";
 
 const TerminalHistory = ({ auth }) => {
   if (!hasAccess(auth.user.type, [2050, 2051, 2053])) {
@@ -25,7 +24,7 @@ const TerminalHistory = ({ auth }) => {
       const response = await axios.get('/request/get/infrastructure/terminal');
       setRequests(filterArray(response.data.data, 'status', ['Completed', 'Request Canceled', 'Request Rejected']));
     } catch (error) {
-      toast.error(productToastMessages.show.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -35,7 +34,7 @@ const TerminalHistory = ({ auth }) => {
       const response = await axios.get('/return/request/get');
       setReturns(filterArray(response.data.data, 'status', ['Completed', 'Canceled']));
     } catch (error) {
-      toast.error(productToastMessages.show.error, error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
