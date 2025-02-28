@@ -45,6 +45,7 @@ Route::middleware(["auth", "verified", PreventBackHistory::class])->group(functi
     Route::get('/reports', fn() => Inertia::render('Reports'))->name('reports');
     Route::get('/reports/history', action: fn() => Inertia::render('Reports.History'))->name('reports-history');
     Route::get('/assignments', fn() => Inertia::render('Assignments'))->name('assignments');
+    Route::get('/assignments/history', action: fn() => Inertia::render('Assignments.History'))->name('assignments-history');
     Route::get('/module', fn() => Inertia::render('Module'))->name('module');
     Route::get('/infrastructure', fn() => Inertia::render('Infrastructure'))->name('infrastructure');
 

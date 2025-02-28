@@ -1,22 +1,21 @@
 import { useState, useEffect } from "react";
 import { router } from "@inertiajs/react";
-import Status from "@/Components/Status";
 import useRole from "@/hooks/useRole";
 import { Card2 } from "@/Components/Cards";
-import { auditTaskStatus } from "@/Constants/status";
-import { dateTimeFormatShort } from "@/Constants/options";
+import { TbCheckbox } from "react-icons/tb";
+import { TbCheckupList } from "react-icons/tb";
 import { filterArray } from "@/functions/filterArray";
-import { TbClockExclamation } from "react-icons/tb";
+import AuditAssignmentCard from "@/Components/cards/AuditAssignmentCard";
 
 const Assignments = ({ auth }) => {
   const { hasAccess, getLayout } = useRole();
   const Layout = getLayout(auth.user.type);
 
   const [tasks, setTasks] = useState([]);
-  const fetchUsers = async (id) => {
+  const fetchAuditorTasks = async (id) => {
     try {
       const response = await axios.get(`/audit/user/task/get/${id}`);
-      setTasks(response.data.data);
+      setTasks(filterArray(response.data.data, 'status', ['Completed', 'Canceled'], true));
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
     }
@@ -27,7 +26,7 @@ const Assignments = ({ auth }) => {
   };
 
   useEffect(() => {
-    fetchUsers(auth.user.id);
+    fetchAuditorTasks(auth.user.id);
   }, [auth]);
   return (
     <AuthenticatedLayout user={auth.user}>
@@ -36,28 +35,19 @@ const Assignments = ({ auth }) => {
         {!hasAccess(auth.user.type, [2050, 2051, 2054, 2055]) ? <Unauthorized /> :
           <div className="content">
             <div className="flex items-end gap-4">
-              <Card2 data={filterArray(tasks, 'status', ['In Progress', 'Pending Review'])?.length} name="Active Task" className="w-full" />
-              <Card2 data={tasks?.length} name="Total Task" className="w-full" />
+              <Card2 data={filterArray(tasks, 'status', ['In Progress', 'Pending Review'])?.length} name="Active Tasks" className="w-full" Icon={TbCheckbox}/>
+              <Card2 data={filterArray(tasks, 'status', ['Completed', 'Canceled'], true)?.length} name="Total Tasks" className="w-full" Icon={TbCheckupList}/>
             </div>
-            <button>History</button>
-            <div className="mt-8 flex flex-col gap-2">
+            <div className='w-full flex mb-2 mt-8 items-end'>
+              <div className='flex items-baseline ml-2'>
+                <p className='font-semibold text-2xl'>Assignments</p>
+                <Link className='ml-2 text-sm hover:underline text-gray-600' href={route('assignments-history')}>History</Link>
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
               {tasks && tasks.map((task, index) => {
                 return (
-                  <div className="p-4 hover:bg-gray-200 cursor-pointer border-card" key={index} onClick={() => handleCardClick(task?.id)}>
-                    <div className="flex items-end">
-                      <p className="font-semibold text-lg">{task.title}</p>
-                      {new Date(task.deadline) - new Date(task.startdate) <= 3 * 24 * 60 * 60 * 1000 ?
-                        <p className={`rounded-md py-1 px-2 h-fit w-fit text-red-600 bg-red-100 flex items-center ml-4`}><TbClockExclamation className="mr-1" />Deadline</p>
-                        : null}
-
-                      <Status statusArray={auditTaskStatus} status={task?.status} className="ml-auto" />
-                    </div>
-
-                    <p className="font-medium text-gray-600 mt-3">Type <span className="font-medium text-black">{task.type}</span></p>
-                    <p className="font-medium text-gray-600">Assigned By <span className="font-medium text-black">{task.assigned_by_name}</span></p>
-
-                    <p className="mt-3 flex items-center">{`${new Date(task.startdate).toLocaleString(undefined, dateTimeFormatShort)} - ${new Date(task.deadline).toLocaleString(undefined, dateTimeFormatShort)}`}</p>
-                  </div>
+                  <AuditAssignmentCard data={task} key={index} onClick={() => handleCardClick(task.id)} />
                 )
               })}
             </div>

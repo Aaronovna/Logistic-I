@@ -69,7 +69,7 @@ export const auditLinks = [
         Icon: TbClipboardData
     },
     {
-        name: ['assignments', 'assignments-view'],
+        name: ['assignments', 'assignments-view', 'assignments-history'],
         Icon: TbPinned
     },
 ];
