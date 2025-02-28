@@ -326,41 +326,44 @@ class InventoryController extends Controller
 
     public function outOfStockProducts($limit = 5)
     {
+        $products = collect(); // Initialize an empty collection
+
         // Get products that have inventory but are out of stock
         $outOfStockInventories = Inventory::with('product')
             ->where('quantity', 0)
+            ->limit($limit) // Apply limit here if needed
             ->get();
+
+        foreach ($outOfStockInventories as $inventory) {
+            $products->push([
+                'product_id' => $inventory->product_id,
+                'name' => optional($inventory->product)->name ?? 'N/A',
+                'price' => optional($inventory->product)->price ?? 0,
+                'restock_point' => optional($inventory->product)->restock_point ?? 0,
+            ]);
+        }
 
         // Get products that have no inventory at all
         $productsWithoutInventory = Product::doesntHave('inventory')
-            ->limit($limit)
+            ->limit($limit) // Apply limit here if needed
             ->get();
 
-        // Merge both collections
-        $allOutOfStockProducts = $outOfStockInventories->map(function ($inventory) {
-            return [
-                'product_id' => $inventory->product_id,
-                'name' => $inventory->product->name ?? 'N/A',
-                'price' => $inventory->product->price ?? 0,
-                'restock_point' => $inventory->product->restock_point ?? 0,
-            ];
-        })->merge(
-            $productsWithoutInventory->map(function ($product) {
-                return [
-                    'product_id' => $product->id,
-                    'name' => $product->name ?? 'N/A',
-                    'price' => $product->price ?? 0,
-                    'restock_point' => $product->restock_point ?? 0,
-                ];
-            })
-        );
+        foreach ($productsWithoutInventory as $product) {
+            $products->push([
+                'product_id' => $product->id,
+                'name' => $product->name ?? 'N/A',
+                'price' => $product->price ?? 0,
+                'restock_point' => $product->restock_point ?? 0,
+            ]);
+        }
 
-        if ($allOutOfStockProducts->isEmpty()) {
+        if ($products->isEmpty()) {
             return response()->json(['message' => 'No out-of-stock products found.'], 404);
         }
 
-        return response()->json(['data' => $allOutOfStockProducts->take($limit)], 200);
+        return response()->json(['data' => $products->take($limit)], 200);
     }
+
 
     public function outOfStockProductsCount()
     {

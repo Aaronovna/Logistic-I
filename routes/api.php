@@ -18,4 +18,6 @@ Route::get('/v1/products/least/{limit?}', [ProductController::class, 'leastExpen
 Route::get('/v1/inventory/total/stock', [InventoryController::class, 'totalStock']);
 Route::get('/v1/inventory/out/stock/{limit?}', [InventoryController::class, 'outOfStockProducts']);
 Route::get('/v1/inventory/low/stock/{limit?}', [InventoryController::class, 'lowStockProducts']);
+Route::get('/v1/inventory/out/count/', [InventoryController::class, 'outOfStockProductsCount']);
+Route::get('/v1/inventory/low/count/', [InventoryController::class, 'lowStockProductsCount']);
 Route::get('/v1/inventory/total/value', [InventoryController::class, 'totalStockValue']);
