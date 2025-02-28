@@ -1,6 +1,6 @@
 export const returnCategories = [
     { name: "Scrap", desc: "Items that are no longer usable and need to be disposed of or recycled." },
-    { name: "Damaged/Broken", desc: "Products that are physically damaged and cannot be repaired." },
+    { name: "Damaged", desc: "Products that are physically damaged and cannot be repaired." },
     { name: "Defective", desc: "Items with manufacturing or functional defects." },
     { name: "Expired", desc: "Perishable goods or products past their shelf life." },
     { name: "Obsolete", desc: "Outdated items that are no longer in demand or compatible with newer systems." },

@@ -7,7 +7,6 @@ import { Card2 } from '@/Components/Cards';
 import { filterArray } from '@/functions/filterArray';
 
 import { TbBox } from "react-icons/tb";
-import { TbCurrencyPeso } from "react-icons/tb";
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
@@ -17,7 +16,7 @@ const cardStyle = 'mb-2 snap-center mx-2 md:min-w-64 inline-block min-w-[100%] b
 const formatValue = (value) => {
   if (value) {
     const formattedValue = new Intl.NumberFormat('fil-PH', {
-      //style: 'currency',
+      style: 'currency',
       currency: 'PHP',
     }).format(value);
 
@@ -296,7 +295,7 @@ const Warehouse = ({ auth }) => {
               </div>
 
               <div className='ml-auto md:items-end mb-2 md:mb-0 md:gap-4 overflow-x-auto snap-mandatory snap-x pb-1 whitespace-nowrap'>
-                <Card2 data={totalValue && formatValue(totalValue.total_stock_value)} name="Total Asset Value" className={cardStyle} Icon={TbCurrencyPeso} iconColor={theme.text} />
+                <Card2 data={totalValue && formatValue(totalValue.total_stock_value)} name="Total Asset Value" className={cardStyle} iconColor={theme.text} />
                 <Card2 data={totalStocks && totalStocks.total_quantity} name="Total Stocks" className={cardStyle} Icon={TbBox} iconColor={theme.text} />
               </div>
             </div>

@@ -9,6 +9,8 @@ import { returnStatus } from "@/Constants/status";
 import { dateFormatShort, dateTimeFormatShort } from "@/Constants/options";
 import { TbX } from "react-icons/tb";
 import { filterArray } from "@/functions/filterArray";
+import { TbRotateClockwise } from "react-icons/tb";
+import { returnCategories } from "@/Constants/categories";
 
 const Return = ({ auth }) => {
   const { hasAccess, getLayout } = useRole();
@@ -108,19 +110,28 @@ const Return = ({ auth }) => {
       <Layout user={auth.user} header={<NavHeader headerName="Return" />}>
         {!hasAccess(auth.user.type, [2050, 2051, 2052]) ? <Unauthorized /> :
           <div className="content">
-            <div>
-              <Card2 name="Return Requests" data={returns?.length} className="w-fit" />
+            <div className="flex gap-4">
+              <Card2 name="Active Requests" data={returns && returns.length} className="w-fit" Icon={TbRotateClockwise} iconColor="#34b7eb"/>
+              <div className="border-card flex-1 flex flex-wrap select-none">
+                {
+                  returnCategories.map((cat, index)=>{
+                    return (
+                      <span title={cat.desc} className="cursor-default h-fit my-2 mx-4 hover:scale-105 hover:drop-shadow">
+                        <span className="font-medium text-gray-600">{cat.name}</span>
+                        <span className="text-xl font-semibold ml-2">{filterArray(returnedMaterials, 'category', [cat.name]).length}</span>
+                      </span>
+                    )
+                  })
+                }
+              </div>
             </div>
 
-            <div className='mt-8 flex items-end'>
-              <p className='font-medium text-2xl'>Return Requests</p>
-              <Link
-                className='ml-auto font-medium border-card'
-                href={route('return-history')}
-              >
-                View History
-              </Link>
-            </div>
+            <div className='w-full flex mb-2 mt-8 items-end'>
+                  <div className='flex items-baseline ml-2'>
+                    <p className='font-semibold text-2xl'>Return Requests</p>
+                    <Link className='ml-2 text-sm hover:underline text-gray-600' href={route('return-history')}>History</Link>
+                  </div>
+                </div>
 
             <div className="flex gap-4 mt-2">
               <div className={`h-[508px] ${openDetailSection ? 'w-4/6' : 'w-full'} ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} >

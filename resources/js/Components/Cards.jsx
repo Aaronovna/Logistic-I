@@ -18,17 +18,17 @@ export const Card = ({ data, Icon = TbFavicon, iconColor = feedback.info, name =
   )
 }
 
-export const Card2 = ({ data, Icon = TbFavicon, iconColor = 'black', name = 'Name', className = '' }) => {
+export const Card2 = ({ data, Icon, iconColor = 'black', name = 'Name', className = '' }) => {
   const { theme } = useStateContext();
   return (
-    <div className={'rounded-xl pl-4 py-4 pr-20 border-card shadow-md ' + className}
+    <div className={'rounded-xl pl-4 py-4 border-card shadow-md ' + className}
       style={{ borderColor: theme.border, color:theme.text }}
     >
-      <div className="mb-4 w-fit p-2 rounded-xl">
-        <Icon color={iconColor} size={32} />
+      <div className="flex flex-col relative min-w-48 h-full">
+        <p className='text-sm font-medium text-gray-600 mb-2'>{name}</p>
+        <p className='font-medium text-3xl mt-auto mb-10'>{data ? data : '-'}</p>
+        {Icon && <Icon color={iconColor} size={48} className="right-2 bottom-2 absolute"/>}
       </div>
-      <p className='text-sm font-medium'>{name}</p>
-      <p className='font-medium text-3xl'>{data ? data : '-'}</p>
     </div>
   )
 }
