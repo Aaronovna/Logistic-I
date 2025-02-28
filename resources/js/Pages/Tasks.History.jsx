@@ -1,20 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useStateContext } from '@/context/contextProvider';
 
-import InventoryLayout from '@/Layouts/InventoryLayout';
 import { AgGridReact } from 'ag-grid-react';
 import { router } from '@inertiajs/react';
 import Status from '@/Components/Status';
 import { filterArray } from '@/functions/filterArray';
 import { auditTaskStatus } from '@/Constants/status';
 import { dateTimeFormatShort } from '@/Constants/options';
+import useRole from '@/hooks/useRole';
 
 const TasksHistory = ({ auth }) => {
-  if (!hasAccess(auth.user.type, [2050, 2051, 2054, 2055])) {
-    return (
-      <Unauthorized />
-    )
-  }
+  const { hasAccess, getLayout } = useRole();
+  const Layout = getLayout(auth.user.type);
 
   const { theme, themePreference } = useStateContext();
   const [history, setHistory] = useState([]);
@@ -44,7 +41,7 @@ const TasksHistory = ({ auth }) => {
       user={auth.user}
     >
       <Head title="Task History" />
-      <InventoryLayout
+      <Layout
         user={auth.user}
         header={<BreadCrumbsHeader
           headerNames={["Task", "History"]}
@@ -55,17 +52,19 @@ const TasksHistory = ({ auth }) => {
         />
         }
       >
-        <div className="content flex-1">
-          <div className={`h-full ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} >
-            <AgGridReact
-              rowData={history}
-              columnDefs={colDefs}
-              rowSelection='single'
-              pagination={true}
-            />
+        {!hasAccess(auth.user.type, [2050, 2051, 2054, 2055]) ? <Unauthorized /> :
+          <div className="content flex-1">
+            <div className={`h-full ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} >
+              <AgGridReact
+                rowData={history}
+                columnDefs={colDefs}
+                rowSelection='single'
+                pagination={true}
+              />
+            </div>
           </div>
-        </div>
-      </InventoryLayout>
+        }
+      </Layout>
     </AuthenticatedLayout>
   );
 }

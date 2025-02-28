@@ -373,7 +373,7 @@ const Terminal = ({ auth }) => {
     >
       <Head title="Terminal" />
       <Layout user={auth.user} header={<NavHeader headerName="Terminal" />}>
-        {!hasAccess(auth.user.type, [2050, 2053]) ? <Unauthorized /> :
+        {!hasAccess(auth.user.type, [2050, 2051, 2053]) ? <Unauthorized /> :
           <div className="content">
             <div className='border-card p-4 shadow-sm flex flex-col h-56 bg-cover bg-white'
               style={{

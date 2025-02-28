@@ -266,7 +266,7 @@ const Product = ({ auth }) => {
       <Head title="Product" />
 
       <Layout user={auth.user} header={<NavHeader headerName="Product" />}>
-        {!hasAccess(auth.user.type, [2050, 2052]) ? <Unauthorized /> :
+        {!hasAccess(auth.user.type, [2050, 2051, 2052]) ? <Unauthorized /> :
           <div className="content">
             <div className='md:items-end mb-2 md:mb-0 md:gap-4 overflow-x-auto snap-mandatory snap-x pb-1 whitespace-nowrap'>
               <Card2 data={productStats?.totalStock} name="Total Stocks" className={cardStyle} Icon={TbPackages} iconColor={feedbackVibrant.info} />

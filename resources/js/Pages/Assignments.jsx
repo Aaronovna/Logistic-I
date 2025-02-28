@@ -33,7 +33,7 @@ const Assignments = ({ auth }) => {
     <AuthenticatedLayout user={auth.user}>
       <Head title="My Tasks" />
       <Layout user={auth.user} header={<NavHeader headerName="Assignments" />}>
-        {!hasAccess(auth.user.type, [2050, 2054, 2055]) ? <Unauthorized /> :
+        {!hasAccess(auth.user.type, [2050, 2051, 2054, 2055]) ? <Unauthorized /> :
           <div className="content">
             <div className="flex items-end gap-4">
               <Card2 data={filterArray(tasks, 'status', ['In Progress', 'Pending Review'])?.length} name="Active Task" className="w-full" />

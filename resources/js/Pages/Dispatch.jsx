@@ -262,7 +262,7 @@ const Dispatch = ({ auth }) => {
       <Head title="Dispatch" />
 
       <Layout user={auth.user} header={<NavHeader headerName="Dispatch" />}>
-        {!hasAccess(auth.user.type, [2050, 2052]) ? <Unauthorized /> :
+        {!hasAccess(auth.user.type, [2050, 2051, 2052]) ? <Unauthorized /> :
           <div className="content flex flex-col h-screen">
             <div className='flex gap-4 mb-8'>
               <Card2 name='Total Requests' data={requests?.length} className='w-1/2' />

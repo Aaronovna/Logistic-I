@@ -185,7 +185,7 @@ const AssignmentsView = ({ auth }) => {
           ]} />
         }
       >
-        {!hasAccess(auth.user.type, [2050, 2054, 2055]) ? <Unauthorized /> :
+        {!hasAccess(auth.user.type, [2050, 2051, 2054, 2055]) ? <Unauthorized /> :
           <div className="content">
             <div className="border-card p-8">
               <div className="flex items-end">

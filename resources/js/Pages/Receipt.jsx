@@ -165,7 +165,7 @@ const Receipt = ({ auth }) => {
     >
       <Head title="Receipt" />
       <Layout user={auth.user} header={<NavHeader headerName="Receipt" />}>
-        {!hasAccess(auth.user.type, [2050, 2052]) ? <Unauthorized /> :
+        {!hasAccess(auth.user.type, [2050, 2051, 2052]) ? <Unauthorized /> :
           <div className="content">
             <div
               className='relative rounded-xl p-4 flex h-44 overflow-hidden shadow-xl cursor-pointer hover:shadow-2xl duration-200'

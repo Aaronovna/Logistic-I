@@ -75,7 +75,7 @@ const Reports = ({ auth }) => {
     >
       <Head title="Reports" />
       <Layout user={auth.user} header={<NavHeader headerName="Reports" />}>
-        {!hasAccess(auth.user.type, [2050, 2054, 2055]) ? <Unauthorized /> :
+        {!hasAccess(auth.user.type, [2050, 2051, 2054, 2055]) ? <Unauthorized /> :
           <div className="content">
             <div className='flex gap-4'>
               <div className='overflow-hidden border-card p-0 w-1/2 h-64 flex flex-col shadow-md hover:shadow-xl hover:scale-[101%] duration-200 cursor-pointer pattern1 bg-cover' onClick={() => handleReportClick(reports[0]?.id)}>

@@ -69,7 +69,7 @@ const ReturnHistory = ({ auth }) => {
         />
         }
       >
-        {!hasAccess(auth.user.type, [2050, 2052]) ? <Unauthorized /> :
+        {!hasAccess(auth.user.type, [2050, 2051, 2052]) ? <Unauthorized /> :
           <div className="content flex-1 flex gap-2">
             <div className={`h-full ${openDetailSection ? 'w-4/6' : 'w-full'} ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} >
               <AgGridReact

@@ -66,7 +66,7 @@ const ReceiptHistory = ({ auth }) => {
         />
         }
       > 
-        {!hasAccess(auth.user.type, [2050, 2052]) ? <Unauthorized /> :
+        {!hasAccess(auth.user.type, [2050, 2051, 2052]) ? <Unauthorized /> :
           <div className="content flex-1">
             <div className={`h-full ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`} >
               <AgGridReact

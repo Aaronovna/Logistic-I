@@ -58,7 +58,7 @@ const DepotHistory = ({ auth }) => {
           ]} />
         }
       >
-        {!hasAccess(auth.user.type, [2050, 2053]) ? <Unauthorized /> :
+        {!hasAccess(auth.user.type, [2050, 2051, 2053]) ? <Unauthorized /> :
           <div className="content">
             <p className="font-medium text-xl mb-2" id="request-section">Request History</p>
             <div className={`w-full h-96 ${themePreference === 'light' ? 'ag-theme-quartz' : 'ag-theme-quartz-dark'}`}>

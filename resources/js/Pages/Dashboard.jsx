@@ -95,7 +95,7 @@ export default function Dashboard({ auth }) {
       <Head title="Dashboard" />
 
       <Layout user={auth.user} header={<NavHeader headerName="Dashboard" />}>
-        {!hasAccess(auth.user.type, [2050, 2052]) ? <Unauthorized /> :
+        {!hasAccess(auth.user.type, [2050, 2051, 2052]) ? <Unauthorized /> :
           <div className="content">
             <div className='flex gap-4'>
               <Chart data={productStats?.productsByCategory} series={pieSeries} legendPosition='right' title='Product Stock' className='w-1/2' />

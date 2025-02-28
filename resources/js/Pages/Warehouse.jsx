@@ -270,7 +270,7 @@ const Warehouse = ({ auth }) => {
       <Head title="Receipt" />
 
       <Layout user={auth.user} header={<NavHeader headerName="Warehouse" />}>
-        {!hasAccess(auth.user.type, [2050, 2052]) ? <Unauthorized /> :
+        {!hasAccess(auth.user.type, [2050, 2051, 2052]) ? <Unauthorized /> :
           <div className="content bg-cover" >
             <div
               className='border-card p-4 shadow-md mb-6 flex bg-cover bg-center'

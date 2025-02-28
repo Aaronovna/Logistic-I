@@ -106,7 +106,7 @@ const Return = ({ auth }) => {
     <AuthenticatedLayout user={auth.user}>
       <Head title="Return" />
       <Layout user={auth.user} header={<NavHeader headerName="Return" />}>
-        {!hasAccess(auth.user.type, [2050, 2052]) ? <Unauthorized /> :
+        {!hasAccess(auth.user.type, [2050, 2051, 2052]) ? <Unauthorized /> :
           <div className="content">
             <div>
               <Card2 name="Return Requests" data={returns?.length} className="w-fit" />

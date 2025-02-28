@@ -149,7 +149,7 @@ const Category = ({ auth }) => {
       <Head title="Category" />
 
       <Layout user={auth.user} header={<NavHeader headerName="Category" />}>
-        {!hasAccess(auth.user.type, [2050, 2052]) ? <Unauthorized /> :
+        {!hasAccess(auth.user.type, [2050, 2051, 2052]) ? <Unauthorized /> :
           <div className="content">
             <div className='flex flex-col gap-4'>
               <div className='flex items-end'>

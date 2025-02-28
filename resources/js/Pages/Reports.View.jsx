@@ -91,7 +91,7 @@ const ReportsView = ({ auth }) => {
           ]} />
         }
       >
-        {!hasAccess(auth.user.type, [2050, 2054, 2055]) ? <Unauthorized /> :
+        {!hasAccess(auth.user.type, [2050, 2051, 2054, 2055]) ? <Unauthorized /> :
           <div className="content">
             <div className="border-card p-8">
               <p className="font-medium text-xl mb-2 ml-1">Task Details</p>
