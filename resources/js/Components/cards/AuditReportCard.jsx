@@ -5,10 +5,10 @@ const AuditReportCard = ({ data = {}, onClick = () => { } }) => {
   const deadline = new Date(data.task_deadline) - new Date(data.task_startdate) <= 3 * 24 * 60 * 60 * 1000 ? true : false;
 
   return (
-    <div className={`p-4 hover:bg-gray-200 cursor-pointer border-card ${deadline ? 'border-x-red-600 border-x-4' : null}`} onClick={onClick}>
+    <div className={`p-4 hover:bg-gray-200 cursor-pointer border-card ${(deadline && data.review_status === "Pending Review")  ? 'border-x-red-600 border-x-4' : null}`} onClick={onClick}>
       <div className="flex items-end">
         <p className="font-semibold text-lg">{data.task_title}</p>
-        {!deadline ? null :
+        {!(deadline && data.review_status === "Pending Review") ? null :
           <p className={`rounded-md py-1 px-2 h-fit w-fit text-red-600 bg-red-100 flex items-center ml-4`}><TbClockExclamation className="mr-1" />Deadline</p>
         }
       </div>

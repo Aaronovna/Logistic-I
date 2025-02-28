@@ -46,7 +46,7 @@ const ReportHistory = ({ auth }) => {
         />
         }
       >
-        <div className='content'>
+        <div className='content flex flex-col gap-2'>
           {
             history && history.map((report, index) => {
               return (
