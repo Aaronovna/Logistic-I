@@ -53,7 +53,7 @@ const Reports = ({ auth }) => {
   const fetchReports = async () => {
     try {
       const response = await axios.get('/audit/report/get');
-      setReports(response.data.data);
+      setReports(filterArray(response.data.data, 'review_status', ["Pending Review"]));
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
     }
@@ -66,7 +66,9 @@ const Reports = ({ auth }) => {
   }, [])
 
   const handleReportClick = (id) => {
-    router.get('/reports/view', { id: id });
+    if (id) {
+      router.get('/reports/view', { id: id });
+    }
   };
 
   return (
@@ -78,18 +80,23 @@ const Reports = ({ auth }) => {
         {!hasAccess(auth.user.type, [2050, 2051, 2054, 2055]) ? <Unauthorized /> :
           <div className="content">
             <div className='flex gap-4'>
-              <div className='overflow-hidden border-card p-0 w-1/2 h-64 flex flex-col shadow-md hover:shadow-xl hover:scale-[101%] duration-200 cursor-pointer pattern1 bg-cover' onClick={() => handleReportClick(reports[0]?.id)}>
-                <div className='flex m-4'>
-                  <p className='text-xl font-medium text-white'>Recent Report</p>
-                  <p className='text-lg font-medium ml-auto text-white'>{new Date(reports[0]?.created_at).toLocaleDateString(undefined, dateFormatShort)}</p>
-                </div>
-                <div className='bg-white mt-16 px-4 py-2 shadow-lg'>
-                  <p>{reports[0]?.task_assigned_to_name}</p>
-                  <p className='font-medium text-lg drop-shadow-lg'>{reports[0]?.task_title}</p>
-                </div>
-                <p className='mt-auto font-medium text-lg text-white m-4'>{reports[0]?.task_type}</p>
+              <div className='overflow-hidden border-card p-0 w-1/2 h-64 flex flex-col shadow-md hover:shadow-xl hover:scale-[101%] duration-200 cursor-pointer pattern1 bg-cover'
+                onClick={() => handleReportClick(reports[0]?.id)}
+              >
+                {reports && reports.length <= 0 ? <div className='w-full h-full flex items-center bg-gray-50/50'><p className='font-semibold text-2xl text-center w-full'>No Recent Reports</p></div> :
+                  <>
+                    <div className='flex m-4'>
+                      <p className='text-xl font-medium text-white'>Recent Report</p>
+                      <p className='text-lg font-medium ml-auto text-white'>{new Date(reports[0]?.created_at).toLocaleDateString(undefined, dateFormatShort)}</p>
+                    </div>
+                    <div className='bg-white mt-auto px-4 py-6 shadow-lg'>
+                      <p>{reports[0]?.task_assigned_to_name}</p>
+                      <p className='font-medium text-lg drop-shadow-lg'>{reports[0]?.task_title}</p>
+                      <p className='mt-4 font-medium text-lg'>{reports[0]?.task_type}</p>
+                    </div>
+                  </>
+                }
               </div>
-
               <div className='w-1/2 gap-4 h-64 flex flex-wrap'>
                 <Card name='Auditors' data={users?.length} Icon={TbUserSearch} />
                 <Card name='Tasks' data={tasks?.length} Icon={TbClipboardList} />
@@ -97,7 +104,12 @@ const Reports = ({ auth }) => {
               </div>
             </div>
 
-            <p className='font-semibold text-xl mt-8 mb-4'>Pending Reviews</p>
+            <div className='w-full flex mb-2 mt-8 items-end'>
+              <div className='flex items-baseline ml-2'>
+                <p className='font-semibold text-2xl'>Pending Reviews</p>
+                <Link className='ml-2 text-sm hover:underline text-gray-600' href={route('reports-history')}>History</Link>
+              </div>
+            </div>
             <div className='flex flex-col gap-2'>
               {
                 reports && reports.map((report, index) => {

@@ -65,11 +65,11 @@ export const auditLinks = [
         Icon: TbCheckbox
     },
     {
-        name: ['reports','reports-view'],
+        name: ['reports', 'reports-view', 'reports-history'],
         Icon: TbClipboardData
     },
     {
-        name: ['assignments','assignments-view'],
+        name: ['assignments', 'assignments-view'],
         Icon: TbPinned
     },
 ];
@@ -108,7 +108,7 @@ export const managementLinks = [
         Icon: TbBuildingCog
     },
     {
-        name: 'module', 
+        name: 'module',
         Icon: TbPuzzle
     },
 ];
@@ -119,7 +119,7 @@ export const managementLinks = [
 export const adminPages = [
     'dashboard', /* 'report', */ 'receipt', 'dispatch', 'warehouse', 'product', 'category',
     'depot', 'terminal',
-    'tasks', 'reports','assignments',
+    'tasks', 'reports', 'assignments',
     'user', 'infrastructure', 'module',
 ]
 
@@ -132,5 +132,5 @@ export const infrastructurePages = [
 ]
 
 export const auditPages = [
-    'tasks', 'reports','assignments',
+    'tasks', 'reports', 'assignments',
 ]

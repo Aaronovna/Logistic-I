@@ -20,7 +20,7 @@ const TasksHistory = ({ auth }) => {
   const fetchTasks = async () => {
     try {
       const response = await axios.get('/audit/task/get');
-      setTasks(response.data);
+      setTasks(response.data.data);
     } catch (error) {
       console.error('error');
     }

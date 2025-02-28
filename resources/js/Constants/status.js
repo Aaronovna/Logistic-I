@@ -30,11 +30,11 @@ export const auditTaskStatus = [
 export const auditReportStatus = [
     {
         name: 'Pending Review',
-        color: 'bg-yellow-100 text-yellow-600',
+        color: 'bg-blue-100 text-blue-600',
     },
     {
         name: 'Reviewed',
-        color: 'bg-green-100 text-green-600',
+        color: 'bg-purple-100 text-purple-600',
     }
 ]
 
