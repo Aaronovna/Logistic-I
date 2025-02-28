@@ -76,11 +76,11 @@ export const requestStatus = [
     },
     {
         name: 'Preparing for Delivery',
-        color: 'bg-blue-100 text-blue-600',
+        color: 'bg-cyan-100 text-cyan-600',
     },
     {
         name: 'In Transit',
-        color: 'bg-purple-100 text-purple-600',
+        color: 'bg-orange-100 text-orange-600',
     },
     {
         name: 'Delivered',
@@ -92,7 +92,7 @@ export const requestStatus = [
     },
     {
         name: 'Request Rejected',
-        color: 'bg-red-100 text-red-600',
+        color: 'bg-pink-100 text-pink-600',
     },
     {
         name: 'Request Canceled',

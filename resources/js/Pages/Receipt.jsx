@@ -236,8 +236,8 @@ const Receipt = ({ auth }) => {
                   )
                 })}
               </div>
-
             </div>
+            
             <Modal name="Shipment Details" show={openShipmentDataModal} onClose={() => setOpenShipmentDataModal(false)}>
               <div>
                 <div className='flex justify-between mb-2'>

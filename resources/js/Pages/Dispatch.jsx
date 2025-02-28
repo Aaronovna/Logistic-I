@@ -10,6 +10,8 @@ import useUpdateStatus from '@/api/useUpdateStatus';
 import { dateTimeFormatLong } from '@/Constants/options';
 import Status from '@/Components/Status';
 import { getStatusStep, requestStatus } from '@/Constants/status';
+import { TbMail } from 'react-icons/tb';
+import { TbTruckDelivery } from 'react-icons/tb';
 
 const Dispatch = ({ auth }) => {
   const { hasAccess, getLayout } = useRole();
@@ -20,6 +22,7 @@ const Dispatch = ({ auth }) => {
   const [depotRequests, setDepotRequests] = useState();
   const [terminalRequests, setTerminalRequests] = useState();
   const [requests, setRequests] = useState();
+  const [filteredRequests, setFilteredRequests] = useState();
 
   const fetchRequests = async () => {
     try {
@@ -255,6 +258,21 @@ const Dispatch = ({ auth }) => {
     setOpenRequestModal(false);
   }
 
+  const [activeFilter, setActiveFilter] = useState('No Filter');
+  const filterRequests = (status) => {
+    if (status === 'No Filter') {
+      setFilteredRequests(requests);
+    } else {
+      const filteredRequests = filterArray(requests, 'status', [status]);
+      setFilteredRequests(filteredRequests);
+    }
+    setActiveFilter(status);
+  };
+
+  useEffect(() => {
+    filterRequests(activeFilter);
+  }, [requests]);
+
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -264,16 +282,34 @@ const Dispatch = ({ auth }) => {
       <Layout user={auth.user} header={<NavHeader headerName="Dispatch" />}>
         {!hasAccess(auth.user.type, [2050, 2051, 2052]) ? <Unauthorized /> :
           <div className="content flex flex-col h-screen">
-            <div className='flex gap-4 mb-8'>
-              <Card2 name='Total Requests' data={requests?.length} className='w-1/2' />
-              <Card2 name='Total Deliveries' className='w-1/2' data={requests && filterArray(requests, 'status', ["In Transit", "Delivered"]).length} />
+            <div className='flex gap-4'>
+              <Card2 name='Active Requests' data={requests && filterArray(requests, 'status', ["In Transit", "Delivered", "Request Rejected", "Request Canceled"], true).length} className='w-1/2' Icon={TbMail} />
+              <Card2 name='Deliveries' className='w-1/2' Icon={TbTruckDelivery} data={requests && filterArray(requests, 'status', ["In Transit", "Delivered"]).length} />
             </div>
 
-            <div className='flex mt-8 mb-4 items-baseline justify-between'>
-              <p className='font-medium text-xl' style={{ color: theme.text }}>Requests</p>
-              <Link href={route('dispatch-history')}>
-                View History
-              </Link>
+            <div className='flex flex-col w-full justify-between mt-8'>
+              <div className='flex gap-2 mb-4 flex-wrap gap-y-4'>
+                {requestStatus.map((status, index) => {
+                  return (
+                    <span key={index} className={`cursor-pointer shadow-sm ${activeFilter === status.name ? 'scale-110 mx-1 shadow-xl' : null}`}>
+                      <Status statusArray={requestStatus} status={status.name} onClick={() => filterRequests(status.name)} />
+                    </span>
+                  )
+                })}
+                <span>
+                  <span onClick={() => filterRequests('No Filter')}
+                    className={`leading-normal whitespace-nowrap p-1 px-3 rounded-lg w-fit h-fit bg-gray-100 text-gray-600 cursor-pointer shadow-sm ${activeFilter === 'No Filter' ? 'scale-x-150 mx-1 shadow-xl' : null}`}>
+                    No Filter
+                  </span>
+                </span>
+              </div>
+
+              <div className='w-full flex mb-2 mt-2 items-end'>
+                <div className='flex items-baseline ml-2'>
+                  <p className='font-semibold text-2xl'>Requests</p>
+                  <Link className='ml-2 text-sm hover:underline text-gray-600' href={route('dispatch-history')}>History</Link>
+                </div>
+              </div>
             </div>
 
             <div className='grid gap-4 grid-cols-3'>
@@ -305,7 +341,7 @@ const Dispatch = ({ auth }) => {
             }
 
             <div className='mt-8 grid gap-4 grid-cols-3'>
-              {requests?.map((request, index) => {
+              {filteredRequests?.map((request, index) => {
                 return (
                   <div key={index} onClick={() => handleOpenRequestModal(request)}>
                     <RequestCard data={request} />
