@@ -112,7 +112,6 @@ Route::middleware(["auth", "verified", "throttle:60,1"])->group(function () {
     Route::delete('/inventory/delete/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
     Route::get('/inventory/get/warehouse/group', [InventoryController::class, 'indexGrouped'])->name('inventory.indexGrouped');
     Route::get('/inventory/get/warehouse/{id}', [InventoryController::class, 'indexByWarehouse'])->name('inventory.indexByWarehouse');
-    Route::get('/inventory/stats', [InventoryController::class, 'stats'])->name('inventory.stats');
     Route::patch('/inventory/stock/update/{id}', [InventoryController::class, 'updateStock'])->name('inventory.updateStock');
     Route::post('/inventory/create/bulk', [InventoryController::class, 'storeBulk'])->name('inventory.storeBulk');
 
@@ -188,19 +187,6 @@ Route::middleware(["auth", "verified", "throttle:60,1"])->group(function () {
     Route::post('file/store', [FileController::class, 'store']);
     Route::delete('/file/delete/{id}', [FileController::class, 'destroy']);
 });
-
-// Route for all dispatch trails
-Route::get('/dispatch/trails/get', [DispatchMaterialController::class, 'getAllDispatches'])->name('dispatch.getAllDispatches');
-
-// Route for dispatch trails by product ID
-Route::get('/dispatch/trails/get/product/{productId}', [DispatchMaterialController::class, 'getDispatchByProduct']);
-
-// Route for quantities by product ID
-Route::get('/dispatch/trails/get/product/{productId}/quantities', [DispatchMaterialController::class, 'getQuantitiesByProduct']);
-
-// Route for quantities by product ID and days range
-Route::get('/dispatch/trails/get/product/{productId}/quantities/days/{days}', [DispatchMaterialController::class, 'getQuantitiesByProductAndDays']);
-
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

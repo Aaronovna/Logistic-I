@@ -266,53 +266,6 @@ class InventoryController extends Controller
         return response()->json(['message' => 'Inventory deleted successfully'], 200);
     }
 
-    public function stats()
-    {
-        $totalStock = Inventory::sum('quantity');
-        $outOfStockProductsCount = Inventory::where('quantity', 0)->count();
-        $outOfStockProducts = Inventory::where('quantity', 0)
-            ->select(
-                'inventories.id',
-                'product_id',
-                'quantity',
-                'products.name as product_name',
-                'products.price as product_price',
-                'products.restock_point as restock_point'
-            )
-            ->join('products', 'inventories.product_id', '=', 'products.id') // Joining the 'products' table
-            ->get();
-
-        $lowStockProductsCount = Inventory::join('products', 'inventories.product_id', '=', 'products.id')
-            ->whereColumn('quantity', '<', 'products.restock_point')
-            ->count();
-        $lowStockProducts = Inventory::join('products', 'products.id', '=', 'inventories.product_id')
-            ->whereColumn('inventories.quantity', '<', 'products.restock_point')
-            ->where('inventories.quantity', '>', 0)
-            ->select(
-                'inventories.id',
-                'inventories.product_id',
-                'inventories.quantity',
-                'products.name as product_name',
-                'products.price as product_price',
-                'products.restock_point as restock_point'
-            )
-            ->get();
-
-
-        $totalStockValue = Inventory::join('products', 'products.id', '=', 'inventories.product_id')
-            ->select(DB::raw('SUM(products.price * inventories.quantity) as total_stock_value'))
-            ->value('total_stock_value');
-
-        return response()->json([
-            'totalStock' => $totalStock,
-            'outOfStockProductsCount' => $outOfStockProductsCount,
-            'outOfStockProducts' => $outOfStockProducts,
-            'lowStockProductsCount' => $lowStockProductsCount,
-            'lowStockProducts' => $lowStockProducts,
-            'totalStockValue' => $totalStockValue,
-        ]);
-    }
-
     /**
      * Store multiple products in the inventory.
      */
@@ -362,5 +315,111 @@ class InventoryController extends Controller
             DB::rollBack(); // Roll back the transaction on error
             return response()->json(['message' => 'An error occurred', 'details' => $e->getMessage()], 500);
         }
+    }
+
+    public function totalStock()
+    {
+        $totalQuantity = Inventory::sum('quantity');
+
+        return response()->json(['data' => ['total_quantity' => $totalQuantity]], 200);
+    }
+
+    public function outOfStockProducts($limit = 5)
+    {
+        // Get products that have inventory but are out of stock
+        $outOfStockInventories = Inventory::with('product')
+            ->where('quantity', 0)
+            ->get();
+
+        // Get products that have no inventory at all
+        $productsWithoutInventory = Product::doesntHave('inventory')
+            ->limit($limit)
+            ->get();
+
+        // Merge both collections
+        $allOutOfStockProducts = $outOfStockInventories->map(function ($inventory) {
+            return [
+                'product_id' => $inventory->product_id,
+                'name' => $inventory->product->name ?? 'N/A',
+                'price' => $inventory->product->price ?? 0,
+                'restock_point' => $inventory->product->restock_point ?? 0,
+            ];
+        })->merge(
+            $productsWithoutInventory->map(function ($product) {
+                return [
+                    'product_id' => $product->id,
+                    'name' => $product->name ?? 'N/A',
+                    'price' => $product->price ?? 0,
+                    'restock_point' => $product->restock_point ?? 0,
+                ];
+            })
+        );
+
+        if ($allOutOfStockProducts->isEmpty()) {
+            return response()->json(['message' => 'No out-of-stock products found.'], 404);
+        }
+
+        return response()->json(['data' => $allOutOfStockProducts->take($limit)], 200);
+    }
+
+    public function outOfStockProductsCount()
+    {
+        // Count products that have inventory but are out of stock
+        $countOutOfStock = Inventory::where('quantity', 0)->count();
+
+        // Count products that have no inventory records
+        $countNoInventory = Product::doesntHave('inventory')->count();
+
+        return response()->json(['data' => ['out_of_stock_count' => $countOutOfStock + $countNoInventory]], 200);
+    }
+
+
+    public function lowStockProducts($limit = 5)
+    {
+        $inventories = Inventory::with('product')
+            ->where('quantity', '>', 0) // Exclude out-of-stock items
+            ->whereHas('product', function ($query) {
+                $query->whereColumn('inventories.quantity', '<', 'products.restock_point');
+            })
+            ->limit($limit)
+            ->get();
+
+        if ($inventories->isEmpty()) {
+            return response()->json(['message' => 'No low-stock products found.'], 404);
+        }
+
+        $products = $inventories->map(function ($inventory) {
+            return [
+                'product_id' => $inventory->product_id,
+                'name' => $inventory->product->name ?? 'N/A',
+                'price' => $inventory->product->price ?? 0,
+                'restock_point' => $inventory->product->restock_point ?? 0,
+                'quantity' => $inventory->quantity,
+            ];
+        });
+
+        return response()->json(['data' => $products], 200);
+    }
+
+    public function lowStockProductsCount()
+    {
+        $count = Inventory::where('quantity', '>', 0)
+            ->whereHas('product', function ($query) {
+                $query->whereColumn('inventories.quantity', '<', 'products.restock_point');
+            })
+            ->count();
+
+        return response()->json(['data' => ['low_stock_count' => $count]], 200);
+    }
+
+    public function totalStockValue()
+    {
+        $totalValue = Inventory::with('product')
+            ->get()
+            ->sum(function ($inventory) {
+                return ($inventory->product->price ?? 0) * $inventory->quantity;
+            });
+
+        return response()->json(['data' => ['total_stock_value' => $totalValue]], 200);
     }
 }
