@@ -30,7 +30,7 @@ const Trigger = ({ children }) => {
     );
 };
 
-const Content = ({ align = 'right', width = '48', contentClasses = 'py-1', children }) => {
+const Content = ({ align = 'right', width = '48', contentClasses = 'rounded-md overflow-hidden border ', children }) => {
     const { open, setOpen } = useContext(DropDownContext);
 
     let alignmentClasses = 'origin-top';
@@ -76,7 +76,7 @@ const DropdownLink = ({ className = '', children, ...props }) => {
             {...props}
             style={{background: theme.background, color: theme.text}}
             className={
-                'block w-full px-4 py-2 text-start text-sm leading-5 transition duration-150 ease-in-out ' +
+                'block w-full px-4 py-2 text-start text-sm leading-5 ' +
                 className
             }
         >
