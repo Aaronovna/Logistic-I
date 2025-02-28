@@ -9,6 +9,7 @@ use App\Http\Controllers\InventoryController;
     return $request->user();
 })->middleware('auth:sanctum'); */
 
+Route::get('/v1/product/get', [ProductController::class, 'index']);
 Route::get('/v1/products/category', [ProductController::class, 'productEachCategory']);
 Route::get('/v1/products/supplier', [ProductController::class, 'productEachSupplier']);
 Route::get('/v1/products/recent/{limit?}', [ProductController::class, 'recentProducts']);
@@ -18,6 +19,6 @@ Route::get('/v1/products/least/{limit?}', [ProductController::class, 'leastExpen
 Route::get('/v1/inventory/total/stock', [InventoryController::class, 'totalStock']);
 Route::get('/v1/inventory/out/stock/{limit?}', [InventoryController::class, 'outOfStockProducts']);
 Route::get('/v1/inventory/low/stock/{limit?}', [InventoryController::class, 'lowStockProducts']);
-Route::get('/v1/inventory/out/count/', [InventoryController::class, 'outOfStockProductsCount']);
-Route::get('/v1/inventory/low/count/', [InventoryController::class, 'lowStockProductsCount']);
+Route::get('/v1/inventory/out/count', [InventoryController::class, 'outOfStockProductsCount']);
+Route::get('/v1/inventory/low/count', [InventoryController::class, 'lowStockProductsCount']);
 Route::get('/v1/inventory/total/value', [InventoryController::class, 'totalStockValue']);

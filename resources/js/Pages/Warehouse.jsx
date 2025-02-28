@@ -36,9 +36,7 @@ const Warehouse = ({ auth }) => {
   const [openAddInventoryModal, setOpenAddInventoryModal] = useState(false);
   const [openEditInventoryModal, setOpenEditInventoryModal] = useState(false);
 
-  const [totalProductValue, setTotalProductValue] = useState(0);
   const [inventory, setInventory] = useState([]);
-  const [inventoryStats, setInventoryStats] = useState([]);
 
   const fetchInventory = async () => {
     try {
@@ -61,10 +59,19 @@ const Warehouse = ({ auth }) => {
     }
   };
 
+  const [totalStocks, setTotalStocks] = useState();
+  const [totalValue, setTotalValue] = useState();
   const fetchInventoryStats = async () => {
     try {
-      const response = await axios.get('/inventory/stats');
-      setInventoryStats(response.data.data);
+      const response = await axios.get('/api/v1/inventory/total/stock');
+      setTotalStocks(response.data.data);
+    } catch (error) {
+      toast.error(`${error.status} ${error.response.data.message}`);
+    }
+
+    try {
+      const response = await axios.get('/api/v1/inventory/total/value');
+      setTotalValue(response.data.data);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
     }
@@ -215,12 +222,6 @@ const Warehouse = ({ auth }) => {
     setGridApi(params.api);
   }, []);
 
-  useEffect(() => {
-    if (inventoryStats) {
-      setTotalProductValue(formatValue(inventoryStats.totalStockValue));
-    }
-  }, [inventoryStats]);
-
   const [editInventoryFormData, setEditInventoryFormData] = useState({
     quantity: '',
     warehouse_id: 0,
@@ -295,8 +296,8 @@ const Warehouse = ({ auth }) => {
               </div>
 
               <div className='ml-auto md:items-end mb-2 md:mb-0 md:gap-4 overflow-x-auto snap-mandatory snap-x pb-1 whitespace-nowrap'>
-                <Card2 data={totalProductValue} name="Total Asset Value" className={cardStyle} Icon={TbCurrencyPeso} iconColor={theme.text} />
-                <Card2 data={inventoryStats && inventoryStats?.totalStock} name="Total Stocks" className={cardStyle} Icon={TbBox} iconColor={theme.text} />
+                <Card2 data={totalValue && formatValue(totalValue.total_stock_value)} name="Total Asset Value" className={cardStyle} Icon={TbCurrencyPeso} iconColor={theme.text} />
+                <Card2 data={totalStocks && totalStocks.total_quantity} name="Total Stocks" className={cardStyle} Icon={TbBox} iconColor={theme.text} />
               </div>
             </div>
 

@@ -43,14 +43,29 @@ const Product = ({ auth }) => {
 
   const product_image_placeholder = 'https://psediting.websites.co.in/obaju-turquoise/img/product-placeholder.png';
 
-  const [productStats, setProductStats] = useState({});
-
-  const fetchProductStats = async () => {
+  const [totalStocks, setTotalStocks] = useState();
+  const [low, setLow] = useState();
+  const [out, setOut] = useState();
+  const fetchStats = async () => {
     try {
-      const response = await axios.get('/product/stats');
-      setProductStats(response.data);
+      const response = await axios.get('/api/v1/inventory/total/stock');
+      setTotalStocks(response.data.data);
     } catch (error) {
-      toast.error('product stat error', error);
+      toast.error(`${error.status} ${error.response.data.message}`);
+    }
+
+    try {
+      const response = await axios.get('/api/v1/inventory/low/count');
+      setLow(response.data.data);
+    } catch (error) {
+      toast.error(`${error.status} ${error.response.data.message}`);
+    }
+
+    try {
+      const response = await axios.get('/api/v1/inventory/out/count');
+      setOut(response.data.data);
+    } catch (error) {
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
@@ -131,7 +146,7 @@ const Product = ({ auth }) => {
     try {
       const response = await axios.post('/product/store', addProductFormData);
       fetchProducts();
-      fetchProductStats();
+      fetchStats();
       setOpenAddProductModal(false);
       toast.success(response.data.message);
     } catch (error) {
@@ -143,7 +158,7 @@ const Product = ({ auth }) => {
     fetchProducts();
     fetchCategories();
     fetchSuppliers();
-    fetchProductStats();
+    fetchStats();
   }, []);
 
   useEffect(() => {
@@ -269,10 +284,10 @@ const Product = ({ auth }) => {
         {!hasAccess(auth.user.type, [2050, 2051, 2052]) ? <Unauthorized /> :
           <div className="content">
             <div className='md:items-end mb-2 md:mb-0 md:gap-4 overflow-x-auto snap-mandatory snap-x pb-1 whitespace-nowrap'>
-              <Card2 data={productStats?.totalStock} name="Total Stocks" className={cardStyle} Icon={TbPackages} iconColor={feedbackVibrant.info} />
-              <Card2 data={productStats?.totalProducts} name="Total Products" className={cardStyle} Icon={TbPackage} iconColor={feedbackVibrant.success} />
-              <Card2 data={productStats?.lowStockProductsCount} name="Low on Stock" className={cardStyle} Icon={TbCaretDownFilled} iconColor={feedbackVibrant.warning} />
-              <Card2 data={productStats?.outOfStockProductsCount || 0} name="Out of Stock" className={cardStyle} Icon={TbPackageOff} iconColor={feedbackVibrant.danger} />
+              <Card2 data={totalStocks && totalStocks.total_quantity} name="Total Stocks" className={cardStyle} Icon={TbPackages} iconColor={feedbackVibrant.info} />
+              <Card2 data={products && products.length} name="Total Products" className={cardStyle} Icon={TbPackage} iconColor={feedbackVibrant.success} />
+              <Card2 data={low && low.low_stock_count} name="Low on Stock" className={cardStyle} Icon={TbCaretDownFilled} iconColor={feedbackVibrant.warning} />
+              <Card2 data={out && out.out_of_stock_count} name="Out of Stock" className={cardStyle} Icon={TbPackageOff} iconColor={feedbackVibrant.danger} />
             </div>
 
             <div className='flex sm:flex-row flex-col md:flex-row w-full gap-4 mb-4'>
