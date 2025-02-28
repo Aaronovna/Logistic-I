@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\InventoryController;
 
+use App\Http\Controllers\InventoryTrailController;
+
 /* Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum'); */
@@ -22,3 +24,10 @@ Route::get('/v1/inventory/low/stock/{limit?}', [InventoryController::class, 'low
 Route::get('/v1/inventory/out/count', [InventoryController::class, 'outOfStockProductsCount']);
 Route::get('/v1/inventory/low/count', [InventoryController::class, 'lowStockProductsCount']);
 Route::get('/v1/inventory/total/value', [InventoryController::class, 'totalStockValue']);
+
+Route::get('/v1/average/inventory/{productId}/{days}', [InventoryTrailController::class, 'averageInventory']);
+Route::get('/v1/beginning/inventory/{productId}/{days}', [InventoryTrailController::class, 'getBeginningInventory']);
+Route::get('/v1/purchases/{productId}/{days}', [InventoryTrailController::class, 'getPurchases']);
+Route::get('/v1/ending/inventory/{productId}', [InventoryTrailController::class, 'getEndingInventory']);
+Route::get('/v1/cogs/{productId}/{days}', [InventoryTrailController::class, 'calculateCOGS']);
+Route::get('/v1/inventory/turnover/{productId}/{days}', [InventoryTrailController::class, 'inventoryTurnover']);

@@ -114,7 +114,7 @@ Route::middleware(["auth", "verified", "throttle:60,1"])->group(function () {
     Route::delete('/inventory/delete/{id}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
     Route::get('/inventory/get/warehouse/group', [InventoryController::class, 'indexGrouped'])->name('inventory.indexGrouped');
     Route::get('/inventory/get/warehouse/{id}', [InventoryController::class, 'indexByWarehouse'])->name('inventory.indexByWarehouse');
-    Route::patch('/inventory/stock/update/{id}', [InventoryController::class, 'updateStock'])->name('inventory.updateStock');
+    Route::patch('/inventory/stock/update/{id}', [InventoryController::class, 'updateInDispatch'])->name('inventory.updateInDispatch');
     Route::post('/inventory/create/bulk', [InventoryController::class, 'storeBulk'])->name('inventory.storeBulk');
 
     Route::get('/receipt/get', [ReceiptController::class, 'index'])->name('receipt.index');

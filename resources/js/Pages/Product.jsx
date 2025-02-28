@@ -216,6 +216,7 @@ const Product = ({ auth }) => {
       demands = generateDemandData(30, 1, 100);
     }
     getPrediction(data.id, demands, setPrediction);
+    getProductTurnoverRate(data.id);
   }
 
   const [openEditProductModal, setOpenEditProductModal] = useState(false);
@@ -273,6 +274,17 @@ const Product = ({ auth }) => {
       prompt(promptBuilder('Product', selectedProduct, product_intruction), setResponse);
     }
     setViewReport(true);
+  }
+
+  const [prodTurnoverRate, setProdTurnoverRate] = useState('');
+
+  const getProductTurnoverRate = async (id) => {
+    try {
+      const response = await axios.get(`/api/v1/inventory/turnover/${id}/90`);
+      setProdTurnoverRate(response.data);
+    } catch (error) {
+      toast.error(`${error.status} ${error.response.data.message}`);
+    }
   }
   return (
     <AuthenticatedLayout
@@ -452,7 +464,17 @@ const Product = ({ auth }) => {
                       <span className='font-semibold'><span className='font-medium text-base text-gray-300 mr-2'>Restock Point</span>{selectedProduct?.restock_point}</span>
                     </p>
 
-                    <p className='font-semibold text-xl mt-2 flex'><span className='font-medium text-base text-gray-300'>Safe Stock Level</span><TbSparkles className='mr-2 text-orange-300' /> {prediction}</p>
+                    <p className='font-semibold text-xl mt-2 flex'>
+                      <span className='font-medium text-base text-gray-300'>Safe Stock Level</span>
+                      <TbSparkles className='mr-2 text-orange-300' />
+                      {prediction}
+                    </p>
+                    <p className='font-semibold text-lg mt-2 flex items-baseline'>
+                      <span className='font-medium text-base text-gray-300 mr-2'>Turnover Rate</span>
+                      {prodTurnoverRate.turnover_category}
+                    </p>
+                    
+                    
                     <button className='border-card w-full mt-auto flex justify-center'
                       onClick={generateReport}
                     > Generate Report <TbSparkles size={20} className='ml-2 text-orange-300' /> </button>

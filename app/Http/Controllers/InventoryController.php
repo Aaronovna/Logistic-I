@@ -6,6 +6,7 @@ use App\Models\Inventory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Product;
+use App\Http\Controllers\InventoryTrailController;
 
 class InventoryController extends Controller
 {
@@ -82,7 +83,6 @@ class InventoryController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate the incoming request data
         $validatedData = $request->validate([
             'quantity' => 'required|integer|min:0',
             'product_id' => 'required|exists:products,id',
@@ -90,40 +90,33 @@ class InventoryController extends Controller
         ]);
 
         DB::transaction(function () use ($validatedData) {
-            // Check if the product and warehouse combination already exists in inventories
             $inventory = Inventory::where('product_id', $validatedData['product_id'])
                 ->where('warehouse_id', $validatedData['warehouse_id'])
                 ->first();
 
             if ($inventory) {
-                // Add the new quantity to the existing inventory
                 $newQuantity = $inventory->quantity + $validatedData['quantity'];
                 $inventory->update(['quantity' => $newQuantity]);
 
-                // Log the addition action in inventory_trails
-                DB::table('inventory_trails')->insert([
-                    'user_id' => auth('web')->id(),
-                    'product_id' => $validatedData['product_id'],
-                    'quantity' => $validatedData['quantity'],
-                    'operation' => 'add',
-                    'log' => auth('web')->user()->name . " added {$validatedData['quantity']} units to inventory for product_id: {$validatedData['product_id']} in warehouse_id: {$validatedData['warehouse_id']}. Total is now: $newQuantity",
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                // Log addition in inventory_trails using TrailController
+                app(InventoryTrailController::class)->storeTrail(
+                    auth('web')->id(),
+                    $validatedData['product_id'],
+                    $validatedData['quantity'],
+                    'add',
+                    auth('web')->user()->name . " added {$validatedData['quantity']} units to inventory for product_id: {$validatedData['product_id']} in warehouse_id: {$validatedData['warehouse_id']}. Total is now: $newQuantity"
+                );
             } else {
-                // Create a new inventory record
-                $inventory = Inventory::create($validatedData);
+                Inventory::create($validatedData);
 
-                // Log the creation action in inventory_trails
-                DB::table('inventory_trails')->insert([
-                    'user_id' => auth('web')->id(),
-                    'product_id' => $validatedData['product_id'],
-                    'quantity' => $validatedData['quantity'],
-                    'operation' => 'add',
-                    'log' => auth('web')->user()->name . " created new inventory for product_id: {$validatedData['product_id']} in warehouse_id: {$validatedData['warehouse_id']} with {$validatedData['quantity']} units",
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                // Log creation in inventory_trails using TrailController
+                app(InventoryTrailController::class)->storeTrail(
+                    auth('web')->id(),
+                    $validatedData['product_id'],
+                    $validatedData['quantity'],
+                    'add',
+                    auth('web')->user()->name . " created new inventory for product_id: {$validatedData['product_id']} in warehouse_id: {$validatedData['warehouse_id']} with {$validatedData['quantity']} units"
+                );
             }
         });
 
@@ -159,92 +152,74 @@ class InventoryController extends Controller
         return response()->json(['data' => $productData], 200);
     }
 
-
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         $validatedData = $request->validate([
             'quantity' => 'required|integer|min:0',
             'warehouse_id' => 'required|exists:infrastructures,id',
-            'operation' => 'required|string|in:add,subtract', // Ensure operation is either 'add' or 'subtract'
+            'operation' => 'required|string|in:add,subtract',
         ]);
 
         DB::transaction(function () use ($validatedData, $id) {
-            // Find the inventory record or fail
             $inventory = Inventory::findOrFail($id);
 
-            // Ensure the warehouse_id matches
             if ($inventory->warehouse_id != $validatedData['warehouse_id']) {
                 throw new \Exception("The warehouse_id does not match the inventory's associated warehouse.");
             }
 
-            // Calculate the new quantity based on the operation
-            if ($validatedData['operation'] === 'add') {
-                $newQuantity = $inventory->quantity + $validatedData['quantity'];
-            } elseif ($validatedData['operation'] === 'subtract') {
-                $newQuantity = $inventory->quantity - $validatedData['quantity'];
-                if ($newQuantity < 0) {
-                    throw new \Exception("The resulting quantity cannot be less than zero.");
-                }
+            $newQuantity = $validatedData['operation'] === 'add'
+                ? $inventory->quantity + $validatedData['quantity']
+                : $inventory->quantity - $validatedData['quantity'];
+
+            if ($newQuantity < 0) {
+                throw new \Exception("The resulting quantity cannot be less than zero.");
             }
 
-            // Update the inventory quantity
             $inventory->update(['quantity' => $newQuantity]);
 
-            // Log the update action in inventory_trails
-            DB::table('inventory_trails')->insert([
-                'user_id' => auth('web')->id(),
-                'product_id' => $inventory->product_id,
-                'quantity' => $validatedData['quantity'],
-                'operation' => $validatedData['operation'],
-                'log' => auth('web')->user()->name . " {$validatedData['operation']}ed {$validatedData['quantity']} units for product_id: {$inventory->product_id} in warehouse_id: {$inventory->warehouse_id}. New quantity: {$newQuantity}",
-                'update' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            // Log the update in inventory_trails using TrailController
+            app(InventoryTrailController::class)->storeTrail(
+                auth('web')->id(),
+                $inventory->product_id,
+                $validatedData['quantity'],
+                $validatedData['operation'],
+                auth('web')->user()->name . " {$validatedData['operation']}ed {$validatedData['quantity']} units for product_id: {$inventory->product_id} in warehouse_id: {$inventory->warehouse_id}. New quantity: {$newQuantity}",
+                true
+            );
         });
 
         return response()->json(['message' => 'Inventory updated successfully']);
     }
 
-    public function updateStock(Request $request, string $id)
+    public function updateInDispatch(Request $request, string $id)
     {
         $validatedData = $request->validate([
             'quantity' => 'required|integer|min:0',
-            'operation' => 'required|string|in:add,subtract', // Ensure operation is either 'add' or 'subtract'
+            'operation' => 'required|string|in:add,subtract',
         ]);
 
         DB::transaction(function () use ($validatedData, $id) {
-            // Find the inventory record by product_id
             $inventory = Inventory::where('product_id', $id)->firstOrFail();
 
-            // Calculate the new quantity based on the operation
-            if ($validatedData['operation'] === 'add') {
-                $newQuantity = $inventory->quantity + $validatedData['quantity'];
-            } elseif ($validatedData['operation'] === 'subtract') {
-                $newQuantity = $inventory->quantity - $validatedData['quantity'];
-                if ($newQuantity < 0) {
-                    throw new \Exception("Not enough stock available for product ID: {$id}");
-                }
+            $newQuantity = $validatedData['operation'] === 'add'
+                ? $inventory->quantity + $validatedData['quantity']
+                : $inventory->quantity - $validatedData['quantity'];
+
+            if ($newQuantity < 0) {
+                throw new \Exception("Not enough stock available for product ID: {$id}");
             }
 
-            // Update the inventory quantity
             $inventory->update(['quantity' => $newQuantity]);
 
-            // Log the update action in inventory_trails
-            DB::table('inventory_trails')->insert([
-                'user_id' => auth('web')->id(),
-                'product_id' => $id,
-                'quantity' => $validatedData['quantity'],
-                'operation' => $validatedData['operation'],
-                'log' => auth('web')->user()->name . " {$validatedData['operation']}ed {$validatedData['quantity']} units for product_id: {$id}. New stock: {$newQuantity}",
-                'update' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            // Log the update in inventory_trails using TrailController
+            app(InventoryTrailController::class)->storeTrail(
+                auth('web')->id(),
+                $id,
+                $validatedData['quantity'],
+                $validatedData['operation'],
+                auth('web')->user()->name . " {$validatedData['operation']}ed {$validatedData['quantity']} units for product_id: {$id}. New stock: {$newQuantity}",
+                true
+            );
         });
 
         return response()->json(['message' => 'Stock updated successfully'], 200);
@@ -269,6 +244,7 @@ class InventoryController extends Controller
     /**
      * Store multiple products in the inventory.
      */
+
     public function storeBulk(Request $request)
     {
         $validated = $request->validate([
@@ -279,7 +255,7 @@ class InventoryController extends Controller
         ]);
 
         try {
-            DB::beginTransaction(); // Start a transaction
+            DB::beginTransaction(); // Start transaction
 
             $warehouseId = $validated['warehouse_id'];
             $products = $validated['products'];
@@ -291,10 +267,18 @@ class InventoryController extends Controller
                 // If the product doesn't exist, create it
                 if (!$product) {
                     $product = Product::create([
-                        'name' => $productData['name'] ?? 'Unnamed Product', // Adjust based on your Product model
+                        'name' => $productData['name'] ?? 'Unnamed Product',
                         'description' => $productData['description'] ?? '',
                     ]);
                 }
+
+                // Retrieve previous quantity
+                $inventory = Inventory::where('product_id', $product->id)
+                    ->where('warehouse_id', $warehouseId)
+                    ->first();
+
+                $previousQuantity = $inventory ? $inventory->quantity : 0;
+                $newQuantity = $previousQuantity + $productData['quantity'];
 
                 // Create or update inventory record
                 Inventory::updateOrCreate(
@@ -303,19 +287,29 @@ class InventoryController extends Controller
                         'warehouse_id' => $warehouseId,
                     ],
                     [
-                        'quantity' => DB::raw("quantity + {$productData['quantity']}"),
+                        'quantity' => $newQuantity,
                     ]
+                );
+
+                // Log inventory addition in `inventory_trails` using TrailController
+                app(InventoryTrailController::class)->storeTrail(
+                    auth('web')->id(),
+                    $product->id,
+                    $productData['quantity'],
+                    'add',
+                    auth('web')->user()->name . " added {$productData['quantity']} units to product_id: {$product->id} in warehouse_id: {$warehouseId}. New quantity: {$newQuantity}"
                 );
             }
 
-            DB::commit(); // Commit the transaction
+            DB::commit(); // Commit transaction
 
             return response()->json(['message' => 'Products successfully added to inventory'], 200);
         } catch (\Exception $e) {
-            DB::rollBack(); // Roll back the transaction on error
+            DB::rollBack(); // Rollback transaction on error
             return response()->json(['message' => 'An error occurred', 'details' => $e->getMessage()], 500);
         }
     }
+
 
     public function totalStock()
     {
