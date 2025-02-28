@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useStateContext } from '@/context/contextProvider';
-import { auditTaskStatus, getStatusStep } from '@/Constants/status';
+import { auditTaskStatus, getStatusStep, receiptStatus } from '@/Constants/status';
 import useUpdateStatus from '@/api/useUpdateStatus';
 
 import ReceiptCard from '@/Components/cards/ReceiptCard';
 import { UpcomingShipmentCard } from '@/Components/cards/ReceiptCard';
 import { gradients } from "@/Constants/themes";
 
-import { TbSearch } from "react-icons/tb";
-import toast from 'react-hot-toast';
+import { filterArray } from '@/functions/filterArray';
 import { TbUserFilled } from 'react-icons/tb';
 import { TbHash } from 'react-icons/tb';
 import { dateTimeFormatLong } from '@/Constants/options';
@@ -32,6 +31,7 @@ const Receipt = ({ auth }) => {
   const [openUpcomingShipmentModal, setOpenUpcomingShipmentModal] = useState(false);
 
   const [receivedShipment, setReceivedShipment] = useState();
+  const [filteredReceivedShipments, setFilteredReceivedShipments] = useState([]);
   const fetchReceivedShipment = async () => {
     try {
       const response = await axios.get('/receipt/get');
@@ -159,6 +159,21 @@ const Receipt = ({ auth }) => {
     }
   }
 
+  const [activeFilter, setActiveFilter] = useState('No Filter');
+    const filterShipments = (status) => {
+      if (status === 'No Filter') {
+        setFilteredReceivedShipments(receivedShipment);
+      } else {
+        const filteredShipments = filterArray(receivedShipment, 'status', [status]);
+        setFilteredReceivedShipments(filteredShipments);
+      }
+      setActiveFilter(status);
+    };
+  
+    useEffect(() => {
+      filterShipments(activeFilter);
+    }, [receivedShipment]);
+
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -174,12 +189,12 @@ const Receipt = ({ auth }) => {
             >
               <div className='md:block hidden absolute log w-44 scale-150 top-1 right-10 h-full bg-no-repeat'></div>
               <div className='absolute w-full h-full top-0 left-0 hover-r-grd duration-150 hover:opacity-100 opacity-0 flex'>
-                <p className='font-medium text-2xl text-white tracking-wide z-10 ml-auto mt-auto p-2 bg-black/50 rounded-tl-lg'>View Details</p>
+                <p className='font-medium text-xl text-white tracking-wide z-10 ml-auto mt-auto p-2 bg-black/50 rounded-tl-lg'>View Upcoming Shipments</p>
               </div>
 
               <div className='flex flex-col'>
                 <p className='font-semibold text-3xl text-white tracking-wider'>
-                  {`${OFD.length === 0 ? `No Upcoming Shipment` : `Upcoming Shipment`}`}
+                  {`${OFD.length === 0 ? `No Upcoming Shipments` : `Upcoming Shipments`}`}
                   <sup className='text-lg font-semibold'>{`${OFD.length <= 1 ? `` : ` +${OFD.length - 1}`}`}</sup>
                 </p>
                 {OFD.length === 0
@@ -189,28 +204,33 @@ const Receipt = ({ auth }) => {
               </div>
             </div>
 
-            <div className='mt-8 flex'>
-              <p className='font-medium text-3xl' style={{ color: theme.text }}>Shipments</p>
-              <Link
-                className='ml-auto p-2 font-medium border-card'
-                style={{ background: theme.accent, borderColor: theme.border, color: theme.background }}
-                href={route('receipt-history')}
-              >
-                View History
-              </Link>
-            </div>
-
             <div className='mt-4'>
-              <div className='w-full h-10 z-10 flex items-center mb-4' style={{ borderColor: theme.text }}>
-                <span className='absolute'>
-                  <TbSearch size={24} color={theme.text} />
-                </span>
-                <input type="text" name="search_received" id="search_received" placeholder='Search ...'
-                  className='pl-8 bg-transparent border-none tracking-wide w-full' style={{ color: theme.text }}
-                />
+              <div className='flex flex-col w-full justify-between mt-8'>
+                <div className='flex gap-2 mb-4'>
+                  {receiptStatus.map((status, index) => {
+                    return (
+                      <span key={index} className={`cursor-pointer shadow-sm ${activeFilter === status.name ? 'scale-110 mx-1 shadow-xl' : null}`}>
+                        <Status statusArray={receiptStatus} status={status.name} onClick={() => filterShipments(status.name)} />
+                      </span>
+                    )
+                  })}
+                  <span>
+                    <span onClick={() => filterShipments('No Filter')}
+                      className={`leading-normal whitespace-nowrap p-1 px-3 rounded-lg w-fit h-fit bg-gray-100 text-gray-600 cursor-pointer shadow-sm ${activeFilter === 'No Filter' ? 'scale-x-150 mx-1 shadow-xl' : null}`}>
+                      No Filter
+                    </span>
+                  </span>
+                </div>
+
+                <div className='w-full flex mb-2 mt-2 items-end'>
+                  <div className='flex items-baseline ml-2'>
+                    <p className='font-semibold text-2xl'>Shipments</p>
+                    <Link className='ml-2 text-sm hover:underline text-gray-600' href={route('receipt-history')}>History</Link>
+                  </div>
+                </div>
               </div>
               <div className='grid md:grid-cols-2 grid-cols-1 gap-2 overflow-y-scroll pr-2'>
-                {receivedShipment?.map((data, index) => {
+                {filteredReceivedShipments?.map((data, index) => {
                   return (
                     <ReceiptCard data={data} key={index} onClick={() => handleShipmentClick(data)} />
                   )
@@ -293,7 +313,7 @@ const Receipt = ({ auth }) => {
                 {
                   !ordersDummyData?.length ?
                     <div className='w-full h-full flex justify-center items-center'>
-                      <p className='text-3xl font-medium'>No upcoming shipments</p>
+                      <p className='text-2xl font-medium text-gray-400'>No upcoming shipments</p>
                     </div>
                     :
                     <div className='h-full overflow-y-auto pr-1'>
