@@ -6,7 +6,7 @@ import Modal from '@/Components/Modal';
 import useRole from '@/hooks/useRole';
 
 const AuthenticatedLayout = ({ user, children }) => {
-  const { theme } = useStateContext();
+  const { theme, themePreference } = useStateContext();
   const { hasAccess } = useRole();
 
   const [openDev, setOpenDev] = useState(false);
@@ -16,7 +16,7 @@ const AuthenticatedLayout = ({ user, children }) => {
   };
 
   return (
-    <div style={{ background: theme.background }}>
+    <div className={`${themePreference === 'dark' ? 'dark' : null} bg-background`}>
       <Toaster
         position="top-right"
         reverseOrder={false}

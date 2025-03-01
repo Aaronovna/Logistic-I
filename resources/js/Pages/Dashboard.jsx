@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useStateContext } from '@/context/contextProvider';
 
 import Chart from '@/Components/Chart';
 import useRole from '@/hooks/useRole';
@@ -102,8 +101,6 @@ export default function Dashboard({ auth }) {
     }
   }
 
-  const { theme } = useStateContext();
-
   useEffect(() => {
     fetchStats();
     fetchCategories();
@@ -140,29 +137,27 @@ export default function Dashboard({ auth }) {
 
       <Layout user={auth.user} header={<NavHeader headerName="Dashboard" />}>
         {!hasAccess(auth.user.type, [2050, 2051, 2052]) ? <Unauthorized /> :
-          <div className="content bg-gray-200 border-card rounded-3xl p-4">
+          <div className="content">
             <div className='flex gap-4'>
-              <Chart data={productEachCategory} series={pieSeries} legendPosition='right' title='Product Stock' className='w-1/2 border-card rounded-3xl bg-white' />
-              <Chart data={productEachSupplier && getTop(8, productEachSupplier)} series={barSeries} legendPosition='right' title='Supplier Distribution' className='w-1/2 border-card rounded-3xl bg-white' />
+              <Chart data={productEachCategory} series={pieSeries} legendPosition='right' title='Product Stock' className='w-1/2 border rounded-3xl bg-background' />
+              <Chart data={productEachSupplier && getTop(8, productEachSupplier)} series={barSeries} legendPosition='right' title='Supplier Distribution' className='w-1/2 border rounded-3xl bg-background' />
             </div>
 
-            <div className='mt-4 flex gap-4 h-80 bg-white rounded-3xl'>
-              <Chart data={stockCountPerPeriod && stockCountPerPeriod} series={lineSeries} title='Stock Levels' className='w-full' />
-            </div>
+            <Chart data={stockCountPerPeriod && stockCountPerPeriod} series={lineSeries} title='Stock Levels' className=' mt-4 w-full border rounded-3xl bg-background' />
 
             <div className='flex gap-2 h-80 mt-4'>
               <div className='w-2/3 flex flex-col gap-2 '>
                 <div className='flex'>
-                  <div className='border-card w-full bg-white rounded-3xl p-4 select-none cursor-pointer' onClick={() => setProductExpSwitch(!productExpSwitch)}>
+                  <div className='w-full border rounded-3xl bg-background text-text p-4 select-none cursor-pointer' onClick={() => setProductExpSwitch(!productExpSwitch)}>
                     {productExpSwitch ?
                       <>
                         <p className='font-bold tracking-widest text-3xl'>Most Expensive Products</p>
                         <div className='flex mt-4'>
-                          <div className='w-1/2 hover:bg-gray-100 rounded-3xl p-2'>
+                          <div className='w-1/2 hover:bg-hbg rounded-3xl p-2'>
                             <p className='text-5xl quicksand truncate'>{mostExp && mostExp[0]?.name}</p>
                             <p className='text-3xl tracking-widest quicksand ml-auto w-fit'>{mostExp && mostExp[0]?.price}</p>
                           </div>
-                          <div className='w-1/2 hover:bg-gray-100 rounded-3xl p-2'>
+                          <div className='w-1/2 hover:bg-hbg rounded-3xl p-2'>
                             <p className='text-5xl quicksand truncate'>{mostExp && mostExp[1]?.name}</p>
                             <p className='text-3xl tracking-widest quicksand ml-auto w-fit'>{mostExp && mostExp[1]?.price}</p>
                           </div>
@@ -171,11 +166,11 @@ export default function Dashboard({ auth }) {
                       <>
                         <p className='font-bold tracking-widest text-3xl'>Least Expensive Products</p>
                         <div className='flex mt-4'>
-                          <div className='w-1/2 hover:bg-gray-100 rounded-3xl p-2'>
+                          <div className='w-1/2 hover:bg-hbg rounded-3xl p-2'>
                             <p className='text-5xl quicksand truncate'>{leastExp && leastExp[0]?.name}</p>
                             <p className='text-3xl tracking-widest quicksand ml-auto w-fit'>{leastExp && leastExp[0]?.price}</p>
                           </div>
-                          <div className='w-1/2 hover:bg-gray-100 rounded-3xl p-2'>
+                          <div className='w-1/2 hover:bg-hbg rounded-3xl p-2'>
                             <p className='text-5xl quicksand truncate'>{leastExp && leastExp[1]?.name}</p>
                             <p className='text-3xl tracking-widest quicksand ml-auto w-fit'>{leastExp && leastExp[1]?.price}</p>
                           </div>
@@ -185,13 +180,13 @@ export default function Dashboard({ auth }) {
                   </div>
                 </div>
 
-                <div className='border-card bg-white rounded-3xl flex-1 p-4'>
+                <div className='border rounded-3xl bg-background text-text flex-1 p-4'>
                   <p className='font-bold tracking-widest text-3xl'>Total Asset Value</p>
                   <p className='text-4xl tracking-widest quicksand ml-auto w-fit mt-4'>{assetValue && formatValue(assetValue.total_stock_value)}</p>
                 </div>
               </div>
 
-              <div className='border-card rounded-3xl w-1/3 bg-white'>
+              <div className='border rounded-3xl bg-background text-text w-1/3'>
                 <p className='text-center my-2 '>Out of Stock</p>
                 <div className='overflow-y-auto h-64'>
                   {
@@ -202,9 +197,9 @@ export default function Dashboard({ auth }) {
                             alt={product.name} className='w-16 h-16 rounded-full border p-1'
                           />
                           <div className='ml-4 text-sm'>
-                            <p className='font-medium text-base truncate'>{product.name} <span className='text-gray-600 text-xs'>{product.model}</span></p>
-                            <p className='text-gray-600'>Restock Point <span className='text-black font-semibold'>{product.restock_point}</span></p>
-                            <p className='text-gray-600'>Price <span className='text-black font-semibold'>{product.price}</span></p>
+                            <p className='font-medium text-base truncate'>{product.name} <span className='text-gray-500 text-xs'>{product.model}</span></p>
+                            <p className='text-gray-500'>Restock Point <span className='text-text font-semibold'>{product.restock_point}</span></p>
+                            <p className='text-gray-500'>Price <span className='text-text font-semibold'>{product.price}</span></p>
                           </div>
                         </div>
                       )
@@ -215,7 +210,7 @@ export default function Dashboard({ auth }) {
             </div>
 
             <div className='flex gap-2 h-80 mt-4'>
-              <div className='border-card rounded-3xl w-1/3 bg-white'>
+              <div className='border rounded-3xl bg-background text-text w-1/3'>
                 <p className='text-center my-2 '>Low on Stock</p>
                 <div className='overflow-y-auto h-64'>
                   {
@@ -226,9 +221,9 @@ export default function Dashboard({ auth }) {
                             alt={product.name} className='w-16 h-16 rounded-full border p-1'
                           />
                           <div className='ml-4 text-sm'>
-                            <p className='font-medium text-base truncate'>{product.name} <span className='text-gray-600 text-xs'>{product.model}</span></p>
-                            <p className='text-gray-600'>Restock Point <span className='text-black font-semibold'>{product.restock_point}</span></p>
-                            <p className='text-gray-600'>Price <span className='text-black font-semibold'>{product.price}</span></p>
+                            <p className='font-medium text-base truncate'>{product.name} <span className='text-gray-500 text-xs'>{product.model}</span></p>
+                            <p className='text-gray-500'>Restock Point <span className='text-text font-semibold'>{product.restock_point}</span></p>
+                            <p className='text-gray-500'>Price <span className='text-text font-semibold'>{product.price}</span></p>
                           </div>
                         </div>
                       )
@@ -285,6 +280,6 @@ function generateLineSeries(categories, period) {
     yName: category.name, // Display name for the chart legend
     interpolation: {
       type: 'smooth'
-  },
+    },
   }));
 }
