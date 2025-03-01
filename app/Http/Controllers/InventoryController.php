@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Product;
 use App\Http\Controllers\InventoryTrailController;
+use Carbon\Carbon;
 
 class InventoryController extends Controller
 {
@@ -332,6 +333,7 @@ class InventoryController extends Controller
             $products->push([
                 'product_id' => $inventory->product_id,
                 'name' => optional($inventory->product)->name ?? 'N/A',
+                'model' => optional($inventory->product)->model ?? 'N/A',
                 'price' => optional($inventory->product)->price ?? 0,
                 'restock_point' => optional($inventory->product)->restock_point ?? 0,
             ]);
@@ -346,6 +348,8 @@ class InventoryController extends Controller
             $products->push([
                 'product_id' => $product->id,
                 'name' => $product->name ?? 'N/A',
+                'model' => $product->model,
+                'image_url' => $product->image_url,
                 'price' => $product->price ?? 0,
                 'restock_point' => $product->restock_point ?? 0,
             ]);
@@ -389,6 +393,8 @@ class InventoryController extends Controller
             return [
                 'product_id' => $inventory->product_id,
                 'name' => $inventory->product->name ?? 'N/A',
+                'model' => $inventory->product->model,
+                'image_url' => $inventory->product->image_url,
                 'price' => $inventory->product->price ?? 0,
                 'restock_point' => $inventory->product->restock_point ?? 0,
                 'quantity' => $inventory->quantity,
@@ -418,5 +424,72 @@ class InventoryController extends Controller
             });
 
         return response()->json(['data' => ['total_stock_value' => $totalValue]], 200);
+    }
+
+    public function getStockDataByPeriod($period)
+    {
+        switch ($period) {
+            case 'year':
+                $dateFormat = 'DATE_FORMAT(inventories.created_at, "%Y-%m")';
+                $labelKey = 'month';
+                $range = range(1, 12); // 12 months in a year
+                $formatFunction = function ($i) {
+                    return date("Y") . '-' . str_pad($i, 2, '0', STR_PAD_LEFT);
+                };
+                break;
+            case 'quarter':
+                $dateFormat = 'CONCAT(YEAR(inventories.created_at), "-Q", QUARTER(inventories.created_at))';
+                $labelKey = 'quarter';
+                $range = range(1, 4); // 4 quarters
+                $formatFunction = function ($i) {
+                    return date("Y") . "-Q$i";
+                };
+                break;
+            case 'month':
+            default:
+                $dateFormat = 'DATE(inventories.created_at)';
+                $labelKey = 'day';
+                $range = range(1, 30); // 30 days in a month
+                $formatFunction = function ($i) {
+                    return date("Y-m") . '-' . str_pad($i, 2, '0', STR_PAD_LEFT);
+                };
+                break;
+        }
+
+        // Fetch stock grouped by period & category
+        $inventory = Inventory::join('products', 'inventories.product_id', '=', 'products.id')
+            ->join('categories', 'products.category_id', '=', 'categories.id')
+            ->select(
+                DB::raw("$dateFormat as period"),
+                'categories.name as category',
+                DB::raw('COALESCE(SUM(inventories.quantity), 0) as total_stock') // Ensure NULLs become 0
+            )
+            ->groupBy('period', 'categories.name')
+            ->orderBy('period', 'asc')
+            ->get();
+
+        // Initialize structured data with empty values
+        $formattedData = [];
+        foreach ($range as $i) {
+            $formattedData[] = [
+                $labelKey => $formatFunction($i),
+            ];
+        }
+
+        // Map inventory data into the structured array
+        foreach ($inventory as $item) {
+            $periodValue = $item->period;
+            $category = $item->category;
+            $totalStock = (int) $item->total_stock;
+
+            // Find the correct index in structured data
+            $index = array_search($periodValue, array_column($formattedData, $labelKey));
+
+            if ($index !== false) {
+                $formattedData[$index][$category] = $totalStock;
+            }
+        }
+
+        return response()->json(['data' => $formattedData], 200);
     }
 }

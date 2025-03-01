@@ -31,3 +31,4 @@ Route::get('/v1/purchases/{productId}/{days}', [InventoryTrailController::class,
 Route::get('/v1/ending/inventory/{productId}', [InventoryTrailController::class, 'getEndingInventory']);
 Route::get('/v1/cogs/{productId}/{days}', [InventoryTrailController::class, 'calculateCOGS']);
 Route::get('/v1/inventory/turnover/{productId}/{days}', [InventoryTrailController::class, 'inventoryTurnover']);
+Route::get('/v1/inventory/stock/{period}', [InventoryController::class, 'getStockDataByPeriod'])->where('period', 'month|quarter|year');

@@ -2,91 +2,135 @@ import { useState, useEffect } from 'react';
 import { useStateContext } from '@/context/contextProvider';
 
 import Chart from '@/Components/Chart';
-import { generateRandomNumber } from '@/functions/numberGenerator';
 import useRole from '@/hooks/useRole';
 
-function getTop5(data) {
+function getTop(count = 5, data) {
   return data
     .sort((a, b) => b.total - a.total)
-    .slice(0, 5);
+    .slice(0, count);
 }
 
 export default function Dashboard({ auth }) {
   const { hasAccess, getLayout } = useRole();
   const Layout = getLayout(auth.user.type);
 
-  const { theme } = useStateContext();
-  const [productStats, setProductStats] = useState({});
+  const [productEachCategory, setProductEachCategory] = useState();
+  const [productEachSupplier, setProductEachSupplier] = useState();
+  const [lowProducts, setLowProducts] = useState();
+  const [outProducts, setOutProducts] = useState();
 
-  const fetchProductStats = async () => {
+  const [leastExp, setLeastExp] = useState();
+  const [mostExp, setMostExp] = useState();
+  const [assetValue, setAssetValue] = useState();
+
+  const [recentProducts, setRecentProducts] = useState();
+
+  const [stockCountPerPeriod, setStockCountPerPeriod] = useState();
+
+  const fetchStats = async () => {
     try {
-      const response = await axios.get('/product/stats');
-      setProductStats(response.data);
+      const response = await axios.get('/api/v1/products/category');
+      setProductEachCategory(response.data.data);
     } catch (error) {
-      toast.error('product stat error', error);
+      toast.error(`${error.status} ${error.response.data.message}`);
     }
-  };
+
+    try {
+      const response = await axios.get('/api/v1/products/supplier');
+      setProductEachSupplier(response.data.data);
+    } catch (error) {
+      toast.error(`${error.status} ${error.response.data.message}`);
+    }
+
+    try {
+      const response = await axios.get('/api/v1/inventory/low/stock/5');
+      setLowProducts(response.data.data);
+    } catch (error) {
+    }
+
+    try {
+      const response = await axios.get('/api/v1/inventory/out/stock/5');
+      setOutProducts(response.data.data);
+    } catch (error) {
+    }
+
+    try {
+      const response = await axios.get('/api/v1/products/most/2');
+      setMostExp(response.data.data);
+    } catch (error) {
+      toast.error(`${error.status} ${error.response.data.message}`);
+    }
+
+    try {
+      const response = await axios.get('/api/v1/products/least/2');
+      setLeastExp(response.data.data);
+    } catch (error) {
+      toast.error(`${error.status} ${error.response.data.message}`);
+    }
+
+    try {
+      const response = await axios.get('/api/v1/inventory/total/value');
+      setAssetValue(response.data.data);
+    } catch (error) {
+      toast.error(`${error.status} ${error.response.data.message}`);
+    }
+
+
+
+    try {
+      const response = await axios.get('/api/v1/products/recent/2');
+      setRecentProducts(response.data.data);
+    } catch (error) {
+      toast.error(`${error.status} ${error.response.data.message}`);
+    }
+
+    try {
+      const response = await axios.get('/api/v1/inventory/stock/year');
+      setStockCountPerPeriod(response.data.data);
+    } catch (error) {
+      toast.error(`${error.status} ${error.response.data.message}`);
+    }
+  }
+
+  const [categories, setCategories] = useState();
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get('/category/get');
+      setCategories(response.data.data)
+    } catch (error) {
+      toast.error(`${error.status} ${error.response.data.message}`);
+    }
+  }
+
+  const { theme } = useStateContext();
 
   useEffect(() => {
-    fetchProductStats();
+    fetchStats();
+    fetchCategories();
   }, []);
+
+  const [lineSeries, setLineSeries] = useState();
+  useEffect(() => {
+    if (categories) {
+      setLineSeries(generateLineSeries(categories, 'year'));
+    }
+  }, [categories]);
 
   const pieSeries = [{
     type: 'pie',
-    angleKey: 'total',
+    angleKey: 'products.length',
     legendItemKey: 'category_name',
   }];
   const barSeries = [
     {
       type: 'bar',
       xKey: 'supplier_name',
-      yKey: 'total',
+      yKey: 'products.length',
+      yName: 'Products'
     }
   ];
-  const lineSeries = [
-    {
-      type: "line",
-      xKey: "quarter",
-      yKey: "a",
-      yName: "Bus Parts and Components"
-    },
-    {
-      type: "line",
-      xKey: "quarter",
-      yKey: "b",
-      yName: "Maintenance Supplies"
-    },
-    {
-      type: "line",
-      xKey: "quarter",
-      yKey: "c",
-      yName: "Operational Supplies"
-    },
-    {
-      type: "line",
-      xKey: "quarter",
-      yKey: "d",
-      yName: "Bus Accessories"
-    },
-    {
-      type: "line",
-      xKey: "quarter",
-      yKey: "e",
-      yName: "Documentation and Records"
-    },
-    {
-      type: "line",
-      xKey: "quarter",
-      yKey: "f",
-      yName: "Fuel and Fluids"
-    },
-    {
-      type: "line",
-      xKey: "quarter",
-      yKey: "g",
-      yName: "Packaging Materials"
-    },
-  ];
+
+  const [productExpSwitch, setProductExpSwitch] = useState(true);
 
   return (
     <AuthenticatedLayout
@@ -96,56 +140,105 @@ export default function Dashboard({ auth }) {
 
       <Layout user={auth.user} header={<NavHeader headerName="Dashboard" />}>
         {!hasAccess(auth.user.type, [2050, 2051, 2052]) ? <Unauthorized /> :
-          <div className="content">
+          <div className="content bg-gray-200 border-card rounded-3xl p-4">
             <div className='flex gap-4'>
-              <Chart data={productStats?.productsByCategory} series={pieSeries} legendPosition='right' title='Product Stock' className='w-1/2' />
-              <Chart data={productStats?.productsBySupplier && getTop5(productStats?.productsBySupplier)} series={barSeries} legendPosition='right' title='Supplier Distribution' className='w-1/2' />
+              <Chart data={productEachCategory} series={pieSeries} legendPosition='right' title='Product Stock' className='w-1/2 border-card rounded-3xl bg-white' />
+              <Chart data={productEachSupplier && getTop(8, productEachSupplier)} series={barSeries} legendPosition='right' title='Supplier Distribution' className='w-1/2 border-card rounded-3xl bg-white' />
             </div>
 
-            <div className='mt-4 flex gap-4 h-80'>
-              <Chart data={data} series={lineSeries} title='Stock Levels' className='w-full' />
+            <div className='mt-4 flex gap-4 h-80 bg-white rounded-3xl'>
+              <Chart data={stockCountPerPeriod && stockCountPerPeriod} series={lineSeries} title='Stock Levels' className='w-full' />
             </div>
 
-            <div>
-              <div className='flex gap-2'>
-                <div className='border-card shadow-md mt-4 w-1/2' style={{ background: theme.background, borderColor: theme.border }}>
-                  <p className='text-center my-4'>Low on Stock</p>
-                  <div className='overflow-y-auto h-80'>
-                    {
-                      productStats?.lowStockProducts?.map((product, index) => {
-                        return (
-                          <div className='p-1' key={index}>
-                            <div className='mb-2 py-2'>
-                              <p className='font-semibold text-lg'>{`${product.name} ${product.model}`}</p>
-                              <span className='flex justify-between'>
-                                <p>restock point <span className='font-semibold'>{product.restock_point}</span></p>
-                                <p>stock <span className='font-semibold'>{product.stock}</span></p>
-                              </span>
-                            </div>
-                            <hr />
+            <div className='flex gap-2 h-80 mt-4'>
+              <div className='w-2/3 flex flex-col gap-2 '>
+                <div className='flex'>
+                  <div className='border-card w-full bg-white rounded-3xl p-4 select-none cursor-pointer' onClick={() => setProductExpSwitch(!productExpSwitch)}>
+                    {productExpSwitch ?
+                      <>
+                        <p className='font-bold tracking-widest text-3xl'>Most Expensive Products</p>
+                        <div className='flex mt-4'>
+                          <div className='w-1/2 hover:bg-gray-100 rounded-3xl p-2'>
+                            <p className='text-5xl quicksand truncate'>{mostExp && mostExp[0]?.name}</p>
+                            <p className='text-3xl tracking-widest quicksand ml-auto w-fit'>{mostExp && mostExp[0]?.price}</p>
                           </div>
-                        )
-                      })
+                          <div className='w-1/2 hover:bg-gray-100 rounded-3xl p-2'>
+                            <p className='text-5xl quicksand truncate'>{mostExp && mostExp[1]?.name}</p>
+                            <p className='text-3xl tracking-widest quicksand ml-auto w-fit'>{mostExp && mostExp[1]?.price}</p>
+                          </div>
+                        </div>
+                      </> :
+                      <>
+                        <p className='font-bold tracking-widest text-3xl'>Least Expensive Products</p>
+                        <div className='flex mt-4'>
+                          <div className='w-1/2 hover:bg-gray-100 rounded-3xl p-2'>
+                            <p className='text-5xl quicksand truncate'>{leastExp && leastExp[0]?.name}</p>
+                            <p className='text-3xl tracking-widest quicksand ml-auto w-fit'>{leastExp && leastExp[0]?.price}</p>
+                          </div>
+                          <div className='w-1/2 hover:bg-gray-100 rounded-3xl p-2'>
+                            <p className='text-5xl quicksand truncate'>{leastExp && leastExp[1]?.name}</p>
+                            <p className='text-3xl tracking-widest quicksand ml-auto w-fit'>{leastExp && leastExp[1]?.price}</p>
+                          </div>
+                        </div>
+                      </>
                     }
                   </div>
                 </div>
+
+                <div className='border-card bg-white rounded-3xl flex-1 p-4'>
+                  <p className='font-bold tracking-widest text-3xl'>Total Asset Value</p>
+                  <p className='text-4xl tracking-widest quicksand ml-auto w-fit mt-4'>{assetValue && formatValue(assetValue.total_stock_value)}</p>
+                </div>
               </div>
-              <div className='border-card shadow-md w-1/4 h-80' style={{ background: theme.background, borderColor: theme.border }}>
-                <p className='text-center my-2'>Out of Stock</p>
-                <div className='overflow-y-auto h-60'>
+
+              <div className='border-card rounded-3xl w-1/3 bg-white'>
+                <p className='text-center my-2 '>Out of Stock</p>
+                <div className='overflow-y-auto h-64'>
                   {
-                    productStats?.outOfStockProducts?.map((product, index) => {
+                    outProducts && outProducts.map((product, index) => {
                       return (
-                        <div className='p-1' key={index}>
-                          <div className='mb-2 py-2'>
-                            <p className='font-semibold text-lg'>{`${product.name} ${product.model}`}</p>
+                        <div className='p-1 flex hover:bg-gray-100 rounded-full cursor-default select-none' key={index}>
+                          <img src={product.image_url || 'https://psediting.websites.co.in/obaju-turquoise/img/product-placeholder.png'}
+                            alt={product.name} className='w-16 h-16 rounded-full border p-1'
+                          />
+                          <div className='ml-4 text-sm'>
+                            <p className='font-medium text-base truncate'>{product.name} <span className='text-gray-600 text-xs'>{product.model}</span></p>
+                            <p className='text-gray-600'>Restock Point <span className='text-black font-semibold'>{product.restock_point}</span></p>
+                            <p className='text-gray-600'>Price <span className='text-black font-semibold'>{product.price}</span></p>
                           </div>
-                          <hr />
                         </div>
                       )
                     })
                   }
                 </div>
+              </div>
+            </div>
+
+            <div className='flex gap-2 h-80 mt-4'>
+              <div className='border-card rounded-3xl w-1/3 bg-white'>
+                <p className='text-center my-2 '>Low on Stock</p>
+                <div className='overflow-y-auto h-64'>
+                  {
+                    lowProducts && lowProducts.map((product, index) => {
+                      return (
+                        <div className='p-1 flex hover:bg-gray-100 rounded-full cursor-default select-none' key={index}>
+                          <img src={product.image_url || 'https://psediting.websites.co.in/obaju-turquoise/img/product-placeholder.png'}
+                            alt={product.name} className='w-16 h-16 rounded-full border p-1'
+                          />
+                          <div className='ml-4 text-sm'>
+                            <p className='font-medium text-base truncate'>{product.name} <span className='text-gray-600 text-xs'>{product.model}</span></p>
+                            <p className='text-gray-600'>Restock Point <span className='text-black font-semibold'>{product.restock_point}</span></p>
+                            <p className='text-gray-600'>Price <span className='text-black font-semibold'>{product.price}</span></p>
+                          </div>
+                        </div>
+                      )
+                    })
+                  }
+                </div>
+              </div>
+
+              <div className='w-2/3 flex gap-2'>
+
               </div>
             </div>
           </div>
@@ -156,45 +249,42 @@ export default function Dashboard({ auth }) {
   );
 }
 
-const data = [
-  {
-    quarter: "Q1",
-    a: generateRandomNumber(3),
-    b: generateRandomNumber(3),
-    c: generateRandomNumber(3),
-    d: generateRandomNumber(3),
-    e: generateRandomNumber(3),
-    f: generateRandomNumber(3),
-    g: generateRandomNumber(3),
+const formatValue = (value) => {
+  if (value) {
+    const formattedValue = new Intl.NumberFormat('fil-PH', {
+      style: 'currency',
+      currency: 'PHP',
+    }).format(value);
+
+    return formattedValue;
+  }
+
+  return 0;
+}
+
+function generateLineSeries(categories, period) {
+  let xKey;
+
+  switch (period) {
+    case "month":
+      xKey = "day";
+      break;
+    case "quarter":
+      xKey = "quarter";
+      break;
+    case "year":
+    default:
+      xKey = "month";
+      break;
+  }
+
+  return categories.map(category => ({
+    type: "line",
+    xKey: xKey,
+    yKey: category.name, // Match category name from API response
+    yName: category.name, // Display name for the chart legend
+    interpolation: {
+      type: 'smooth'
   },
-  {
-    quarter: "Q2",
-    a: generateRandomNumber(3),
-    b: generateRandomNumber(3),
-    c: generateRandomNumber(3),
-    d: generateRandomNumber(3),
-    e: generateRandomNumber(3),
-    f: generateRandomNumber(3),
-    g: generateRandomNumber(3),
-  },
-  {
-    quarter: "Q3",
-    a: generateRandomNumber(3),
-    b: generateRandomNumber(3),
-    c: generateRandomNumber(3),
-    d: generateRandomNumber(3),
-    e: generateRandomNumber(3),
-    f: generateRandomNumber(3),
-    g: generateRandomNumber(3),
-  },
-  {
-    quarter: "Q4",
-    a: generateRandomNumber(3),
-    b: generateRandomNumber(3),
-    c: generateRandomNumber(3),
-    d: generateRandomNumber(3),
-    e: generateRandomNumber(3),
-    f: generateRandomNumber(3),
-    g: generateRandomNumber(3),
-  },
-];
+  }));
+}
