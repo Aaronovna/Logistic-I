@@ -2,6 +2,7 @@
 
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\PreventBackHistory;
 
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
@@ -19,7 +20,7 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\AuditReportController;
 use App\Http\Controllers\ReturnMaterialController;
 use App\Http\Controllers\ReturnRequestController;
-use App\Http\Middleware\PreventBackHistory;
+use App\Http\Controllers\AuditLogController;
 
 Route::redirect('/', 'login');
 
@@ -188,6 +189,8 @@ Route::middleware(["auth", "verified", "throttle:60,1"])->group(function () {
     Route::get('/file/get/{id}', [FileController::class, 'show']);
     Route::post('file/store', [FileController::class, 'store']);
     Route::delete('/file/delete/{id}', [FileController::class, 'destroy']);
+    
+    Route::get('/audit/get/{model}', [AuditLogController::class, 'show']);
 });
 
 Route::middleware('auth')->group(function () {
