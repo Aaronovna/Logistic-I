@@ -15,5 +15,10 @@ class AuditLog extends Model
         'model',
         'model_id',
         'ip_address',
+        'message',
     ];
+
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
 }

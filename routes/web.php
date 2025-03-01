@@ -70,6 +70,8 @@ Route::middleware(["auth", "verified", PreventBackHistory::class])->group(functi
 
     Route::get('/return', fn() => Inertia::render('Return'))->name('return');
     Route::get('/return/history', fn() => Inertia::render('Return.History'))->name('return-history');
+
+    Route::get('/logs', fn() => Inertia::render('Logs'))->name('logs');
 });
 
 //! END: PAGES ROUTES //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -190,9 +192,9 @@ Route::middleware(["auth", "verified", "throttle:60,1"])->group(function () {
     Route::post('file/store', [FileController::class, 'store']);
     Route::delete('/file/delete/{id}', [FileController::class, 'destroy']);
     
-    Route::get('/audit/get/{model}', [AuditLogController::class, 'show']);
 });
 
+Route::get('/audit/get/{model}', [AuditLogController::class, 'show']);
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -97,6 +97,7 @@ export const infrastructureLinks = [
 import { TbUserCog } from "react-icons/tb";
 import { TbCategory } from "react-icons/tb";
 import { TbPuzzle } from "react-icons/tb";
+import { TbLogs } from "react-icons/tb";
 
 export const managementLinks = [
     {
@@ -107,9 +108,13 @@ export const managementLinks = [
         name: ['infrastructure', 'infrastructure-view'],
         Icon: TbBuildingCog
     },
-    {
+    /* {
         name: 'module',
         Icon: TbPuzzle
+    }, */
+    {
+        name: 'logs',
+        Icon: TbLogs
     },
 ];
 

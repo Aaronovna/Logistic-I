@@ -145,14 +145,14 @@ export default function Dashboard({ auth }) {
 
             <Chart data={stockCountPerPeriod && stockCountPerPeriod} series={lineSeries} title='Stock Levels' className=' mt-4 w-full border rounded-3xl bg-background' />
 
-            <div className='flex gap-2 h-80 mt-4'>
-              <div className='w-2/3 flex flex-col gap-2 '>
-                <div className='flex'>
+            <div className='flex gap-4 h-80 mt-4'>
+              <div className='w-2/3 flex flex-col gap-2'>
+                <div className='flex gap-4'>
                   <div className='w-full border rounded-3xl bg-background text-text p-4 select-none cursor-pointer' onClick={() => setProductExpSwitch(!productExpSwitch)}>
                     {productExpSwitch ?
                       <>
                         <p className='font-bold tracking-widest text-3xl'>Most Expensive Products</p>
-                        <div className='flex mt-4'>
+                        <div className='flex mt-4 gap-2'>
                           <div className='w-1/2 hover:bg-hbg rounded-3xl p-2'>
                             <p className='text-5xl quicksand truncate'>{mostExp && mostExp[0]?.name}</p>
                             <p className='text-3xl tracking-widest quicksand ml-auto w-fit'>{mostExp && mostExp[0]?.price}</p>
@@ -165,7 +165,7 @@ export default function Dashboard({ auth }) {
                       </> :
                       <>
                         <p className='font-bold tracking-widest text-3xl'>Least Expensive Products</p>
-                        <div className='flex mt-4'>
+                        <div className='flex mt-4 gap-2'>
                           <div className='w-1/2 hover:bg-hbg rounded-3xl p-2'>
                             <p className='text-5xl quicksand truncate'>{leastExp && leastExp[0]?.name}</p>
                             <p className='text-3xl tracking-widest quicksand ml-auto w-fit'>{leastExp && leastExp[0]?.price}</p>
