@@ -192,7 +192,7 @@ export default function Dashboard({ auth }) {
                   {
                     outProducts && outProducts.map((product, index) => {
                       return (
-                        <div className='p-1 flex hover:bg-gray-100 rounded-full cursor-default select-none' key={index}>
+                        <div className='p-1 flex hover:bg-hbg rounded-full cursor-default select-none' key={index}>
                           <img src={product.image_url || 'https://psediting.websites.co.in/obaju-turquoise/img/product-placeholder.png'}
                             alt={product.name} className='w-16 h-16 rounded-full border p-1'
                           />
@@ -216,7 +216,7 @@ export default function Dashboard({ auth }) {
                   {
                     lowProducts && lowProducts.map((product, index) => {
                       return (
-                        <div className='p-1 flex hover:bg-gray-100 rounded-full cursor-default select-none' key={index}>
+                        <div className='p-1 flex hover:bg-hbg rounded-full cursor-default select-none' key={index}>
                           <img src={product.image_url || 'https://psediting.websites.co.in/obaju-turquoise/img/product-placeholder.png'}
                             alt={product.name} className='w-16 h-16 rounded-full border p-1'
                           />
