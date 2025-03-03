@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useStateContext } from '@/context/contextProvider';
-import { auditTaskStatus, getStatusStep, receiptStatus } from '@/Constants/status';
+import { auditTaskStatus, getStatusStep } from '@/Constants/status';
 import useUpdateStatus from '@/api/useUpdateStatus';
 
 import ReceiptCard from '@/Components/cards/ReceiptCard';
@@ -21,7 +21,7 @@ const filterOrdersByStatuses = (orders, statuses) => {
 };
 
 const Receipt = ({ auth }) => {
-  const { hasAccess, getLayout } = useRole();
+  const { hasAccess, getLayout, hasPermissions } = useRole();
   const Layout = getLayout(auth.user.type);
 
   const { updateStatus } = useUpdateStatus();
@@ -207,10 +207,10 @@ const Receipt = ({ auth }) => {
             <div className='mt-4'>
               <div className='flex flex-col w-full justify-between mt-8'>
                 <div className='flex gap-2 mb-4'>
-                  {receiptStatus.map((status, index) => {
+                  {shipmentStatus.map((status, index) => {
                     return (
                       <span key={index} className={`cursor-pointer shadow-sm ${activeFilter === status.name ? 'scale-110 mx-1 shadow-xl' : null}`}>
-                        <Status statusArray={receiptStatus} status={status.name} onClick={() => filterShipments(status.name)} />
+                        <Status statusArray={shipmentStatus} status={status.name} onClick={() => filterShipments(status.name)} />
                       </span>
                     )
                   })}
@@ -224,12 +224,12 @@ const Receipt = ({ auth }) => {
 
                 <div className='w-full flex mb-2 mt-2 items-end'>
                   <div className='flex items-baseline ml-2'>
-                    <p className='font-semibold text-2xl'>Shipments</p>
-                    <Link className='ml-2 text-sm hover:underline text-gray-600' href={route('receipt-history')}>History</Link>
+                    <p className='font-semibold text-2xl text-text'>Shipments</p>
+                    <Link className='ml-2 text-sm hover:underline text-neutral' href={route('receipt-history')}>History</Link>
                   </div>
                 </div>
               </div>
-              <div className='grid md:grid-cols-2 grid-cols-1 gap-2 overflow-y-scroll pr-2'>
+              <div className='grid md:grid-cols-2 grid-cols-1 gap-4 overflow-y-auto pb-8'>
                 {filteredReceivedShipments?.map((data, index) => {
                   return (
                     <ReceiptCard data={data} key={index} onClick={() => handleShipmentClick(data)} />
@@ -239,7 +239,7 @@ const Receipt = ({ auth }) => {
             </div>
             
             <Modal name="Shipment Details" show={openShipmentDataModal} onClose={() => setOpenShipmentDataModal(false)}>
-              <div>
+              <div className='text-text'>
                 <div className='flex justify-between mb-2'>
                   <p>{new Date(shipmentData?.created_at).toLocaleString(undefined, dateTimeFormatLong)}</p>
                   <Status statusArray={shipmentStatus} status={shipmentData?.status} />
@@ -247,33 +247,33 @@ const Receipt = ({ auth }) => {
 
                 <div className='flex justify-between'>
                   <p className='flex items-center text-lg'><TbUserFilled className='mr-' /><span className='font-semibold'>{shipmentData && JSON.parse(shipmentData?.supplier).name}</span></p>
-                  <p className='flex items-center text-gray-500 mr-1'><TbHash className='ml-2' /><span>{shipmentData?.order_id}</span></p>
+                  <p className='flex items-center text-neutral mr-1'><TbHash className='ml-2' /><span>{shipmentData?.order_id}</span></p>
                 </div>
 
                 <p className='flex items-baseline'><TbMapPin className='mr-1' />{shipmentData?.order_warehouse}</p>
 
                 {shipmentData && getStatusStep(auditTaskStatus, shipmentData?.task_status) <= 3 &&
-                  <div className='p-2 mt-2 bg-gray-100 rounded-md'>
+                  <div className='mt-2 border-card'>
                     <p>Assigned To: {shipmentData.task_assigned_to_name}</p>
                   </div>
                 }
 
                 {shipmentData && getStatusStep(auditTaskStatus, shipmentData?.task_status) === 4 &&
-                  <div className='p-2 mt-2 bg-gray-100 rounded-md'>
+                  <div className='mt-2 border-card'>
                     <p>Assigned To: {shipmentData.task_assigned_to_name}</p>
                     <p>Final Comment: {shipmentData.task_report_final_comment}</p>
                     <p>Status: {shipmentData.task_status}</p>
                   </div>
                 }
 
-                <p className='font-semibold text-lg mt-4'>Product List</p>
+                <p className='font-medium ml-1 text-lg mt-4'>Product List</p>
                 <div className='mt-2 mb-4 h-72 overflow-y-auto pr-1 '>
                   {shipmentData?.products?.length && (
                     shipmentData?.products?.map((order, index) => (
-                      <p className='flex p-2 bg-gray-100 rounded-md mb-2' key={index}>
-                        <span className='text-gray-600 mr-2 w-14'>{order.id}</span>
+                      <p className='flex p-2 rounded-md mb-2' key={index}>
+                        <span className='text-neutral mr-2 w-14'>{order.id}</span>
                         <span className='font-semibold'>{order.name}</span>
-                        <span className='ml-auto text-gray-600'>Qty: {order.quantity}</span>
+                        <span className='ml-auto text-neutral'>{order.quantity} qty.</span>
                       </p>
                     ))
                   )}
@@ -282,25 +282,25 @@ const Receipt = ({ auth }) => {
                 <div className='flex'>
                   {
                     shipmentData && getStatusStep(shipmentStatus, shipmentData?.status) === 1 &&
-                    <button className='border-card ml-auto' onClick={() => onReceived(shipmentData.id)}>Shipment Received</button>
+                    <button className='btn ml-auto bg-accent text-background hover:bg-primary disable' disabled={!hasPermissions([302])} onClick={() => onReceived(shipmentData.id)}>Shipment Received</button>
                   }
 
                   {
                     shipmentData && getStatusStep(shipmentStatus, shipmentData?.status) === 2 && !shipmentData?.task_id &&
-                    <button className='border-card w-fit ml-auto' onClick={(e) => onCreateTaskSubmit(e, shipmentData)}>Generate Audit Task</button>
+                    <button className='btn ml-auto bg-accent text-background hover:bg-primary disable' disabled={!hasPermissions([302])} onClick={(e) => onCreateTaskSubmit(e, shipmentData)}>Generate Audit Task</button>
                   }
 
                   {
                     shipmentData && getStatusStep(shipmentStatus, shipmentData?.status) !== 4 &&
                     getStatusStep(auditTaskStatus, shipmentData?.task_status) === 4 &&
-                    <button className='border-card w-fit ml-auto' onClick={() => onDelivered(shipmentData.id)}>Product Checked</button>
+                    <button className='btn ml-auto bg-accent text-background hover:bg-primary disable' disabled={!hasPermissions([302])} onClick={() => onDelivered(shipmentData.id)}>Product Checked</button>
                   }
 
                   {
                     shipmentData && getStatusStep(shipmentStatus, shipmentData?.status) === 4 &&
                     <div className='ml-auto'>
-                      <button className='border-card mr-2' onClick={() => onReturn(shipmentData.id)}>Return</button>
-                      <button className='border-card' onClick={() => onAccept(shipmentData.id, shipmentData)}>Accept</button>
+                      <button className='btn mr-2 bg-accent text-background hover:bg-primary disable' disabled={!hasPermissions([302])} onClick={() => onReturn(shipmentData.id)}>Return</button>
+                      <button className='btn bg-accent text-background hover:bg-primary disable' disabled={!hasPermissions([302])} onClick={() => onAccept(shipmentData.id, shipmentData)}>Accept</button>
                     </div>
                   }
                 </div>

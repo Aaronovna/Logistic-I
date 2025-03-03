@@ -1,32 +1,33 @@
-import { useStateContext } from "@/context/contextProvider";
-
 import { dateTimeFormatLong } from "@/Constants/options";
 import { TbMapPin } from 'react-icons/tb';
 import { TbTruckDelivery } from "react-icons/tb";
+import useRole from "@/hooks/useRole";
 
 import Status from "../Status";
 import { shipmentStatus } from "@/Constants/status";
 
 const ReceiptCard = ({ data = {}, onClick = () => { } }) => {
-  const { theme } = useStateContext();
 
   return (
     <div
-      className="relative min-w-60 border-card p-4 cursor-pointer hover:shadow-md shadow-sm shadow-gray-300 duration-200 overflow-hidden"
-      style={{ borderColor: theme.border, color: theme.text }}
+      className="relative min-w-60 border-card p-4 cursor-pointer hover:shadow-lg shadow-md duration-200 overflow-hidden h-fit hover:bg-hbg"
       onClick={onClick}
     >
-      <div className="relative z-10">
-
+      <div className="relative z-10 text-text">
         <div className="flex justify-between">
           <p>{new Date(data.order_date + 'Z').toLocaleString(undefined, dateTimeFormatLong)}</p>
           <Status statusArray={shipmentStatus} status={data.status} />
         </div>
 
-        <p className="flex items-center text-lg"><TbMapPin className="mr-1" /><span className="font-medium">{data.order_warehouse}</span></p>
-        <span className="flex items-center text-gray-600"><TbTruckDelivery className="mr-1 text-lg" /><p>{`${JSON.parse(data.fleet).name} | ${JSON.parse(data.fleet).plate}`}</p></span>
+        <p className="flex items-center text-lg">
+          <TbMapPin className="mr-1" />
+          <span className="font-medium">{data.order_warehouse}</span>
+        </p>
+        <p className="flex items-center text-neutral">
+          <TbTruckDelivery className="mr-1 text-lg" />
+          <span>{`${JSON.parse(data.fleet).name} | ${JSON.parse(data.fleet).plate}`}</span>
+        </p>
       </div>
-
     </div>
   )
 }
@@ -34,7 +35,7 @@ const ReceiptCard = ({ data = {}, onClick = () => { } }) => {
 export default ReceiptCard;
 
 export const UpcomingShipmentCard = ({ data = {}, callback = () => { } }) => {
-  const { theme } = useStateContext();
+  const { hasPermissions } = useRole();
 
   let payload = {
     order_id: data.id || '',
@@ -73,34 +74,36 @@ export const UpcomingShipmentCard = ({ data = {}, callback = () => { } }) => {
   };
 
   return (
-    <div className='border-card flex p-2 md:flex-row flex-col mb-2 hover:shadow-lg shadow-md hover:cursor-pointer duration-200'>
+    <div className='border-card flex p-2 md:flex-row flex-col mb-2 hover:shadow-lg shadow-md hover:cursor-pointer duration-200 text-text'>
 
       <div>
-        <p className="text-xl font-medium">{data.supplier.name}</p>
-        <p className="font-medium text-lg text-gray-600">{new Date(data.date).toLocaleString(undefined, dateTimeFormatLong)}</p>
+        <p className="font-medium text-lg">{new Date(data.date).toLocaleString(undefined, dateTimeFormatLong)}</p>
 
-        <div className="flex gap-2 mt-4">
+        <p className="text font-medium mt-2">{data.supplier.name}<span className="ml-2 text-neutral">{data.id}</span></p>
 
-          <p>{data.id}</p>
-          <p>{`${data.fleet.name} ${data.fleet.plate}`}</p>
-
-        </div>
-        <p>To: {data.destination.name}</p>
+        <p className="flex items-center text-neutral mt-4">
+          <TbTruckDelivery className="mr-1 text-lg" />
+          <span>{`${data.fleet.name} | ${data.fleet.plate}`}</span>
+        </p>
+        <p className="flex items-center text-lg text-neutral">
+          <TbMapPin className="mr-1" />
+          <span className="font-medium">{data.destination.name}</span>
+        </p>
 
 
       </div>
       <div className='md:w-fit md:h-fit md:mt-auto md:ml-auto w-full mt-2 flex gap-2'>
         <button
-          className='border-card font-semibold w-1/2'
-          style={{ background: theme.danger, color: theme.text }}
+          className='btn bg-red-200 text-[#050315] hover:bg-red-400 disable'
           onClick={handleReject}
+          disabled={!hasPermissions([302])}
         >
           Reject
         </button>
         <button
-          className='border-card font-semibold w-1/2'
-          style={{ background: theme.accent, color: theme.background }}
+          className='btn bg-accent text-background hover:bg-primary disable'
           onClick={handleAccept}
+          disabled={!hasPermissions([302])}
         >
           Accept
         </button>
