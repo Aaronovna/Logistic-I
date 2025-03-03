@@ -28,7 +28,7 @@ const Warehouse = ({ auth }) => {
   const { hasAccess, getLayout, hasPermissions } = useRole();
   const Layout = getLayout(auth.user.type);
 
-  const { theme, themePreference } = useStateContext();
+  const { themePreference } = useStateContext();
 
   const [openAddInventoryModal, setOpenAddInventoryModal] = useState(false);
   const [openEditInventoryModal, setOpenEditInventoryModal] = useState(false);
@@ -310,7 +310,7 @@ const Warehouse = ({ auth }) => {
                 </div>
               </div>
 
-              <div className='md:w-1/3 w-full flex flex-col h-fit' style={{ color: theme.text }}>
+              <div className='md:w-1/3 w-full flex flex-col h-fit'>
                 <div className='flex gap-2 mb-2'>
                   <button
                     onClick={() => setOpenAddInventoryModal(true)}
@@ -362,7 +362,6 @@ const Warehouse = ({ auth }) => {
                       value={searchedProduct}
                       onChange={handleSearchProduct}
                       onClick={() => setOpenProductDropdown(!openProductDropdown)}
-                      style={{ borderColor: theme.border }}
                     />
                     {openProductDropdown &&
                       <div
@@ -392,7 +391,6 @@ const Warehouse = ({ auth }) => {
                   <div className='flex gap-2 mt-auto'>
                     <input type="number" name="quantity" id="quantity" placeholder="Quantity"
                       className='border-card bg-transparent flex-1'
-                      style={{ borderColor: theme.border }}
                       value={addInventoryFormData.quantity}
                       onChange={handleAddProductInputChange}
                     />
@@ -404,7 +402,7 @@ const Warehouse = ({ auth }) => {
             </Modal>
 
             <Modal show={openEditInventoryModal} onClose={() => setOpenEditInventoryModal(false)} maxWidth='lg' name={`Edit '${selectedData?.product_name}' Stock`}>
-              <div style={{ color: theme.text }}>
+              <div>
                 <p className='text-lg mt-2 mb-4 text-gray-500'>Warehouse: <span className='font-semibold text-gray-700'>{`${selectedData?.warehouse_name}(${selectedData?.warehouse_id})`}</span></p>
                 <form onSubmit={handleEditInventorySubmit} className="flex flex-col">
                   <div className='py-4'>
@@ -438,7 +436,6 @@ const Warehouse = ({ auth }) => {
                   <div className='flex gap-2 mt-auto'>
                     <input type="number" name="quantity" id="quantity" placeholder="Quantity"
                       className='border-card bg-transparent flex-1'
-                      style={{ borderColor: theme.border }}
                       value={editInventoryFormData.quantity}
                       onChange={handleEditProductInputChange}
                     />
