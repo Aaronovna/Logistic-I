@@ -46,7 +46,7 @@
 }
 
 .btn {
-    @apply rounded-md p-2 font-medium cursor-pointer;
+    @apply rounded-md p-2 font-medium cursor-pointer text-background bg-accent hover:bg-primary;
 }
 
 .border-card {

@@ -6,12 +6,10 @@ import useRole from '@/hooks/useRole';
 import { Card2 } from '@/Components/Cards';
 import { filterArray } from '@/functions/filterArray';
 
-import { TbBox } from "react-icons/tb";
-
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 
-const cardStyle = 'mb-2 snap-center mx-2 md:min-w-64 inline-block min-w-[100%] border-none bg-white/50 backdrop-blur-sm';
+const cardStyle = 'mb-2 snap-center mx-2 md:min-w-64 inline-block min-w-[100%] border-none text-black backdrop-blur-lg bg-white/30';
 
 const formatValue = (value) => {
   if (value) {
@@ -27,7 +25,7 @@ const formatValue = (value) => {
 }
 
 const Warehouse = ({ auth }) => {
-  const { hasAccess, getLayout } = useRole();
+  const { hasAccess, getLayout, hasPermissions } = useRole();
   const Layout = getLayout(auth.user.type);
 
   const { theme, themePreference } = useStateContext();
@@ -272,31 +270,29 @@ const Warehouse = ({ auth }) => {
       <Layout user={auth.user} header={<NavHeader headerName="Warehouse" />}>
         {!hasAccess(auth.user.type, [2050, 2051, 2052]) ? <Unauthorized /> :
           <div className="content bg-cover" >
-            <div
-              className='border-card p-4 shadow-md mb-6 flex bg-cover bg-center'
-              style={{
-                color: theme.text, backgroundImage: selectedWarehouse?.image_url ? `url(${selectedWarehouse.image_url})` :
-                  `url(https://img.freepik.com/free-vector/warehouse-interior-logistics-cargo-delivery_107791-1777.jpg?semt=ais_hybrid)`,
-              }}
-            >
-              <div className='flex flex-col flex-1'>
+            <div className='border-card p-4 shadow-md mb-6 flex relative overflow-hidden'>
+              <div className='w-full h-full absolute blur-sm top-0 left-0 bg-cover bg-center'
+                style={{
+                  backgroundImage: selectedWarehouse?.image_url ? `url(${selectedWarehouse.image_url})` :
+                    `url(https://img.freepik.com/free-vector/warehouse-interior-logistics-cargo-delivery_107791-1777.jpg?semt=ais_hybrid)`,
+                }}></div>
+              <div className='flex flex-col flex-1 z-10'>
                 <div className='flex'>
-
-                  <select className='p-2 w-full border-none font-medium text-xl bg-white/10 backdrop-blur-sm rounded-full px-2' name="warehouse_id" id="warehouse_id" onChange={handleWarehouseChange}>
+                  <select className='p-2 w-full border-none shadow-md text-black tracking-wider bg-white/10 backdrop-blur-lg font-medium text-lg rounded-full' name="warehouse_id" id="warehouse_id" onChange={handleWarehouseChange}>
                     {warehouses && warehouses.map((warehouse, index) => {
                       return (
-                        <option key={index} value={warehouse.id} className='text-sm'>{warehouse.name}</option>
+                        <option key={index} value={warehouse.id} className='text-sm bg-background text-text'>{warehouse.name}</option>
                       )
                     })
                     }
                   </select>
                 </div>
-                <p className='mt-auto bg-white/10 backdrop-blur-sm rounded-full px-2'>{selectedWarehouse?.address}</p>
+                <p className='mt-auto w-fit truncate backdrop-blur-lg bg-white/10 rounded-full px-2 py-1'>{selectedWarehouse?.address}</p>
               </div>
 
               <div className='ml-auto md:items-end mb-2 md:mb-0 md:gap-4 overflow-x-auto snap-mandatory snap-x pb-1 whitespace-nowrap'>
-                <Card2 data={totalValue && formatValue(totalValue.total_stock_value)} name="Total Asset Value" className={cardStyle} iconColor={theme.text} />
-                <Card2 data={totalStocks && totalStocks.total_quantity} name="Total Stocks" className={cardStyle} Icon={TbBox} iconColor={theme.text} />
+                <Card2 data={totalValue && formatValue(totalValue.total_stock_value)} name="Total Asset Value" className={cardStyle} />
+                <Card2 data={totalStocks && totalStocks.total_quantity} name="Total Stocks" className={cardStyle} />
               </div>
             </div>
 
@@ -318,9 +314,8 @@ const Warehouse = ({ auth }) => {
                 <div className='flex gap-2 mb-2'>
                   <button
                     onClick={() => setOpenAddInventoryModal(true)}
-                    disabled={selectedWarehouse?.id === 0}
-                    className='border-card w-full font-medium if-disable'
-                    style={{ background: theme.accent, borderColor: theme.border, color: theme.background }}
+                    disabled={selectedWarehouse?.id === 0 || !hasPermissions([322])}
+                    className='btn w-full disable'
                   >
                     Add Inventory
                   </button>
@@ -346,10 +341,9 @@ const Warehouse = ({ auth }) => {
                     <p className='text-sm text-gray-500'>{product?.category_name ? product?.category_name : '--'}</p>
                   </div>
                   <button
-                    className='border-card ml-auto mt-auto font-medium if-disable'
-                    style={{ background: theme.accent, borderColor: theme.border, color: theme.background }}
+                    className='btn ml-auto mt-auto disable'
                     onClick={() => setOpenEditInventoryModal(true)}
-                    disabled={selectedData ? false : true}
+                    disabled={!selectedData || !hasPermissions([322])}
                   >
                     Edit Stock
                   </button>
@@ -358,8 +352,8 @@ const Warehouse = ({ auth }) => {
               </div>
             </div>
             <Modal show={openAddInventoryModal} onClose={() => setOpenAddInventoryModal(false)} maxWidth='lg' name="Add Inventory">
-              <div style={{ color: theme.text }}>
-                <form onSubmit={handleAddInventorySubmit} className="flex flex-col" style={{ color: theme.text }}>
+              <div className='text-text'>
+                <form onSubmit={handleAddInventorySubmit} className="flex flex-col">
                   <div className='relative w-full'>
                     <input
                       type="text"
@@ -376,13 +370,13 @@ const Warehouse = ({ auth }) => {
                         className="absolute w-full rounded-md max-h-44 overflow-y-auto z-50 backdrop-blur border-card"
                       >
                         {searchedProduct.trim() === ""
-                          ? <p className="p-2">Search Product</p>
+                          ? <p className="p-2">  Product</p>
                           : filteredProducts.length > 0
                             ? filteredProducts.map((product, index) =>
-                              <button key={index} className="block p-2 hover:bg-gray-300/50 w-full text-left" onClick={() => { handleSelectProduct(product); handleAddInventoryInput(product) }}>
+                              <button key={index} className="p-2 hover:bg-hbg rounded-md w-full text-left" onClick={() => { handleSelectProduct(product); handleAddInventoryInput(product) }}>
                                 {`${product.id} ${product.name} ${product.model}`}
                               </button>)
-                            : <p className="p-2 text-[#FF9E8D]">No Product Found</p>
+                            : <p className="p-2 text-neutral">No Product Found</p>
                         }
                       </div>}
                   </div>
@@ -403,16 +397,16 @@ const Warehouse = ({ auth }) => {
                       onChange={handleAddProductInputChange}
                     />
 
-                    <button className='border-card' style={{ background: theme.accent, color: theme.background }}>Add</button>
+                    <button className='btn disable' disabled={!hasPermissions([322])}>Add</button>
                   </div>
                 </form>
               </div>
             </Modal>
 
-            <Modal show={openEditInventoryModal} onClose={() => setOpenEditInventoryModal(false)} maxWidth='lg' name="Edit Product Stock">
+            <Modal show={openEditInventoryModal} onClose={() => setOpenEditInventoryModal(false)} maxWidth='lg' name={`Edit '${selectedData?.product_name}' Stock`}>
               <div style={{ color: theme.text }}>
                 <p className='text-lg mt-2 mb-4 text-gray-500'>Warehouse: <span className='font-semibold text-gray-700'>{`${selectedData?.warehouse_name}(${selectedData?.warehouse_id})`}</span></p>
-                <form onSubmit={handleEditInventorySubmit} className="flex flex-col" style={{ color: theme.text }}>
+                <form onSubmit={handleEditInventorySubmit} className="flex flex-col">
                   <div className='py-4'>
                     <p>Product ID: <span>{`${selectedData ? selectedData?.product_id : ''}`}</span></p>
                     <p>{`Product: ${selectedData ? selectedData?.product_name : ''}`}</p>
@@ -449,7 +443,7 @@ const Warehouse = ({ auth }) => {
                       onChange={handleEditProductInputChange}
                     />
 
-                    <button className='border-card' style={{ background: theme.accent, color: theme.background }}>Save</button>
+                    <button className='btn disable' disabled={!hasPermissions([322])}>Save</button>
                   </div>
                 </form>
               </div>
