@@ -10,7 +10,7 @@ export const ContextProvider = ({ children }) => {
 
     const [theme, setTheme] = useState(themePreference === "dark" ? dark : light);
     const [userPermissions, setUserPermissions] = useState();
-    const [userType, setUserType] = useState(1111);
+    const [userType, setUserType] = useState(2056);
     const [debugMode, setDebugMode] = useState(false);
     const [showWireFrame, setShowWireFrame] = useState(() => {
         return localStorage.getItem("showWireFrame") === "true";

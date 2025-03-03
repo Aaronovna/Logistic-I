@@ -5,19 +5,16 @@ import { AgGridReact } from 'ag-grid-react';
 import useRole from '@/hooks/useRole';
 import { Card } from '@/Components/Cards';
 
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
-
 import { TbCategory } from "react-icons/tb";
 import { TbPlus } from "react-icons/tb";
 import { TbEdit } from "react-icons/tb";
 import { TbX } from "react-icons/tb";
 
 const Category = ({ auth }) => {
-  const { hasAccess, getLayout } = useRole();
+  const { hasAccess, getLayout, hasPermissions } = useRole();
   const Layout = getLayout(auth.user.type);
 
-  const { theme, themePreference } = useStateContext();
+  const { themePreference, userPermissions } = useStateContext();
 
   const [categories, setCategories] = useState(null);
   const [openAddModal, setOpenAddModal] = useState(false);
@@ -58,7 +55,8 @@ const Category = ({ auth }) => {
         return (
           <span className='flex w-full justify-center items-center h-full'>
             <button
-              className='hover:bg-[#b3e9ff] p-2 rounded-full'
+              disabled={!hasPermissions([352])}
+              className='hover:bg-[#b3e9ff] p-2 rounded-full disable'
               onClick={() => {
                 setOpenEditModal(true);
                 setEditFormData({
@@ -71,7 +69,8 @@ const Category = ({ auth }) => {
               <TbEdit size={18} />
             </button>
             <button
-              className='hover:bg-[#FF9E8D] p-2 rounded-full'
+              disabled={!hasPermissions([352])}
+              className='hover:bg-[#FF9E8D] p-2 rounded-full disable'
               onClick={() => handleDelete(params.data.id)}
             >
               <TbX size={18} />
@@ -139,8 +138,10 @@ const Category = ({ auth }) => {
   };
 
   useEffect(() => {
-    fetchCategories();
-  }, []);
+    if (hasPermissions([351])) {
+      fetchCategories();
+    }
+  }, [userPermissions]);
 
   return (
     <AuthenticatedLayout
@@ -156,8 +157,8 @@ const Category = ({ auth }) => {
                 <Card data={categories ? categories.length : "-"} name="Categories" Icon={TbCategory} />
                 <button
                   onClick={() => setOpenAddModal(true)}
-                  className='rounded-lg h-fit py-2 px-2 ml-auto hover:scale-105 hover:shadow-xl duration-200 flex items-center'
-                  style={{ background: theme.accent, color: theme.background }}
+                  className='disable rounded-lg h-fit py-2 bg-accent text-background px-2 ml-auto hover:scale-105 hover:shadow-xl duration-200 flex items-center'
+                  disabled={!hasPermissions([352])}
                 >
                   <TbPlus size={18} />
                   <p className='ml-1'>Add Category</p>
@@ -178,17 +179,17 @@ const Category = ({ auth }) => {
               </div>
 
               {selectedData ?
-                <div className='border-card p-4' style={{ color: theme.text }}>
+                <div className='border-card p-4 text-text'>
                   <span className='flex mb-2'>
-                    <p className='text-gray-300/50 mr-2'>{selectedData.id}</p>
-                    <p className='font-semibold'>{selectedData.name}</p>
+                    <p className='mr-2 font-semibold'>{selectedData.id}</p>
+                    <p className=''>{selectedData.name}</p>
                   </span>
                   <p>{selectedData.description}</p>
                 </div>
                 : null}
             </div>
             <Modal show={openAddModal} onClose={() => setOpenAddModal(false)} maxWidth='lg' name="Add New Category">
-              <form onSubmit={handleAddSubmit} style={{ color: theme.text }}>
+              <form onSubmit={handleAddSubmit} className='text-text'>
                 <input
                   type="text"
                   name="name"
@@ -197,7 +198,6 @@ const Category = ({ auth }) => {
                   onChange={handleAddInputChange}
                   placeholder="Category Name"
                   className="mb-2 p-2 border rounded w-full bg-transparent"
-                  style={{ borderColor: theme.border }}
                 />
                 <textarea
                   type="text"
@@ -208,13 +208,16 @@ const Category = ({ auth }) => {
                   onChange={handleAddInputChange}
                   placeholder="Category Description"
                   className="mb-2 p-2 border rounded w-full resize-none bg-transparent"
-                  style={{ borderColor: theme.border }}
                 />
-                <button type="submit" className="p-2 border-card font-medium text-white block ml-auto" style={{ background: theme.primary, borderColor: theme.border }}>Submit</button>
+                <button type="submit" disabled={!hasPermissions([352])}
+                  className="p-2 border-card font-medium block ml-auto disable bg-accent text-background" 
+                >
+                  Submit
+                </button>
               </form>
             </Modal>
             <Modal show={openEditModal} onClose={() => setOpenEditModal(false)} name="Edit Category">
-              <form onSubmit={handleEditSubmit} style={{ color: theme.text }}>
+              <form onSubmit={handleEditSubmit} className='text-text'>
                 <input
                   type="text"
                   name="name"
@@ -223,7 +226,6 @@ const Category = ({ auth }) => {
                   onChange={handleEditInputChange}
                   placeholder="Category Name"
                   className="mb-2 p-2 border rounded w-full bg-transparent"
-                  style={{ borderColor: theme.border }}
                 />
                 <textarea
                   type="text"
@@ -234,9 +236,12 @@ const Category = ({ auth }) => {
                   onChange={handleEditInputChange}
                   placeholder="Category Description"
                   className="mb-2 p-2 border rounded w-full bg-transparent resize-none"
-                  style={{ borderColor: theme.border }}
                 />
-                <button type="submit" className="p-2 border-card font-medium text-white block ml-auto" style={{ background: theme.primary, borderColor: theme.border }}>Update</button>
+                <button type="submit" disabled={!hasPermissions([352])}
+                  className="disable p-2 border-card font-medium block ml-auto text-background bg-accent"
+                >
+                  Update
+                </button>
               </form>
             </Modal>
           </div>

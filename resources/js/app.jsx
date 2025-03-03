@@ -2,6 +2,7 @@ import './bootstrap';
 import '../css/global.css';
 import '../css/scrollbar.css';
 import '../css/backgrounds.css';
+import '../css/themes.css';
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
 

@@ -3,7 +3,7 @@ import { useStateContext } from '@/context/contextProvider';
 import { TbX } from 'react-icons/tb';
 
 export default function Modal({name = "Modal Name", children, show = false, maxWidth = '2xl', closeable = true, onClose = () => { } }) {
-  const { theme } = useStateContext();
+  const { themePreference } = useStateContext();
   const close = () => {
     if (closeable) {
       onClose();
@@ -25,7 +25,7 @@ export default function Modal({name = "Modal Name", children, show = false, maxW
       <Dialog
         as="div"
         id="modal"
-        className="fixed inset-0 flex overflow-y-auto px-4 py-6 sm:px-0 items-center z-40 transform transition-all"
+        className={`${themePreference === 'dark' ? 'dark' : 'null'} fixed inset-0 flex overflow-y-auto px-4 py-6 sm:px-0 items-center z-40 transform transition-all`}
         onClose={close}
       >
         <TransitionChild
@@ -48,12 +48,12 @@ export default function Modal({name = "Modal Name", children, show = false, maxW
           leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         >
           <DialogPanel
-            style={{ background: theme.background, borderColor: theme.border, padding: '1rem' }}
-            className={`mb-6 border-card backdrop-blur-sm rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:mx-auto ${maxWidthClass}`}
+            style={{ padding: '1rem' }}
+            className={`bg-background border-card backdrop-blur-sm rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:mx-auto ${maxWidthClass}`}
           >
             <div className='flex mb-4'>
-              <p className='text-xl font-medium mt-2 pb-2 tracking-wider'>{name}</p>
-              <button onClick={onClose} className='ml-auto'><TbX size={32}/></button>
+              <p className='text-xl font-medium mt-2 pb-2 tracking-wider text-text'>{name}</p>
+              <button onClick={onClose} className='ml-auto text-text'><TbX size={32}/></button>
             </div>
               {children}
           </DialogPanel>

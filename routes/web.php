@@ -99,6 +99,7 @@ Route::middleware(["auth", "verified", "throttle:60,1"])->group(function () {
     Route::get('/category/get/count', [CategoryController::class, 'indexWithProductCount'])->name('category.indexWithProductCount');
 
     Route::get('/position', [PositionController::class, 'index'])->name('position.index');
+    Route::get('/position/get/{id}', [PositionController::class, 'show'])->name('position.show');
     Route::post('/position/create', [PositionController::class, 'store'])->name('position.store');
     Route::delete('/position/delete/{id}', [PositionController::class, 'destroy'])->name('position.destroy');
     Route::patch('/position/update/{id}', [PositionController::class, 'update'])->name('position.update');

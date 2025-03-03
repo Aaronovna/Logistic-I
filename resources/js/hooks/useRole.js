@@ -4,8 +4,10 @@ import InventoryLayout from "@/Layouts/InventoryLayout";
 import InfrastructureLayout from "@/Layouts/InfrastructureLayout";
 import AuditLayout from "@/Layouts/AuditLayout";
 import { adminPages, inventoryPages, infrastructurePages, auditPages } from "@/Constants/navlinks";
+import { useStateContext } from "@/context/contextProvider";
 
 const useRole = () => {
+  const { userPermissions, userType } = useStateContext();
 
   const hasAccess = (userType = 0, allowedTypes = []) => {
     if (!allowedTypes || allowedTypes.length === 0) return false;
@@ -13,6 +15,12 @@ const useRole = () => {
     const typeList = Array.isArray(allowedTypes) ? allowedTypes : [allowedTypes];
 
     return typeList.includes(userType);
+  };
+
+  const hasPermissions = (allowedPermissions = []) => {
+    if (!userPermissions || typeof userPermissions !== "object" || !Array.isArray(allowedPermissions)) return false;
+
+    return allowedPermissions.some(permission => userPermissions[permission] === true);
   };
 
   const getLayout = (userType = 0) => {
@@ -51,8 +59,8 @@ const useRole = () => {
           return adminPages; */
     }
   }
-  
-  return { hasAccess, getLayout, getPages };
+
+  return { hasAccess, hasPermissions, getLayout, getPages };
 };
 
 export default useRole;
