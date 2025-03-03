@@ -14,7 +14,7 @@ import { TbMail } from 'react-icons/tb';
 import { TbTruckDelivery } from 'react-icons/tb';
 
 const Dispatch = ({ auth }) => {
-  const { hasAccess, getLayout } = useRole();
+  const { hasAccess, getLayout, hasPermissions } = useRole();
   const Layout = getLayout(auth.user.type);
 
   const { theme, debugMode } = useStateContext();
@@ -69,30 +69,31 @@ const Dispatch = ({ auth }) => {
     setOpenRequestModal(true);
   }
 
+  const fetchItemAvailability = async () => {
+    if (requestData?.items) {
+      const items = JSON.parse(requestData.items);
+      const availabilityPromises = items.map(async (item) => {
+        try {
+          const response = await axios.get(`/product/get/${item.product_id}`);
+          const stockCount = response.data.data?.total_stock || 0;
+          return {
+            ...item,
+            available: stockCount >= item.quantity,
+            stockCount,
+          };
+        } catch (error) {
+          toast.error(`${error.status} ${error.response.data.message}`);
+          return { ...item, available: false, stockCount: 0 };
+        }
+      });
+
+      const availabilityResults = await Promise.all(availabilityPromises);
+      setItemAvailability(availabilityResults);
+    }
+  };
+
   const [itemAvailability, setItemAvailability] = useState([]);
   useEffect(() => {
-    const fetchItemAvailability = async () => {
-      if (requestData?.items) {
-        const items = JSON.parse(requestData.items);
-        const availabilityPromises = items.map(async (item) => {
-          try {
-            const response = await axios.get(`/product/get/${item.product_id}`);
-            const stockCount = response.data.data?.total_stock || 0;
-            return {
-              ...item,
-              available: stockCount >= item.quantity,
-              stockCount,
-            };
-          } catch (error) {
-            toast.error(`${error.status} ${error.response.data.message}`);
-            return { ...item, available: false, stockCount: 0 };
-          }
-        });
-
-        const availabilityResults = await Promise.all(availabilityPromises);
-        setItemAvailability(availabilityResults);
-      }
-    };
 
     if (openRequestModal) {
       fetchItemAvailability();
@@ -171,7 +172,7 @@ const Dispatch = ({ auth }) => {
 
   const handleFillStock = async (productId, quantity, index) => {
     try {
-      const payload = { quantity, operation: 'subtract' }; // Only pass the quantity to be deducted
+      const payload = { quantity, operation: 'add' }; // Only pass the quantity to be deducted
       await axios.patch(`/inventory/stock/update/${productId}`, payload);
 
       // Update the local state to mark the item as filled
@@ -288,7 +289,7 @@ const Dispatch = ({ auth }) => {
             </div>
 
             <div className='flex flex-col w-full justify-between mt-8'>
-              <div className='flex gap-2 mb-4 flex-wrap gap-y-4'>
+              <div className='flex gap-4 mb-4 flex-wrap gap-y-4'>
                 {requestStatus.map((status, index) => {
                   return (
                     <span key={index} className={`cursor-pointer shadow-sm ${activeFilter === status.name ? 'scale-110 mx-1 shadow-xl' : null}`}>
@@ -306,8 +307,8 @@ const Dispatch = ({ auth }) => {
 
               <div className='w-full flex mb-2 mt-2 items-end'>
                 <div className='flex items-baseline ml-2'>
-                  <p className='font-semibold text-2xl'>Requests</p>
-                  <Link className='ml-2 text-sm hover:underline text-gray-600' href={route('dispatch-history')}>History</Link>
+                  <p className='font-semibold text-2xl text-text'>Requests</p>
+                  <Link className='ml-2 text-sm hover:underline text-neutral' href={route('dispatch-history')}>History</Link>
                 </div>
               </div>
             </div>
@@ -336,7 +337,7 @@ const Dispatch = ({ auth }) => {
 
             {!requests?.length ?
               <div className='flex-1 flex justify-center items-center'>
-                <p className='text-xl text-gray-300'>No Material Requests Available</p>
+                <p className='text-xl text-neutral'>No Material Requests Available</p>
               </div> : null
             }
 
@@ -384,6 +385,7 @@ const Dispatch = ({ auth }) => {
                       </span>
 
                       {requestData && (getStatusStep(requestStatus, requestData?.status) === 1 ||
+                        getStatusStep(requestStatus, requestData?.status) === 2 ||
                         getStatusStep(requestStatus, requestData?.status) === 3 ||
                         getStatusStep(requestStatus, requestData?.status) === 6 ||
                         getStatusStep(requestStatus, requestData?.status) === 7) &&
@@ -392,7 +394,7 @@ const Dispatch = ({ auth }) => {
                         </span>
                       }
 
-                      {requestData && getStatusStep(requestStatus, requestData?.status) === 1 &&
+                      {requestData && getStatusStep(requestStatus, requestData?.status) === 1 || requestData && getStatusStep(requestStatus, requestData?.status) === 2 &&
                         <span
                           className={`ml-3 px-2 py-1 text-xs rounded ${item.available
                             ? "bg-green-100 text-green-700"
@@ -400,22 +402,24 @@ const Dispatch = ({ auth }) => {
                             }`}
                         >
                           {item.available
-                            ? `Available (Stock: ${item.stockCount})`
-                            : `Out of Stock (Stock: ${item.stockCount})`}
+                            ? `${item.stockCount}`
+                            : `Stock: ${item.stockCount}`}
                         </span>
                       }
 
                       {requestData && getStatusStep(requestStatus, requestData?.status) === 2 && (
                         item.filled ? (
                           <button
-                            className="ml-4 px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 text-sm"
+                            disabled={!hasPermissions([312])}
+                            className="btn disable text-[#050315] bg-red-200 text-sm p-1 px-2"
                             onClick={() => handleCancelFill(item.product_id, item.quantity, index)}
                           >
                             Cancel Fill
                           </button>
                         ) : (
                           <button
-                            className="ml-4 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-sm"
+                            disabled={!hasPermissions([312])}
+                            className="btn disable text-background bg-accent text-sm p-1 px-2"
                             onClick={() => handleFillStock(item.product_id, item.quantity, index)}
                           >
                             Fill Stock
@@ -427,19 +431,19 @@ const Dispatch = ({ auth }) => {
               </div>
 
               {requestData && getStatusStep(requestStatus, requestData?.status) === 1 &&
-                <div className={`justify-end gap-2 mt-4`}>
+                <div className={`w-fit ml-auto mt-4`}>
                   <button
-                    disabled={requestData?.status === 'Request Created' ? false : true}
-                    className="border border-red-300 bg-red-50 text-red-600 px-4 py-2 rounded-md hover:bg-red-100 transition"
+                    disabled={!(requestData?.status === 'Request Created') || !hasPermissions([312])}
+                    className="btn disable mr-2 bg-red-200 hover:bg-red-400 text-[#050315]"
                     onClick={() => {
-                      handleReject(requestData?.id); // Define `handleReject` function
+                      handleReject(requestData?.id);
                     }}
                   >
                     Reject
                   </button>
                   <button
-                    disabled={requestData?.status === 'Request Created' ? false : true}
-                    className="border border-green-300 bg-green-50 text-green-600 px-4 py-2 rounded-md hover:bg-green-100 transition"
+                    disabled={!(requestData?.status === 'Request Created') || !hasPermissions([312])}
+                    className="btn disable bg-accent hover:bg-primary text-background"
                     onClick={() => {
                       handleAccept(requestData?.id);
                       createDispatch(requestData);
@@ -451,28 +455,30 @@ const Dispatch = ({ auth }) => {
               }
 
               {requestData && getStatusStep(requestStatus, requestData?.status) === 2 &&
-                <div className={`justify-end gap-2 mt-4`}>
+                <div className={`w-fit ml-auto mt-4`}>
                   <button
-                    className="bg-red-500 text-white px-4 py-2 rounded"
+                    disabled={!hasPermissions([312])}
+                    className="btn disable mr-2 bg-red-200 hover:bg-red-400 text-[#050315]"
                     onClick={handleRejectAllFill}
                   >
-                    Reject All Fills
+                    Cancel Fills
                   </button>
                   <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                    disabled={!hasPermissions([312])}
+                    className="btn disable bg-accent hover:bg-primary text-background"
                     onClick={handlePrepareForDelivery}
                   >
-                    Prepare for Delivery
+                    Request for Delivery
                   </button>
                 </div>
               }
 
               {requestData && getStatusStep(requestStatus, requestData?.status) === 3 &&
-                <div className={`justify-end gap-2 mt-4 ${requestData?.status === 'Materials Fulfilled' ? 'flex' : 'hidden'}`}>
+                <div className={`justify-between items-end mt-4 ${requestData?.status === 'Materials Fulfilled' ? 'flex' : 'hidden'}`}>
                   {
                     debugMode ? <button className='border-card italic' onClick={() => CompleteDeliver(requestData?.id)}>Make Delivered</button> : null
                   }
-                  <p className='italic'>Waiting for Transport</p>
+                  <p className='italic'>Ready for Dispatch</p>
                 </div>
               }
 

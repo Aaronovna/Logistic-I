@@ -21,25 +21,25 @@ export default function RequestCard({ data = {} }) {
 
   return (
     <div
-      className="border rounded-lg shadow-sm p-4 bg-white hover:shadow-md transition cursor-pointer"
+      className="border rounded-lg shadow-sm p-4 bg-background text-text hover:shadow-md transition cursor-pointer"
     >
       {/* Date */}
-      <p className="text-sm text-gray-500 mb-1">
+      <p className="text-sm text-neutral mb-1">
         {new Date(data.created_at).toLocaleString(undefined, dateTimeFormatLong)}
       </p>
 
       {/* Infrastructure Name */}
-      <h3 className="text-lg font-semibold text-gray-800">
+      <h3 className="text-lg font-semibold">
         {data.infrastructure_name || "No Infrastructure Name"}
       </h3>
 
       {/* Request Type */}
-      <p className="text-sm text-gray-600 mt-2">
+      <p className="text-sm text-neutral mt-2">
         Purpose: <span className="font-medium">{data.type || "N/A"}</span>
       </p>
 
       {/* User Name */}
-      <p className="text-sm text-gray-600 mb-4">
+      <p className="text-sm text-neutral mb-4">
         Request From: <span className="font-medium">{data.infrastructure_name || "Unknown"}</span>
       </p>
 
@@ -54,8 +54,8 @@ export default function RequestCard({ data = {} }) {
                 <div
                   className={`w-full h-1 ${
                     index  <= currentStatusIndex
-                      ? "bg-green-500"
-                      : "bg-gray-200"
+                      ? "bg-accent"
+                      : "bg-neutral"
                   }`}
                 ></div>
               )}
