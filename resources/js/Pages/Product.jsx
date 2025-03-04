@@ -26,13 +26,13 @@ import IMAGE_PLACEHOLDER from "../../../public/assets/images/image-placeholder.p
 const cardStyle = 'mb-2 snap-center mx-2 md:min-w-64 inline-block min-w-[100%]';
 
 const Product = ({ auth }) => {
-  const { hasAccess, getLayout } = useRole();
+  const { hasAccess, getLayout, hasPermissions } = useRole();
   const Layout = getLayout(auth.user.type);
 
   const [products, setProducts] = useState([]);
   const [totalProductValue, setTotalProductValue] = useState(0);
   const [openAddProductModal, setOpenAddProductModal] = useState(false);
-  const { prompt, promptBuilder } = useGemini();
+  const { prompt, promptBuilder, loading } = useGemini();
   const [response, setResponse] = useState('');
   const [viewReport, setViewReport] = useState(false);
 
@@ -314,8 +314,8 @@ const Product = ({ auth }) => {
                   onChange={handleSearchProducts}
                 />
               </span>
-              <button style={{ background: theme.accent, color: theme.background }}
-                className='rounded-lg  h-fit py-2 px-2 hover:scale-105 hover:shadow-xl duration-200 flex items-center'
+              <button className='btn disable'
+                disabled={!hasPermissions([332])}
                 onClick={() => setOpenAddProductModal(true)}
               >
                 <TbPlus size={18} />
@@ -421,9 +421,9 @@ const Product = ({ auth }) => {
                       value={addProductFormData.description}
                       onChange={handleAddProductInputChange}
                     />
-                    <button
-                      style={{ background: theme.primary, borderColor: theme.border }}
-                      className='border-card p-2 font-medium ml-auto text-white'>
+                    <button className='btn disable ml-auto'
+                      disabled={!hasPermissions([332])}
+                    >
                       Add Product
                     </button>
                   </div>
@@ -448,7 +448,7 @@ const Product = ({ auth }) => {
                   }
                 </div>
 
-                <div className='w-full flex mt-2 px-1 gap-2'>
+                <div className='w-full flex mt-2 gap-2'>
                   <div className='w-1/2'>
                     <p className='truncate'>
                       <span className='font-medium mr-2 text-lg'>{selectedProduct?.name} {selectedProduct?.model}</span>
@@ -473,17 +473,17 @@ const Product = ({ auth }) => {
                       <span className='font-medium text-base text-gray-300 mr-2'>Turnover Rate</span>
                       {prodTurnoverRate.turnover_category}
                     </p>
-                    
-                    
-                    <button className='border-card w-full mt-auto flex justify-center'
+
+
+                    <button className='btn bg-primary mt-auto disable' disabled={loading}
                       onClick={generateReport}
                     > Generate Report <TbSparkles size={20} className='ml-2 text-orange-300' /> </button>
                   </div>
                 </div>
 
                 <div className='w-full mt-2 flex gap-2'>
-                  <button className='border-card w-full' onClick={() => handleDeleteProduct(selectedProduct?.id)}>Delete</button>
-                  <button className='border-card w-full' onClick={() => setOpenEditProductModal(true)}>Edit</button>
+                  <button className='btn disable text-black bg-red-200 hover:bg-red-400 w-full' disabled={!hasPermissions([332])} onClick={() => handleDeleteProduct(selectedProduct?.id)}>Delete</button>
+                  <button className='btn disable w-full' disabled={!hasPermissions([332])} onClick={() => setOpenEditProductModal(true)}>Edit</button>
                 </div>
               </div>
             </Modal>
@@ -559,10 +559,10 @@ const Product = ({ auth }) => {
                       value={editProductFormData.description || ''}
                       onChange={handleEditProductInputChange}
                     />
-                    <button
-                      style={{ background: theme.primary, borderColor: theme.border }}
-                      className='border-card p-2 font-medium ml-auto text-white'>
-                      Update
+                    <button className='btn disable ml-auto'
+                      disabled={!hasPermissions([332])}
+                    >
+                      Save Changes
                     </button>
                   </div>
                 </form>
