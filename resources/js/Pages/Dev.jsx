@@ -89,6 +89,16 @@ export default function Dev() {
     setFleetsDummyData(fleet);
   }, [])
 
+
+  const generateApiToken = async () => {
+    try {
+      const response = await axios.post(`/tokens/create`, {token_name: `TOKEN`});
+      alert(response.data.token);
+    } catch (error) {
+      
+    }
+  }
+
   return (
     <div style={{ color: theme.text }}>
       <div className='w-full mb-4'>
@@ -111,6 +121,8 @@ export default function Dev() {
         <button className='border-card mr-2' onClick={() => setOrdersDummyData(generateOrder())}>Generate Order Data</button>
         <button className='border-card mr-2' onClick={() => setOrdersDummyData(generateData(10))}>Generate 10 Order Data</button>
       </div>
+
+      <button className='border-card' onClick={generateApiToken}>Generate API Token</button>
     </div>
   );
 }

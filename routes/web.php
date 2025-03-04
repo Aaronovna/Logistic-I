@@ -21,6 +21,8 @@ use App\Http\Controllers\AuditReportController;
 use App\Http\Controllers\ReturnMaterialController;
 use App\Http\Controllers\ReturnRequestController;
 use App\Http\Controllers\AuditLogController;
+use App\Http\Controllers\InventoryTrailController;
+use Illuminate\Http\Request;
 
 Route::redirect('/', 'login');
 
@@ -50,19 +52,19 @@ Route::middleware(["auth", "verified", PreventBackHistory::class])->group(functi
     Route::get('/module', fn() => Inertia::render('Module'))->name('module');
     Route::get('/infrastructure', fn() => Inertia::render('Infrastructure'))->name('infrastructure');
 
-    Route::get('/infrastructure/view', function (\Illuminate\Http\Request $request) {
+    Route::get('/infrastructure/view', function ($request) {
         return Inertia::render('Infrastructure.View', [
             'id' => $request->query('id'), // Extract 'name' from the query string
         ]);
     })->name('infrastructure-view');
 
-    Route::get('/assignments/view', function (\Illuminate\Http\Request $request) {
+    Route::get('/assignments/view', function ($request) {
         return Inertia::render('Assignments.View', [
             'id' => $request->query('id'),
         ]);
     })->name('assignments-view');
 
-    Route::get('/reports/view', function (\Illuminate\Http\Request $request) {
+    Route::get('/reports/view', function ($request) {
         return Inertia::render('Reports.View', [
             'id' => $request->query('id'),
         ]);
@@ -78,6 +80,13 @@ Route::middleware(["auth", "verified", PreventBackHistory::class])->group(functi
 
 // REQUEST ROUTES
 Route::middleware(["auth", "verified", "throttle:60,1"])->group(function () {
+
+    Route::post('/tokens/create', function (Request $request) {
+        $token = $request->user()->createToken($request->token_name);
+     
+        return ['token' => $token->plainTextToken];
+    });
+    
 
     //? START: PRODUCT REQUEST /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -192,10 +201,32 @@ Route::middleware(["auth", "verified", "throttle:60,1"])->group(function () {
     Route::get('/file/get/{id}', [FileController::class, 'show']);
     Route::post('file/store', [FileController::class, 'store']);
     Route::delete('/file/delete/{id}', [FileController::class, 'destroy']);
+
+    Route::get('/product/get', [ProductController::class, 'index']);
+    Route::get('/products/category', [ProductController::class, 'productEachCategory']);
+    Route::get('/products/supplier', [ProductController::class, 'productEachSupplier']);
+    Route::get('/products/recent/{limit?}', [ProductController::class, 'recentProducts']);
+    Route::get('/products/most/{limit?}', [ProductController::class, 'mostExpensiveProducts']);
+    Route::get('/products/least/{limit?}', [ProductController::class, 'leastExpensiveProducts']);
+
+    Route::get('/inventory/total/stock', [InventoryController::class, 'totalStock']);
+    Route::get('/inventory/out/stock/{limit?}', [InventoryController::class, 'outOfStockProducts']);
+    Route::get('/inventory/low/stock/{limit?}', [InventoryController::class, 'lowStockProducts']);
+    Route::get('/inventory/out/count', [InventoryController::class, 'outOfStockProductsCount']);
+    Route::get('/inventory/low/count', [InventoryController::class, 'lowStockProductsCount']);
+    Route::get('/inventory/total/value', [InventoryController::class, 'totalStockValue']);
+
+    Route::get('/average/inventory/{productId}/{days}', [InventoryTrailController::class, 'averageInventory']);
+    Route::get('/beginning/inventory/{productId}/{days}', [InventoryTrailController::class, 'getBeginningInventory']);
+    Route::get('/purchases/{productId}/{days}', [InventoryTrailController::class, 'getPurchases']);
+    Route::get('/ending/inventory/{productId}', [InventoryTrailController::class, 'getEndingInventory']);
+    Route::get('/cogs/{productId}/{days}', [InventoryTrailController::class, 'calculateCOGS']);
+    Route::get('/inventory/turnover/{productId}/{days}', [InventoryTrailController::class, 'inventoryTurnover']);
+    Route::get('/inventory/stock/{period}', [InventoryController::class, 'getStockDataByPeriod'])->where('period', 'month|quarter|year');
     
+    Route::get('/audit/get/{model}', [AuditLogController::class, 'show']);
 });
 
-Route::get('/audit/get/{model}', [AuditLogController::class, 'show']);
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

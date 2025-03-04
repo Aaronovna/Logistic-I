@@ -48,21 +48,21 @@ const Product = ({ auth }) => {
   const [out, setOut] = useState();
   const fetchStats = async () => {
     try {
-      const response = await axios.get('/api/v1/inventory/total/stock');
+      const response = await axios.get('/inventory/total/stock');
       setTotalStocks(response.data.data);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
     }
 
     try {
-      const response = await axios.get('/api/v1/inventory/low/count');
+      const response = await axios.get('/inventory/low/count');
       setLow(response.data.data);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
     }
 
     try {
-      const response = await axios.get('/api/v1/inventory/out/count');
+      const response = await axios.get('/inventory/out/count');
       setOut(response.data.data);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
@@ -280,7 +280,7 @@ const Product = ({ auth }) => {
 
   const getProductTurnoverRate = async (id) => {
     try {
-      const response = await axios.get(`/api/v1/inventory/turnover/${id}/90`);
+      const response = await axios.get(`/inventory/turnover/${id}/90`);
       setProdTurnoverRate(response.data);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
@@ -302,7 +302,7 @@ const Product = ({ auth }) => {
               <Card2 data={out && out.out_of_stock_count} name="Out of Stock" className={cardStyle} Icon={TbPackageOff} iconColor={feedbackVibrant.danger} />
             </div>
 
-            <div className='flex sm:flex-row flex-col md:flex-row w-full gap-4 mb-4'>
+            <div className='flex sm:flex-row flex-col md:flex-row w-full gap-4 mb-4 mt-4'>
               <span className='flex w-full relative items-center outline-card overflow-hidden ' style={{ outlineColor: theme.border }}>
                 <span className='absolute pl-2'><TbSearch size={24} color={theme.border} /></span>
                 <input

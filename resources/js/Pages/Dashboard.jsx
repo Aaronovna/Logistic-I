@@ -28,47 +28,47 @@ export default function Dashboard({ auth }) {
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get('/api/v1/products/category');
+      const response = await axios.get('/products/category');
       setProductEachCategory(response.data.data);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
     }
 
     try {
-      const response = await axios.get('/api/v1/products/supplier');
+      const response = await axios.get('/products/supplier');
       setProductEachSupplier(response.data.data);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
     }
 
     try {
-      const response = await axios.get('/api/v1/inventory/low/stock/5');
+      const response = await axios.get('/inventory/low/stock/5');
       setLowProducts(response.data.data);
     } catch (error) {
     }
 
     try {
-      const response = await axios.get('/api/v1/inventory/out/stock/5');
+      const response = await axios.get('/inventory/out/stock/5');
       setOutProducts(response.data.data);
     } catch (error) {
     }
 
     try {
-      const response = await axios.get('/api/v1/products/most/2');
+      const response = await axios.get('/products/most/2');
       setMostExp(response.data.data);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
     }
 
     try {
-      const response = await axios.get('/api/v1/products/least/2');
+      const response = await axios.get('/products/least/2');
       setLeastExp(response.data.data);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
     }
 
     try {
-      const response = await axios.get('/api/v1/inventory/total/value');
+      const response = await axios.get('/inventory/total/value');
       setAssetValue(response.data.data);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
@@ -77,14 +77,14 @@ export default function Dashboard({ auth }) {
 
 
     try {
-      const response = await axios.get('/api/v1/products/recent/2');
+      const response = await axios.get('/products/recent/2');
       setRecentProducts(response.data.data);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
     }
 
     try {
-      const response = await axios.get('/api/v1/inventory/stock/year');
+      const response = await axios.get('/inventory/stock/year');
       setStockCountPerPeriod(response.data.data);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
