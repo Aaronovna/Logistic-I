@@ -13,7 +13,7 @@ import { TbRotateClockwise } from "react-icons/tb";
 import { returnCategories } from "@/Constants/categories";
 
 const Return = ({ auth }) => {
-  const { hasAccess, getLayout } = useRole();
+  const { hasAccess, getLayout, hasPermissions } = useRole();
   const Layout = getLayout(auth.user.type);
 
   const { themePreference, debugMode } = useStateContext();
@@ -176,22 +176,22 @@ const Return = ({ auth }) => {
                   </div>
                   <p className="text-sm italic p-1 mt-2">{selectedData?.comment}</p>
                 </div>
-                <div className="mt-auto">
+                <div className="mt-auto flex">
                   {
                     selectedData?.status === 'Waiting for Approval' ?
-                      <button onClick={() => acceptReturn(selectedData?.id)} className="leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-green-100 text-green-600 outline outline-1 outline-green-300" >
+                      <button onClick={() => acceptReturn(selectedData?.id)} className="btn disable ml-auto text-sm" disabled={!hasPermissions([342])}>
                         Accept
                       </button> : null
                   }
                   {
                     debugMode && selectedData?.status === 'Request Approved' ?
-                      <button onClick={() => deliverReturn(selectedData?.id)} className="italic leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-green-100 text-green-600 outline outline-1 outline-green-300" >
+                      <button onClick={() => deliverReturn(selectedData?.id)} className="btn disable ml-auto text-sm" disabled={!hasPermissions([342])}>
                         Mark as delivered
                       </button> : null
                   }
                   {
                     selectedData?.status === 'Delivered' ?
-                      <button onClick={() => onAccept(selectedData?.id, JSON.parse(selectedData?.items))} className="leading-normal whitespace-nowrap p-1 px-3 rounded-lg bg-green-100 text-green-600 outline outline-1 outline-green-300" >
+                      <button onClick={() => onAccept(selectedData?.id, JSON.parse(selectedData?.items))} className="btn disable ml-auto text-sm" disabled={!hasPermissions([342])}>
                         Complete
                       </button> : null
                   }
