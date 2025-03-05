@@ -3,7 +3,7 @@ import SuperAdminLayout from "@/Layouts/SuperAdminLayout";
 import InventoryLayout from "@/Layouts/InventoryLayout";
 import InfrastructureLayout from "@/Layouts/InfrastructureLayout";
 import AuditLayout from "@/Layouts/AuditLayout";
-import { adminPages, inventoryPages, infrastructurePages, auditPages } from "@/Constants/navlinks";
+import { superAdminPages, adminPages, inventoryPages, infrastructurePages, auditPages } from "@/Constants/navlinks";
 import { useStateContext } from "@/context/contextProvider";
 
 const useRole = () => {
@@ -45,8 +45,8 @@ const useRole = () => {
 
   const getPages = (userType) => {
     switch (userType) {
-      /* case 2050:
-          return adminPages; */
+      case 2050:
+          return superAdminPages;
       case 2051:
         return adminPages;
       case 2052:
@@ -55,8 +55,8 @@ const useRole = () => {
         return infrastructurePages;
       case 2054:
         return auditPages;
-      /* case 2055:
-          return adminPages; */
+      case 2055:
+          return auditPages;
     }
   }
 

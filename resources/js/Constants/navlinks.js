@@ -118,14 +118,32 @@ export const managementLinks = [
     },
 ];
 
+export const managementLinks2 = [
+    {
+        name: 'user',
+        Icon: TbUserCog
+    },
+    {
+        name: ['infrastructure', 'infrastructure-view'],
+        Icon: TbBuildingCog
+    },
+];
+
 ////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////
+
+export const superAdminPages = [
+    'dashboard', /* 'report', */ 'receipt', 'dispatch', 'warehouse', 'product', 'category',
+    'depot', 'terminal',
+    'tasks', 'reports', 'assignments',
+    'user', 'infrastructure', 'logs', /* 'module' */,
+]
 
 export const adminPages = [
     'dashboard', /* 'report', */ 'receipt', 'dispatch', 'warehouse', 'product', 'category',
     'depot', 'terminal',
     'tasks', 'reports', 'assignments',
-    'user', 'infrastructure', 'module',
+    'user', 'infrastructure',
 ]
 
 export const inventoryPages = [

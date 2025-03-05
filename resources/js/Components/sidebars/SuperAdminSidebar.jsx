@@ -3,7 +3,7 @@ import { useStateContext } from "@/context/contextProvider";
 import NavLink from '@/Components/NavLink';
 import NavLinkCategory from '@/Components/NavLinkCategory';
 import Logo from "../Logo";
-import { analyticsLinks, inventoryLinks, infrastructureLinks, auditLinks, managementLinks2 } from '@/Constants/navlinks';
+import { analyticsLinks, inventoryLinks, infrastructureLinks, auditLinks, managementLinks } from '@/Constants/navlinks';
 
 import { TbChartHistogram } from "react-icons/tb";
 import { TbPackages } from "react-icons/tb";
@@ -11,7 +11,7 @@ import { TbSettingsCog } from "react-icons/tb";
 import { TbBuildingCommunity } from "react-icons/tb";
 import { TbClipboardCheck } from "react-icons/tb";
 
-const AdminSidebar = () => {
+const SuperAdminSidebar = () => {
   const { theme, setThemePreference } = useStateContext();
 
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);
@@ -79,8 +79,8 @@ const AdminSidebar = () => {
           )
         })}
 
-        <NavLinkCategory routes={managementLinks2} Icon={TbSettingsCog} href='user' label='Management' className='mr-4' />
-        {managementLinks2.map((link, index) => {
+        <NavLinkCategory routes={managementLinks} Icon={TbSettingsCog} href='user' label='Management' className='mr-4' />
+        {managementLinks.map((link, index) => {
           return (
             <NavLink key={index} href={route(Array.isArray(link.name) ? link.name[0] : link.name)} active={Array.isArray(link.name) ? link.name.some(name => route().current(name)) : route().current(link.name)}>
               <span className='flex items-center gap-1 px-1'>
@@ -104,4 +104,4 @@ const AdminSidebar = () => {
   )
 }
 
-export default AdminSidebar;
+export default SuperAdminSidebar;
