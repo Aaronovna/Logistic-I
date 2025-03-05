@@ -26,7 +26,7 @@ const Card = ({ name = "name", data = 0, Icon }) => {
 }
 
 const Reports = ({ auth }) => {
-  const { hasAccess, getLayout } = useRole();
+  const { hasAccess, getLayout, hasPermissions } = useRole();
   const Layout = getLayout(auth.user.type);
 
   const [users, setUsers] = useState([]);

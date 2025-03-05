@@ -12,7 +12,7 @@ import { TbX } from "react-icons/tb";
 import useUpdateStatus from "@/api/useUpdateStatus";
 
 const AssignmentsView = ({ auth }) => {
-  const { hasAccess, getLayout } = useRole();
+  const { hasAccess, getLayout, hasPermissions } = useRole();
   const Layout = getLayout(auth.user.type);
 
   const { updateStatus } = useUpdateStatus();
@@ -203,7 +203,11 @@ const AssignmentsView = ({ auth }) => {
               <div className="flex">
                 {
                   task?.status !== 'Pending' ? null :
-                    <button disabled={task?.status !== 'Pending' ? true : false} onClick={() => handleAccept(task?.id)} className="ml-auto border-card">Accept</button>
+                    <button
+                      disabled={task?.status !== 'Pending' || !hasPermissions([522])}
+                      onClick={() => handleAccept(task?.id)}
+                      className="ml-auto btn disable"
+                    >Accept</button>
                 }
               </div>
             </div>
@@ -288,11 +292,12 @@ const AssignmentsView = ({ auth }) => {
                           accept="image/*,video/*"
                           id="file"
                           onChange={handleFileChange}
-                          className="hidden"
+                          className="hidden disable"
+                          disabled={!hasPermissions([522])}
                         />
                         <label
                           htmlFor="file"
-                          className="flex border-card cursor-pointer font-medium items-center gap-2 w-fit mt-2"
+                          className="flex btn w-fit gap-2 disable"
                         >
                           <TbCloudUpload size={20} />
                           Upload File
@@ -310,7 +315,7 @@ const AssignmentsView = ({ auth }) => {
                   }
 
                   {
-                    task?.status === 'In Progress' ? <button type="submit" className="border-card w-fit ml-auto">Submit</button> : null
+                    task?.status === 'In Progress' ? <button type="submit" className="ml-auto btn disable" disabled={!hasPermissions([522])}>Submit</button> : null
                   }
                 </form>
               </div>

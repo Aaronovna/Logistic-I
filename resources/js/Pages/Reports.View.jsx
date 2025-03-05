@@ -7,7 +7,7 @@ import { auditReportStatus } from "@/Constants/status";
 import Status from "@/Components/Status";
 
 const ReportsView = ({ auth }) => {
-  const { hasAccess, getLayout } = useRole();
+  const { hasAccess, getLayout, hasPermissions } = useRole();
   const Layout = getLayout(auth.user.type);
 
   const { props } = usePage();
@@ -126,7 +126,7 @@ const ReportsView = ({ auth }) => {
 
               <div className="flex mt-4">
                 {report?.task_status === 'Pending Review' ?
-                  <button className="ml-auto border-card" onClick={() => updateTaskStatus(report?.id, report?.task_id)}>Accept</button>
+                  <button className="ml-auto btn disable" disabled={!hasPermissions([512])} onClick={() => updateTaskStatus(report?.id, report?.task_id)}>Accept</button>
                   : null}
               </div>
 
@@ -162,9 +162,9 @@ const ReportsView = ({ auth }) => {
             </div>
             <Modal show={viewMediaModal} onClose={() => setViewMediaModal(false)} name="Preview">
               {
-                !(media?.type === 'image/png') ? null :
-                  <div className="w-full">
-                    <img src={media?.url} alt={media?.ur} className="rounded-lg" />
+                !(media?.type === 'image/png' || media?.type === 'image/jpeg') ? null :
+                  <div className="w-full flex flex-col items-center">
+                    <img src={media?.url} alt={media?.ur} className="rounded-lg h-96 w-fit" />
                     <p className="text-nowrap italic group-hover:underline mt-2">
                       {media?.name} ({(media?.size / 1024 / 1024).toFixed(2)} MB)
                     </p>
