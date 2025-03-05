@@ -52,19 +52,19 @@ Route::middleware(["auth", "verified", PreventBackHistory::class])->group(functi
     Route::get('/module', fn() => Inertia::render('Module'))->name('module');
     Route::get('/infrastructure', fn() => Inertia::render('Infrastructure'))->name('infrastructure');
 
-    Route::get('/infrastructure/view', function ($request) {
+    Route::get('/infrastructure/view', function (Request $request) {
         return Inertia::render('Infrastructure.View', [
-            'id' => $request->query('id'), // Extract 'name' from the query string
+            'id' => $request->query('id'),
         ]);
     })->name('infrastructure-view');
 
-    Route::get('/assignments/view', function ($request) {
+    Route::get('/assignments/view', function (Request $request) {
         return Inertia::render('Assignments.View', [
             'id' => $request->query('id'),
         ]);
     })->name('assignments-view');
 
-    Route::get('/reports/view', function ($request) {
+    Route::get('/reports/view', function (Request $request) {
         return Inertia::render('Reports.View', [
             'id' => $request->query('id'),
         ]);

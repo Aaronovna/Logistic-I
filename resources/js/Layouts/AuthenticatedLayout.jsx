@@ -14,7 +14,7 @@ const AuthenticatedLayout = ({ user, children }) => {
   useEffect(() => {
     const fetchUserPermissions = async (id) => {
       try {
-        const response = await axios.get(`position/get/${id}`);
+        const response = await axios.get(`/position/get/${id}`);
         
         setUserPermissions(JSON.parse(response.data.data.permissions));
       } catch (error) {
