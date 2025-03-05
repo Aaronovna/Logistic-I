@@ -60,14 +60,14 @@ const Warehouse = ({ auth }) => {
   const [totalValue, setTotalValue] = useState();
   const fetchInventoryStats = async () => {
     try {
-      const response = await axios.get('/api/v1/inventory/total/stock');
+      const response = await axios.get('/inventory/total/stock');
       setTotalStocks(response.data.data);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
     }
 
     try {
-      const response = await axios.get('/api/v1/inventory/total/value');
+      const response = await axios.get('/inventory/total/value');
       setTotalValue(response.data.data);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
