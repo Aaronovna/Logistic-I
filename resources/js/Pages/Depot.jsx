@@ -18,7 +18,7 @@ import { WeatherCloudChip, WeatherHumidityWindChip, WeatherTempChip } from '@/Co
 const OPENWEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
 const Depot = ({ auth }) => {
-  const { hasAccess, getLayout } = useRole();
+  const { hasAccess, getLayout, hasPermissions } = useRole();
   const Layout = getLayout(auth.user.type);
 
   const { updateStatus } = useUpdateStatus();
@@ -407,8 +407,8 @@ const Depot = ({ auth }) => {
                 <Link className='ml-2 text-sm hover:underline text-gray-600' href={route('depot-history')}>History</Link>
               </div>
               <button
-                className='ml-auto border-card font-medium'
-                style={{ background: theme.accent, color: theme.background }}
+                className='ml-auto btn disable'
+                disabled={!hasPermissions([402])}
                 onClick={() => setOpenRequestModal(true)}
               >
                 Request
@@ -486,7 +486,10 @@ const Depot = ({ auth }) => {
                 <p className='font-semibold text-2xl'>Returns</p>
                 <Link className='ml-2 text-sm hover:underline text-gray-600' href={route('depot-history') + '#return-section'}>History</Link>
               </div>
-              <button className='ml-auto border-card font-medium mr-2' style={{ background: theme.accent, color: theme.background }} onClick={() => setReturnModal(true)}>Return</button>
+              <button
+                className='ml-auto btn disable'
+                disabled={!hasPermissions([402])}
+                onClick={() => setReturnModal(true)}>Return</button>
             </div>
 
             <div className='h-[434px] flex gap-2'>
@@ -619,9 +622,11 @@ const Depot = ({ auth }) => {
                           ))}
                       </tbody>
                     </table>
-
                   </div>
-                  <button className='border-card'>Request</button>
+
+                  <div className='flex'>
+                    <button className='btn disable ml-auto' disabled={!hasPermissions([402])}>Request</button>
+                  </div>
                 </form>
               </div>
             </Modal>
@@ -750,7 +755,14 @@ const Depot = ({ auth }) => {
                   value={returnRequestFormData.comment}
                   onChange={(e) => handleInputChange(e, setReturnRequestFormData)}
                 />
-                <button type='submit' className='border-card'>Submit</button>
+
+                <div className='flex'>
+                  <button
+                    type='submit'
+                    className='btn disable ml-auto'
+                    disabled={!hasPermissions([402])}
+                  >Submit</button>
+                </div>
               </form>
             </Modal>
           </div>
