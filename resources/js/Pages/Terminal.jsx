@@ -18,7 +18,7 @@ import { WeatherCloudChip, WeatherHumidityWindChip, WeatherTempChip } from '@/Co
 const OPENWEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
 const Terminal = ({ auth }) => {
-  const { hasAccess, getLayout } = useRole();
+  const { hasAccess, getLayout, hasPermissions } = useRole();
   const Layout = getLayout(auth.user.type);
 
   const { theme, themePreference } = useStateContext();
@@ -404,8 +404,8 @@ const Terminal = ({ auth }) => {
                 <Link className='ml-2 text-sm hover:underline text-gray-600' href={route('terminal-history')}>History</Link>
               </div>
               <button
-                className='ml-auto border-card font-medium'
-                style={{ background: theme.accent, color: theme.background }}
+                className='ml-auto btn disable'
+                disabled={!hasPermissions([412])}
                 onClick={() => setOpenRequestModal(true)}
               >
                 Request
@@ -481,7 +481,12 @@ const Terminal = ({ auth }) => {
                 <p className='font-semibold text-2xl'>Returns</p>
                 <Link className='ml-2 text-sm hover:underline text-gray-600' href={route('terminal-history') + '#return-section'}>History</Link>
               </div>
-              <button className='ml-auto border-card font-medium mr-2' style={{ background: theme.accent, color: theme.background }} onClick={() => setReturnModal(true)}>Return</button>
+              <button
+                className='ml-auto btn disable'
+                disabled={!hasPermissions([412])}
+                onClick={() => setReturnModal(true)}
+              >Return
+              </button>
             </div>
 
             <div className='h-[434px] flex gap-2'>
@@ -617,7 +622,9 @@ const Terminal = ({ auth }) => {
                     </table>
 
                   </div>
-                  <button className='border-card'>Request</button>
+                  <div className='flex'>
+                    <button className='ml-auto btn disable' disabled={!hasPermissions([412])}>Request</button>
+                  </div>
                 </form>
               </div>
             </Modal>
@@ -746,7 +753,12 @@ const Terminal = ({ auth }) => {
                   value={returnRequestFormData.comment}
                   onChange={(e) => handleInputChange(e, setReturnRequestFormData)}
                 />
-                <button type='submit' className='border-card'>Submit</button>
+                <div className='flex'>
+                  <button type='submit' 
+                    className='ml-auto btn disable'
+                    disabled={!hasPermissions([412])}
+                  >Submit</button>
+                </div>
               </form>
             </Modal>
           </div>
