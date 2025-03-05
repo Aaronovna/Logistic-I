@@ -18,7 +18,7 @@ import Status from '@/Components/Status';
 import useUpdateStatus from '@/api/useUpdateStatus';
 
 const Tasks = ({ auth }) => {
-  const { hasAccess, getLayout } = useRole();
+  const { hasAccess, getLayout, hasPermissions } = useRole();
   const Layout = getLayout(auth.user.type);
 
   const { updateStatus } = useUpdateStatus();
@@ -217,8 +217,8 @@ const Tasks = ({ auth }) => {
                   <Link className='ml-2 text-sm hover:underline text-gray-600' href={route('tasks-history')}>History</Link>
                 </div>
                 <button
-                  className='ml-auto border-card font-medium'
-                  style={{ background: theme.accent, color: theme.background }}
+                  className='ml-auto btn disable'
+                  disabled={!hasPermissions([502])}
                   onClick={() => setOpenCreateTaskModal(true)}
                 >
                   Create Task
@@ -288,7 +288,9 @@ const Tasks = ({ auth }) => {
                     {createTaskFormData.type && auditTasks.find(task => task.name === createTaskFormData.type).desc || 'Please select task'}
                   </p>
 
-                  <button className='border-card'>Create Task</button>
+                  <div className='flex'>
+                    <button className='btn disable ml-auto' disabled={!hasPermissions([502])}>Create Task</button>
+                  </div>
                 </form>
               </div>
             </Modal>
@@ -344,20 +346,20 @@ const Tasks = ({ auth }) => {
                 </div>
                 {
                   selectedTask && getStatusStep(auditTaskStatus, selectedTask?.status) === 1 &&
-                  <button className='border-card font-medium bg-red-100 text-red-600' onClick={() => handleDeleteTask(selectedTask?.id)}>Delete</button>
+                  <button className='btn bg-red-200 text-black hover:bg-red-400 disable' disabled={!hasPermissions([502])} onClick={() => handleDeleteTask(selectedTask?.id)}>Delete</button>
                 }
                 {
                   selectedTask && (getStatusStep(auditTaskStatus, selectedTask?.status) === 2 || getStatusStep(auditTaskStatus, selectedTask?.status) === 3) &&
-                  <button className='border-card font-medium bg-red-100 text-red-600' onClick={() => handleCancelTask(selectedTask?.id)}>Cancel</button>
+                  <button className='btn bg-red-200 text-black hover:bg-red-400 disable' disabled={!hasPermissions([502])} onClick={() => handleCancelTask(selectedTask?.id)}>Cancel</button>
                 }
                 <div className='flex gap-2 w-full'>
                   {
                     selectedTask?.assigned_to ? null :
-                      <button className='border-card font-medium w-full bg-blue-100 text-blue-600 mt-2' onClick={(e) => handleAutoAddTaskAuditorSubmit(e, selectedTask?.id)}>Auto Assign Auditor</button>
+                      <button className='btn w-full mt-2 disable' disabled={!hasPermissions([502])} onClick={(e) => handleAutoAddTaskAuditorSubmit(e, selectedTask?.id)}>Auto Assign Auditor</button>
                   }
                   {
                     selectedTask?.assigned_to ? null :
-                      <button className='border-card font-medium w-full bg-blue-100 text-blue-600 mt-2' onClick={(e) => handleAddTaskAuditorSubmit(e, selectedTask?.id)}>Save</button>
+                      <button className='btn w-full mt-2 disable' disabled={!hasPermissions([502])} onClick={(e) => handleAddTaskAuditorSubmit(e, selectedTask?.id)}>Save</button>
                   }
                 </div>
               </div>
