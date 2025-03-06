@@ -8,6 +8,7 @@ import { filterArray } from '@/functions/filterArray';
 
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
+import { useConfirmation } from '@/context/confirmationProvider';
 
 const cardStyle = 'mb-2 snap-center mx-2 md:min-w-64 inline-block min-w-[100%] border-none text-black backdrop-blur-lg bg-white/30';
 
@@ -27,6 +28,7 @@ const formatValue = (value) => {
 const Warehouse = ({ auth }) => {
   const { hasAccess, getLayout, hasPermissions } = useRole();
   const Layout = getLayout(auth.user.type);
+  const { confirm } = useConfirmation();
 
   const { themePreference } = useStateContext();
 
@@ -131,29 +133,30 @@ const Warehouse = ({ auth }) => {
 
   const handleAddInventorySubmit = async (e) => {
     e.preventDefault();
+    confirm("Adding inventory this way may lead to inaccuracies. Use only for necessary adjustments.", async () => {
+      const payload = {
+        quantity: addInventoryFormData.quantity,
+        product_id: addInventoryFormData.product_id,
+        warehouse_id: selectedWarehouse.id,
+      }
 
-    const payload = {
-      quantity: addInventoryFormData.quantity,
-      product_id: addInventoryFormData.product_id,
-      warehouse_id: selectedWarehouse.id,
-    }
+      try {
+        const response = await axios.post('/inventory/create', payload);
 
-    try {
-      const response = await axios.post('/inventory/create', payload);
+        setAddInventoryFormData({
+          quantity: '',
+          product_id: '',
+          warehouse_id: addInventoryFormData.warehouse_id,
+        });
 
-      setAddInventoryFormData({
-        quantity: '',
-        product_id: '',
-        warehouse_id: addInventoryFormData.warehouse_id,
-      });
-
-      toast.success(response.data.message);
-      fetchInventoryStats();
-      fetchInventory();
-      setOpenAddInventoryModal(false);
-    } catch (error) {
-      toast.error(`${error.status} ${error.response.data.message}`);
-    }
+        toast.success(response.data.message);
+        fetchInventoryStats();
+        fetchInventory();
+        setOpenAddInventoryModal(false);
+      } catch (error) {
+        toast.error(`${error.status} ${error.response.data.message}`);
+      }
+    })
   };
 
   const [openProductDropdown, setOpenProductDropdown] = useState(false);
@@ -227,27 +230,28 @@ const Warehouse = ({ auth }) => {
 
   const handleEditInventorySubmit = async (e) => {
     e.preventDefault();
+    confirm("Updating inventory this way may lead to inaccuracies. Use only for necessary adjustments.", async () => {
+      try {
+        const response = await axios.patch(`/inventory/update/${selectedData.id}`, {
+          quantity: editInventoryFormData.quantity,
+          warehouse_id: selectedData.warehouse_id,
+          operation: editInventoryFormData.operation,
+        });
 
-    try {
-      const response = await axios.patch(`/inventory/update/${selectedData.id}`, {
-        quantity: editInventoryFormData.quantity,
-        warehouse_id: selectedData.warehouse_id,
-        operation: editInventoryFormData.operation,
-      });
+        setEditInventoryFormData({
+          quantity: '',
+          warehouse_id: 0,
+          operation: null,
+        });
 
-      setEditInventoryFormData({
-        quantity: '',
-        warehouse_id: 0,
-        operation: null,
-      });
-
-      toast.success(response.data.message);
-      fetchInventoryStats();
-      fetchInventory();
-      setOpenEditInventoryModal(false);
-    } catch (error) {
-      toast.error(`${error.status} ${error.response.data.message}`);
-    }
+        toast.success(response.data.message);
+        fetchInventoryStats();
+        fetchInventory();
+        setOpenEditInventoryModal(false);
+      } catch (error) {
+        toast.error(`${error.status} ${error.response.data.message}`);
+      }
+    })
   };
 
   const handleEditProductInputChange = (e) => {
