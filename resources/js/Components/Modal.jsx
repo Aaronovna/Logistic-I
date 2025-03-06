@@ -53,7 +53,7 @@ export default function Modal({name = "Modal Name", children, show = false, maxW
           >
             <div className='flex mb-4'>
               <p className='text-xl font-medium mt-2 pb-2 tracking-wider text-text'>{name}</p>
-              <button onClick={onClose} className='ml-auto text-text'><TbX size={32}/></button>
+              {closeable ? <button onClick={onClose} className='ml-auto text-text'><TbX size={32}/></button> : null}
             </div>
               {children}
           </DialogPanel>

@@ -11,6 +11,7 @@ import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 
 import { ContextProvider } from './context/contextProvider';
+import { ConfirmationProvider } from './context/confirmationProvider';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Nexfleet Dynamics | Logistic I';
 
@@ -22,7 +23,9 @@ createInertiaApp({
 
         root.render(
             <ContextProvider>
-                <App {...props} />
+                <ConfirmationProvider>
+                    <App {...props} />
+                </ConfirmationProvider>
             </ContextProvider>
         );
     },
