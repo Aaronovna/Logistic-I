@@ -29,7 +29,12 @@ export default function Dashboard({ auth }) {
   const fetchStats = async () => {
     try {
       const response = await axios.get('/products/category');
-      setProductEachCategory(response.data.data);
+      const processedData = response.data.data.map(category => ({
+        category_name: category.category_name,
+        product_count: category.products.length, // Correct numeric field
+      }));
+
+      setProductEachCategory(processedData);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
     }
@@ -115,7 +120,7 @@ export default function Dashboard({ auth }) {
 
   const pieSeries = [{
     type: 'pie',
-    angleKey: 'products.length',
+    angleKey: 'product_count',
     legendItemKey: 'category_name',
   }];
   const barSeries = [
