@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
         ]);
         Supplier::factory(10)->create();
         Product::factory(20)->create();
-        User::factory(6)->create();
+        User::factory(7)->create();
         
         $this->call(DispatchTrailSeeder::class);
 

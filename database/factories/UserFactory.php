@@ -28,6 +28,14 @@ class UserFactory extends Factory
         $users = [
             [
                 'name' => 'Ashleigh Koepp',
+                'email' => 'superadminlgstc1@nexfleetdynamics.com',
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+                'remember_token' => Str::random(10),
+                'type' => 2050,
+            ],
+            [
+                'name' => 'Ashleigh Koepp',
                 'email' => 'ashleigh.koepp@example.net',
                 'email_verified_at' => now(),
                 'password' => Hash::make('password'),
