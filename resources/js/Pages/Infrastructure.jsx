@@ -34,7 +34,7 @@ const filterArray = (array, property, criteria) => {
 };
 
 export default function Infrastructure({ auth }) {
-  const { hasAccess, getLayout } = useRole();
+  const { hasAccess, getLayout, hasPermissions } = useRole();
   const Layout = getLayout(auth.user.type);
 
   const { theme } = useStateContext();
@@ -118,11 +118,12 @@ export default function Infrastructure({ auth }) {
         {!hasAccess(auth.user.type, [2050, 2051]) ? <Unauthorized /> :
           <div className="content">
             <div className='flex gap-4'>
-              <div className="h-36 border-card min-w-36 mb-2 flex justify-center items-center hover:shadow-lg duration-200 hover:scale-105 hover:cursor-pointer"
+              <button className="h-36 min-w-36 mb-2 hover:shadow-lg hover:scale-105 btn bg-transparent hover:bg-transparent border-card disable"
                 onClick={() => setOpenAddInfrastructureModal(true)}
+                disabled={!hasPermissions([122])}
               >
                 <TbPlus size={48} color="gray" />
-              </div>
+              </button>
               <div className='h-36 border-card w-full'>
 
               </div>
@@ -204,7 +205,7 @@ export default function Infrastructure({ auth }) {
                     onChange={handleAddInventoryInputChange}
                   />
                   <div className='flex mt-auto'>
-                    <button className='border-card w-full'>Add Infrastructure</button>
+                    <button className='btn w-full disable' disabled={!hasPermissions([122])}>Add Infrastructure</button>
                   </div>
                 </form>
                 <div className='w-1/2'>
