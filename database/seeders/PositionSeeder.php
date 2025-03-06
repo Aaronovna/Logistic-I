@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class PositionSeeder extends Seeder
@@ -43,53 +42,30 @@ class PositionSeeder extends Seeder
             "Audit Supervisor (Warehouse/Inventory)",
             "Inventory Control Auditor",
             "Maintenance Executive",
-            "Logisitic Operator",
+            "Logistic Operator",
             "Maintenance Planner",
             "Maintenance Supervisor",
         ];
 
+        $permissions = [
+            "101", "102", "111", "112", "121", "122", "131", "132", 
+            "201", "202", "203", 
+            "301", "302", "311", "312", "321", "322", "331", "332", "341", "342", "351", "352",
+            "401", "402", "411", "412", 
+            "501", "502", "511", "512", "521", "522"
+        ];
+
+        DB::table('positions')->insert([
+            'name' => "Super Admin",
+            'permissions' => json_encode(array_fill_keys($permissions, true)),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         foreach ($positions as $position) {
             DB::table('positions')->insert([
                 'name' => $position,
-                'permissions' => json_encode([
-                    "101" => false,
-                    "102" => false,
-                    "111" => false,
-                    "112" => false,
-                    "121" => false,
-                    "122" => false,
-                    "131" => false,
-                    "132" => false,
-
-                    "201" => false,
-                    "202" => false,
-                    "203" => false,
-
-                    "301" => false,
-                    "302" => false,
-                    "311" => false,
-                    "312" => false,
-                    "321" => false,
-                    "322" => false,
-                    "331" => false,
-                    "332" => false,
-                    "341" => false,
-                    "342" => false,
-                    "351" => false,
-                    "352" => false,
-
-                    "401" => false,
-                    "402" => false,
-                    "411" => false,
-                    "412" => false,
-
-                    "501" => false,
-                    "502" => false,
-                    "511" => false,
-                    "512" => false,
-                    "521" => false,
-                    "522" => false,
-                ]),
+                'permissions' => json_encode(array_fill_keys($permissions, false)),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
