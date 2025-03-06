@@ -42,10 +42,16 @@ const dummyEmployeesData = [
     email: 'mio.kawakita@app.net',
     employeeId: '5656',
   },
+  {
+    fname: 'John',
+    sname: 'Doe',
+    email: 'materwelon826@gmail.com',
+    employeeId: '7878',
+  },
 ]
 
 export default function User({ auth }) {
-  const { hasAccess, getLayout } = useRole();
+  const { hasAccess, getLayout, hasPermissions } = useRole();
   const Layout = getLayout(auth.user.type);
 
   const { theme, themePreference, userPermissions } = useStateContext();
@@ -339,11 +345,11 @@ export default function User({ auth }) {
                 <p className='text-xl font-semibold h-fit' style={{ color: theme.text }}>Users</p>
 
                 <button style={{ background: theme.accent, color: theme.background }}
-                  disabled={userPermissions === '000' ? true : false}
-                  className='m-2 mr-0 p-2 rounded-md flex items-center gap-1'
+                  disabled={!hasPermissions([102])}
+                  className='btn gap-2 disable'
                   onClick={() => setOpenAddUserModal(true)}>
                   <TbUserPlus />
-                  <p className='md:block hidden'>Add Users</p>
+                  Add Users
                 </button>
 
               </span>
@@ -374,14 +380,14 @@ export default function User({ auth }) {
                     </div>
                   ) : null}
                   <p className='text-lg font-medium ml-1' style={{ color: theme.text }}>{userSelectedData ? userSelectedData.name : '-'}</p>
-                  <p className='text-gray-600 ml-1'>{userSelectedData?.position?.name ? userSelectedData.position?.name : 'No position set yet'}</p>
+                  <p className='text-neutral ml-1'>{userSelectedData?.position?.name ? userSelectedData.position?.name : 'No position set yet'}</p>
                   <div className='my-2 relative border-card grid grid-cols-2 h-56 overflow-y-auto p-2'>
                     {selectedUserPermissions &&
                       permissions.map((permission, index) => {
                         const permissionValue = selectedUserPermissions[index][permission.code]; // Get true/false using key
 
                         return (
-                          <p key={index} className='capitalize flex gap-1 items-center hover:bg-gray-300 rounded'>
+                          <p key={index} className='capitalize flex gap-1 items-center hover:bg-hbg rounded text-text cursor-default'>
                             <span>{permissionValue ? <TbCheck size={22} color='lime' /> : <TbX size={22} color='red' />}</span> {/* Display based on value */}
                             <span>{permission.alias.replace(/_/g, " ")}</span>
                           </p>
@@ -390,17 +396,17 @@ export default function User({ auth }) {
                   </div>
 
                   <form className='flex gap-2 mt-auto' onSubmit={submitSetUserPosition}>
-                    <select name="su_position" id="su_position" className='border-card flex-1' onChange={changePermission}>
-                      <option value={null} className='text-sm text-gray-400'>Select Position</option>
+                    <select name="su_position" id="su_position" className='border-card flex-1 bg-background text-text' onChange={changePermission}>
+                      <option value={null} className='text-sm text-neutral bg-background'>Select Position</option>
                       {
                         positions && positions.map((position, index) => {
                           return (
-                            <option value={position.id} key={index} className='text-sm'>{position.name}</option>
+                            <option value={position.id} key={index} className='text-sm text-text bg-background'>{position.name}</option>
                           )
                         })
                       }
                     </select>
-                    <button className='border-card'>Save</button>
+                    <button className='btn disable' disabled={!hasPermissions([102])}>Save</button>
                   </form>
                 </div>
               </div>
@@ -409,8 +415,8 @@ export default function User({ auth }) {
                 <span className='flex justify-between h-14 items-center'>
                   <p className='text-xl font-semibold h-fit' style={{ color: theme.text }}>Positions</p>
                   <button
-                    className='m-2 mr-0 p-2 rounded-md flex items-center gap-1'
-                    style={{ background: theme.accent, color: theme.background }}
+                    className='m-2 mr-0 p-2 btn gap-1 disable'
+                    disabled={!hasPermissions([102])}
                     onClick={() => setOpenAddPositionModal(true)}>
                     <TbPlus size={24} />
                   </button>
@@ -427,12 +433,12 @@ export default function User({ auth }) {
                 </div>
 
                 {/* MODAL FOR ADD POSITION */}
-                <div className={`z-10 absolute h-full w-full top-0 left-0 p-1 backdrop-blur-sm duration-300 rounded-md ${openAddPositionModal ? 'visible opacity-100' : 'invisible opacity-0'} ${themePreference === 'light' ? 'l-t-grad' : 'd-t-grad'}`}>
+                <div className={`z-10 absolute h-full w-full top-0 left-0 backdrop-blur-sm duration-300 rounded-md ${openAddPositionModal ? 'visible opacity-100' : 'invisible opacity-0'} ${themePreference === 'light' ? 'l-t-grad' : 'd-t-grad'}`}>
                   <span className='h-14 flex justify-end items-center rounded-md'>
-                    <button className='font-semibold m-2 mr-0 p-2 rounded-md flex' style={{ color: theme.background, background: theme.danger }}
+                    <button className='font-semibold m-2 mr-0 btn bg-red-200 hover:bg-red-400'
                       onClick={() => setOpenAddPositionModal(false)}
                     >
-                      <TbX size={24} />
+                      <TbX size={24} color='black' />
                     </button>
                   </span>
                   <form onSubmit={handleAddPositionSubmit} className='flex flex-col p-2 border-card' style={{ borderColor: theme.border }}>
@@ -445,7 +451,7 @@ export default function User({ auth }) {
                       value={addPositionName}
                       onChange={(e) => setAddPositionName(e.target.value)}
                     />
-                    <button className='p-2 mt-2 font-semibold border-card' style={{ background: theme.primary, text: theme.text, borderColor: theme.border }}>Create</button>
+                    <button className='p-2 mt-2 btn disable' disabled={!hasPermissions([102])}>Create</button>
                   </form>
                 </div>
 
@@ -470,19 +476,20 @@ export default function User({ auth }) {
                       onChange={(e) => setEditPositionName(e.target.value)}
                     />
                     <span className='flex gap-2'>
-                      <button type='button' className='flex-1 p-2 mt-2 font-medium text-white border-card'
-                        style={{ color: theme.background, borderColor: theme.border, background: theme.danger }}
+                      <button type='button' className='flex-1 p-2 mt-2 btn disable bg-red-400 hover:bg-red-500'
+                        disabled={!hasPermissions([102])}
                         onClick={() => handleDeletePosition(positionSelectedData.id)}>
                         Remove
                       </button>
-                      <button type='submit' className='flex-1 p-2 mt-2 font-medium border-card'
-                        style={{ background: theme.primary, color: theme.background, borderColor: theme.border }}>
+                      <button type='submit' className='flex-1 p-2 mt-2 btn disable bg-primary hover:bg-accent'
+                        disabled={!hasPermissions([102])}>
                         Update
                       </button>
                     </span>
                     <button type='button' onClick={() => setOpenEditPositionPermissionsModal(true)}
-                      className='p-2 mt-2 font-medium border-card'
-                      style={{ background: theme.secondary, color: theme.text, borderColor: theme.border }}>Edit Permissions</button>
+                      className='p-2 mt-2 btn disable'
+                      disabled={!hasPermissions([102])}>
+                      Edit Permissions</button>
                   </form>
                 </div>
               </div>
@@ -520,8 +527,8 @@ export default function User({ auth }) {
                     <input readOnly={true} value={addUserFormData.name} className='border-card w-3/5 mb-2 bg-transparent' style={{ borderColor: theme.border }} type="text" name="name" id="name" placeholder='Name' />
                     <input readOnly={true} value={addUserFormData.email} className='border-card w-3/5 mb-2 bg-transparent' style={{ borderColor: theme.border }} type="email" name='email' id='email' placeholder='Email' />
                     <input readOnly={true} value={addUserFormData.password} className='border-card w-3/5 mb-2 bg-transparent' style={{ borderColor: theme.border }} type="text" name='password' id='password' placeholder='Password' />
-                    <button type="submit" className="block ml-auto text-white font-medium p-2 rounded-md" style={{ background: theme.primary }}>Submit</button>
                   </div>
+                  <button type="submit" className="ml-auto btn disable" disabled={!hasPermissions([102])}>Create User</button>
                 </form>
               </div>
             </Modal>
@@ -549,14 +556,14 @@ export default function User({ auth }) {
                       )
                     })}
                   </div>
-                  <button type="submit" className="block ml-auto text-white font-medium p-2 rounded-md" style={{ background: theme.primary }}>Submit</button>
+                  <button type="submit" className="ml-auto btn disable" disabled={!hasPermissions([102])}>Save Permissions</button>
                 </form>
               </div>
             </Modal>
           </div>
         }
       </Layout>
-    </AuthenticatedLayout>
+    </AuthenticatedLayout >
   );
 }
 
