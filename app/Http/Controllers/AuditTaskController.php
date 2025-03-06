@@ -82,6 +82,11 @@ class AuditTaskController extends Controller
             return response()->json(['message' => 'Task not found'], 404);
         }
 
+        // Prevent updating status to "Canceled" only if auto_gen is true
+        if ($task->auto_gen && $request->has('status') && $request->status === 'Canceled') {
+            return response()->json(['message' => 'Auto-generated tasks cannot be canceled'], 403);
+        }
+
         $validatedData = $request->validate([
             'assigned_to' => 'sometimes|exists:users,id',
             'status' => 'sometimes|string',
@@ -96,17 +101,26 @@ class AuditTaskController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
-    {
-        $task = AuditTask::find($id);
+{
+    $task = AuditTask::find($id);
 
-        if (!$task) {
-            return response()->json(['message' => 'Task not found'], 404);
-        }
-
-        $task->delete();
-
-        return response()->json(['message' => 'Task deleted successfully'], 200);
+    if (!$task) {
+        return response()->json(['message' => 'Task not found'], 404);
     }
+
+    // Prevent deletion if auto_gen is true (before attempting deletion)
+    if ($task->auto_gen) {
+        return response()->json(['message' => 'Auto-generated tasks cannot be deleted'], 403);
+    }
+
+    try {
+        $task->delete();
+        return response()->json(['message' => 'Task deleted successfully'], 200);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Auto-generated tasks cannot be deleted'], 403);
+    }
+}
+
 
     public function indexByUser(string $userId)
     {
