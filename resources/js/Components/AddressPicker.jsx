@@ -217,7 +217,7 @@ const Searchbar = ({ }) => {
 
   const autoComplete = (e) => {
     setSearchQuery(e.target.value);
-    forwardGeocodeSearch();
+    //forwardGeocodeSearch();
   }
 
   return (
@@ -230,16 +230,16 @@ const Searchbar = ({ }) => {
           placeholder="Search Address..."
           className="rounded-md w-full border-none bg-transparent"
         />
-        <button className="text-gray-400" onClick={forwardGeocodeSearch}><TbSearch size={24} /></button>
+        <button className="text-neutral" onClick={forwardGeocodeSearch}><TbSearch size={24} /></button>
       </div>
 
       {showDropdown && suggestions.length > 0 && (
-        <ul className="absolute w-full bg-white/10 backdrop-blur border rounded mt-1 max-h-60 overflow-auto z-10">
+        <ul className="absolute w-full bg-background backdrop-blur border rounded mt-1 max-h-60 overflow-auto z-10">
           {suggestions.map((place) => (
             <li
               key={place.place_id}
               onClick={() => selectLocation(place.lat, place.lon, place.display_name)}
-              className="p-1 text-sm cursor-pointer hover:bg-gray-200/75 truncate"
+              className="p-1 text-sm cursor-pointer hover:bg-hbg truncate"
               title={place.display_name}
             >
               {place.display_name}
