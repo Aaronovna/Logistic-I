@@ -20,6 +20,7 @@ import useGemini from '@/hooks/useGemini';
 import usePrediction from '@/hooks/usePrediction';
 import { generateDemandData } from './Dev';
 import { product_intruction } from '@/Constants/instructions';
+import { useConfirmation } from '@/context/confirmationProvider';
 
 import IMAGE_PLACEHOLDER from "../../../public/assets/images/image-placeholder.png"
 
@@ -28,6 +29,7 @@ const cardStyle = 'mb-2 snap-center mx-2 md:min-w-64 inline-block min-w-[100%]';
 const Product = ({ auth }) => {
   const { hasAccess, getLayout, hasPermissions } = useRole();
   const Layout = getLayout(auth.user.type);
+  const { confirm } = useConfirmation();
 
   const [products, setProducts] = useState([]);
   const [totalProductValue, setTotalProductValue] = useState(0);
@@ -482,7 +484,10 @@ const Product = ({ auth }) => {
                 </div>
 
                 <div className='w-full mt-2 flex gap-2'>
-                  <button className='btn disable text-black bg-red-200 hover:bg-red-400 w-full' disabled={!hasPermissions([332])} onClick={() => handleDeleteProduct(selectedProduct?.id)}>Delete</button>
+                  <button className='btn disable text-black bg-red-200 hover:bg-red-400 w-full'
+                    disabled={!hasPermissions([332])}
+                    onClick={() => confirm(cm_delete, () => handleDeleteProduct(selectedProduct?.id))}
+                  > Delete </button>
                   <button className='btn disable w-full' disabled={!hasPermissions([332])} onClick={() => setOpenEditProductModal(true)}>Edit</button>
                 </div>
               </div>
@@ -577,3 +582,5 @@ const Product = ({ auth }) => {
 }
 
 export default Product;
+
+const cm_delete = `Are you sure you want to delete this product entry?`;
