@@ -18,7 +18,9 @@ const useRole = () => {
   };
 
   const hasPermissions = (allowedPermissions = []) => {
-    if (!userPermissions || typeof userPermissions !== "object" || !Array.isArray(allowedPermissions)) return false;
+    if (!userPermissions || typeof userPermissions !== "object" || !Array.isArray(allowedPermissions)) {
+      return false;
+    }
 
     return allowedPermissions.some(permission => userPermissions[permission] === true);
   };
