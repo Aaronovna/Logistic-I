@@ -172,6 +172,12 @@ const Depot = ({ auth }) => {
       const response = await axios.post('/request/create', data);
       fetchRequest();
       setOpenRequestModal(false);
+      setRequestMaterialFormData({
+        user_id: null,
+        infrastructure_id: null,
+        type: 'maintenance',
+        items: [],
+      });setRequestedItems([]);
       toast.success(response.data.message);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
@@ -270,6 +276,10 @@ const Depot = ({ auth }) => {
       const response = await axios.post('/return/request/create', payload);
       fetchReturns();
       setReturnModal(false);
+      setItems([
+        { category: '', name: '', assoc_product: '', quantityType: 'qty', value: '' }
+      ]);
+      setReturnRequestFormData({comment: ''})
       toast.success(response.data.message);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
