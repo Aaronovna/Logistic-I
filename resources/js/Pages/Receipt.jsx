@@ -15,6 +15,7 @@ import Status from '@/Components/Status';
 import { shipmentStatus } from '@/Constants/status';
 import { TbMapPin } from 'react-icons/tb';
 import useRole from '@/hooks/useRole';
+import { useConfirmation } from '@/context/confirmationProvider';
 
 const filterOrdersByStatuses = (orders, statuses) => {
   return orders.filter(order => statuses.includes(order?.status));
@@ -23,6 +24,7 @@ const filterOrdersByStatuses = (orders, statuses) => {
 const Receipt = ({ auth }) => {
   const { hasAccess, getLayout, hasPermissions } = useRole();
   const Layout = getLayout(auth.user.type);
+  const { confirm } = useConfirmation();
 
   const { updateStatus } = useUpdateStatus();
   const { theme, ordersDummyData } = useStateContext();
@@ -44,13 +46,14 @@ const Receipt = ({ auth }) => {
         if (dateA > dateB) return 1;
         return 0;
       })
+      setReceivedShipment(data);
 
-      setReceivedShipment(filterOrdersByStatuses(data, [
+      /* setReceivedShipment(filterOrdersByStatuses(data, [
         'Upcoming',
         'Delivered',
         'Auditing on progress',
         'Checked',
-      ]));
+      ])); */
 
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
@@ -160,19 +163,19 @@ const Receipt = ({ auth }) => {
   }
 
   const [activeFilter, setActiveFilter] = useState('No Filter');
-    const filterShipments = (status) => {
-      if (status === 'No Filter') {
-        setFilteredReceivedShipments(receivedShipment);
-      } else {
-        const filteredShipments = filterArray(receivedShipment, 'status', [status]);
-        setFilteredReceivedShipments(filteredShipments);
-      }
-      setActiveFilter(status);
-    };
-  
-    useEffect(() => {
-      filterShipments(activeFilter);
-    }, [receivedShipment]);
+  const filterShipments = (status) => {
+    if (status === 'No Filter') {
+      setFilteredReceivedShipments(receivedShipment);
+    } else {
+      const filteredShipments = filterArray(receivedShipment, 'status', [status]);
+      setFilteredReceivedShipments(filteredShipments);
+    }
+    setActiveFilter(status);
+  };
+
+  useEffect(() => {
+    filterShipments(activeFilter);
+  }, [receivedShipment]);
 
   return (
     <AuthenticatedLayout
@@ -237,7 +240,7 @@ const Receipt = ({ auth }) => {
                 })}
               </div>
             </div>
-            
+
             <Modal name="Shipment Details" show={openShipmentDataModal} onClose={() => setOpenShipmentDataModal(false)}>
               <div className='text-text'>
                 <div className='flex justify-between mb-2'>
@@ -299,8 +302,15 @@ const Receipt = ({ auth }) => {
                   {
                     shipmentData && getStatusStep(shipmentStatus, shipmentData?.status) === 4 &&
                     <div className='ml-auto'>
-                      <button className='btn mr-2 bg-accent text-background hover:bg-primary disable' disabled={!hasPermissions([302])} onClick={() => onReturn(shipmentData.id)}>Return</button>
-                      <button className='btn bg-accent text-background hover:bg-primary disable' disabled={!hasPermissions([302])} onClick={() => onAccept(shipmentData.id, shipmentData)}>Accept</button>
+                      <button className='btn mr-2 bg-accent text-background hover:bg-primary disable'
+                        disabled={!hasPermissions([302])}
+                        onClick={() => confirm(cm_return, () => onReturn(shipmentData.id))}
+                      > Return </button>
+                      <button
+                        className='btn bg-accent text-background hover:bg-primary disable'
+                        disabled={!hasPermissions([302])}
+                        onClick={() => confirm(cm_accept, () => onAccept(shipmentData.id, shipmentData))}
+                      > Accept </button>
                     </div>
                   }
                 </div>
@@ -336,3 +346,6 @@ const Receipt = ({ auth }) => {
 }
 
 export default Receipt;
+
+const cm_return = `Marking this shipment as returned is irreversible. All products listed in this shipment will not be added to inventory. Please confirm before proceeding.`;
+const cm_accept = `Accepting this shipment is final and cannot be undone. All products in this shipment will be automatically added to inventory. Please review before confirming.`;
