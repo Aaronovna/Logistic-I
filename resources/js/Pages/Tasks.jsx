@@ -64,6 +64,10 @@ const Tasks = ({ auth }) => {
 
   const handleCreateTaskSubmit = async (e) => {
     e.preventDefault();
+    if (!createTaskFormData.deadline) {
+      toast.error('No deadline is provided');
+      return;
+    }
 
     const payload = {
       type: createTaskFormData.type,
