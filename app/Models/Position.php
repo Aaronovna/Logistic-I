@@ -21,6 +21,7 @@ class Position extends Model
                 $position->permissions = json_encode([
                     "101" => false,
                     "102" => false,
+                    "103" => false,
                     "111" => false,
                     "112" => false,
                     "121" => false,

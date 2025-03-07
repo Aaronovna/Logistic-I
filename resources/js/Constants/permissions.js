@@ -8,6 +8,10 @@ export const permissions = [
         alias: 'edit_user',
     },
     {
+        code: 103,
+        alias: 'delete_user',
+    },
+    {
         code: 111,
         alias: 'view_position',
     },

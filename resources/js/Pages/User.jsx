@@ -16,12 +16,13 @@ import { TbX, TbCheck } from "react-icons/tb";
 
 import { Card } from '@/Components/Cards';
 import Modal from '@/Components/Modal';
-import { permissions } from '@/Constants/permissions';
+import { permissions, userType } from '@/Constants/permissions';
 
 import { useStateContext } from '@/context/contextProvider';
 
 import { generatePassword } from '@/functions/passwordGenerator';
 import { convertPermissions } from '@/functions/permissionsConverter';
+import { useConfirmation } from '@/context/confirmationProvider';
 
 const dummyEmployeesData = [
   {
@@ -53,8 +54,9 @@ const dummyEmployeesData = [
 export default function User({ auth }) {
   const { hasAccess, getLayout, hasPermissions } = useRole();
   const Layout = getLayout(auth.user.type);
+  const { confirm } = useConfirmation();
 
-  const { theme, themePreference, userPermissions } = useStateContext();
+  const { theme, themePreference } = useStateContext();
 
   const [users, setUsers] = useState(null);
   const [positions, setPositions] = useState(null);
@@ -95,7 +97,7 @@ export default function User({ auth }) {
       toast.success(response.data.message);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
-    }
+    } finally { window.location.reload() }
   }
 
   const [openAddUserModal, setOpenAddUserModal] = useState(false);
@@ -107,6 +109,12 @@ export default function User({ auth }) {
   const [userSelectedData, setUserSelectedData] = useState(null)
   const [selectedUserPermissions, setSelectedUserPermissions] = useState(null)
   const [positionId, setPositionId] = useState(null);
+  const [role, setRole] = useState(null);
+
+  const changeRole = (e) => {
+    setRole(e.target.value);
+  }
+
   const changePermission = (e) => {
     const id = Number(e.target.value);
     setPositionId(id);
@@ -119,15 +127,26 @@ export default function User({ auth }) {
 
   const submitSetUserPosition = async (e) => {
     e.preventDefault();
+    confirm(cm_change, async () => {
+      const payload = {};
+      if (positionId !== null) payload.position_id = positionId;
+      if (role !== null) payload.type = role;
 
-    try {
-      const response = await axios.patch(`/user/update/${userSelectedData.id}`, { position_id: positionId });
-      fetchUsers();
-      toast.success(response.data.message);
-    } catch (error) {
-      toast.error(`${error.status} ${error.response.data.message}`);
-    }
-  }
+      // Ensure there's at least one field to update
+      if (Object.keys(payload).length === 0) {
+        toast.error("No changes detected.");
+        return;
+      }
+
+      try {
+        const response = await axios.patch(`/user/update/${userSelectedData.id}`, payload);
+        fetchUsers();
+        toast.success(response.data.message);
+      } catch (error) {
+        toast.error(`${error.response?.status || "Error"}: ${error.response?.data?.message || "Something went wrong"}`);
+      } finally { window.location.reload() }
+    })
+  };
 
   const onUserSelectionChanged = (event) => {
     const selectedRows = event.api.getSelectedRows();
@@ -188,28 +207,32 @@ export default function User({ auth }) {
 
   const handleAddPositionSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await axios.post('/position/create', { name: addPositionName });
-      setAddPositionName("");
-      fetchPositions();
-      setOpenAddPositionModal(false);
-      toast.success(response.data.message);
-    } catch (error) {
-      toast.error(`${error.status} ${error.response.data.message}`);
-    }
+    confirm(cm_change, async () => {
+      try {
+        const response = await axios.post('/position/create', { name: addPositionName });
+        setAddPositionName("");
+        fetchPositions();
+        setOpenAddPositionModal(false);
+        toast.success(response.data.message);
+      } catch (error) {
+        toast.error(`${error.status} ${error.response.data.message}`);
+      } finally { window.location.reload() }
+    })
   };
 
   const handleEditPositionSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await axios.patch(`/position/update/${positionSelectedData.id}`, { name: editPositionName });
-      setEditPositionName("");
-      fetchPositions();
-      setOpenEditPositionModal(false);
-      toast.success(response.data.message);
-    } catch (error) {
-      toast.error(`${error.status} ${error.response.data.message}`);
-    }
+    confirm(cm_change, async () => {
+      try {
+        const response = await axios.patch(`/position/update/${positionSelectedData.id}`, { name: editPositionName });
+        setEditPositionName("");
+        fetchPositions();
+        setOpenEditPositionModal(false);
+        toast.success(response.data.message);
+      } catch (error) {
+        toast.error(`${error.status} ${error.response.data.message}`);
+      } finally { window.location.reload() }
+    })
   };
 
   const handleDeletePosition = async (id) => {
@@ -220,7 +243,7 @@ export default function User({ auth }) {
       toast.success(response.data.message);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
-    }
+    } finally { window.location.reload() }
   };
 
   const handleAddUserSubmit = async (e) => {
@@ -242,7 +265,7 @@ export default function User({ auth }) {
       toast.success(response.data.message);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
-    }
+    } finally { window.location.reload() }
   };
 
   const userColDefs = [
@@ -262,6 +285,13 @@ export default function User({ auth }) {
     {
       field: "position", filter: true, flex: 1,
       valueFormatter: (params) => params.value?.name
+    },
+    {
+      field: "type", filter: true, maxWidth: 300,
+      valueFormatter: (params) => {
+        const type = userType.find(item => item.code === params.value);
+        return type ? type.alias : "Unknown";
+      }
     },
   ];
 
@@ -349,7 +379,7 @@ export default function User({ auth }) {
                   className='btn gap-2 disable'
                   onClick={() => setOpenAddUserModal(true)}>
                   <TbUserPlus />
-                  Add Users
+                  Add User
                 </button>
 
               </span>
@@ -395,18 +425,36 @@ export default function User({ auth }) {
                       })}
                   </div>
 
-                  <form className='flex gap-2 mt-auto' onSubmit={submitSetUserPosition}>
-                    <select name="su_position" id="su_position" className='border-card flex-1 bg-background text-text' onChange={changePermission}>
-                      <option value={null} className='text-sm text-neutral bg-background'>Select Position</option>
-                      {
-                        positions && positions.map((position, index) => {
-                          return (
-                            <option value={position.id} key={index} className='text-sm text-text bg-background'>{position.name}</option>
-                          )
-                        })
-                      }
-                    </select>
-                    <button className='btn disable' disabled={!hasPermissions([102])}>Save</button>
+                  <form className='flex flex-col gap-2 mt-auto' onSubmit={submitSetUserPosition}>
+                    <div className='flex gap-2'>
+                      <select name="su_position" id="su_position" className='border-card bg-background text-text w-2/3' onChange={changePermission}>
+                        <option value={null} className='text-sm text-neutral bg-background'>Select Position</option>
+                        {
+                          positions && positions.map((position, index) => {
+                            return (
+                              <option value={position.id} key={index} className='text-sm text-text bg-background'>{position.name}</option>
+                            )
+                          })
+                        }
+                      </select>
+                      <select name="su_role" id="su_role" className='border-card bg-background text-text w-1/3' onChange={(changeRole)}>
+                        <option value={null} className='text-sm text-neutral bg-background'>Select Role</option>
+                        {
+                          userType.map((type, index) => {
+                            return (
+                              <option value={type.code} key={index} className='text-sm text-text bg-background'>{type.alias}</option>
+                            )
+                          })
+                        }
+                      </select>
+                    </div>
+                    <div className='flex gap-2'>
+                      <button className='btn disable w-full bg-red-400 hover:bg-red-500' type='button'
+                        onClick={() => confirm(cm_change, () => handleDeleteUser(userSelectedData.id))}
+                        disabled={!hasPermissions([103])}
+                      > Delete User </button>
+                      <button className='btn disable w-full' disabled={!hasPermissions([102])}>Save</button>
+                    </div>
                   </form>
                 </div>
               </div>
@@ -566,6 +614,8 @@ export default function User({ auth }) {
     </AuthenticatedLayout >
   );
 }
+
+const cm_change = `All changes to users, roles, and positions require a system restart. The application will automatically restart after confirming. Are you sure you want to proceed?`;
 
 //SINGLE FIELD SEARCH
 /* const handleSearchEmployee = e => {

@@ -65,7 +65,8 @@ class UserController extends Controller
         }
 
         $validatedData = $request->validate([
-            'position_id' => 'required|exists:positions,id',
+            'position_id' => 'sometimes|exists:positions,id',
+            'type' => 'sometimes|integer|between:2050,2056'
         ]);
 
         $user->update($validatedData);
