@@ -87,13 +87,6 @@ export default function Dashboard({ auth }) {
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
     }
-
-    try {
-      const response = await axios.get('/inventory/stock/year');
-      setStockCountPerPeriod(response.data.data);
-    } catch (error) {
-      toast.error(`${error.status} ${error.response.data.message}`);
-    }
   }
 
   const [categories, setCategories] = useState();
@@ -105,18 +98,6 @@ export default function Dashboard({ auth }) {
       toast.error(`${error.status} ${error.response.data.message}`);
     }
   }
-
-  useEffect(() => {
-    fetchStats();
-    fetchCategories();
-  }, []);
-
-  const [lineSeries, setLineSeries] = useState();
-  useEffect(() => {
-    if (categories) {
-      setLineSeries(generateLineSeries(categories, 'year'));
-    }
-  }, [categories]);
 
   const pieSeries = [{
     type: 'pie',
@@ -134,6 +115,58 @@ export default function Dashboard({ auth }) {
 
   const [productExpSwitch, setProductExpSwitch] = useState(true);
 
+  const [availableDate, setAvailableDate] = useState([]);
+  const fetchAvailableDate = async () => {
+    try {
+      const response = await axios.get('/inventory/years');
+      setAvailableDate(response.data.data);
+    } catch (error) {
+      toast.error(`${error.status} ${error.response.data.message}`);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+    fetchCategories();
+    fetchAvailableDate();
+    fetchLineData();
+  }, []);
+
+  const [lineSeries, setLineSeries] = useState();
+
+  const periods = [
+    'year',
+    'quarter',
+    'month',
+  ];
+
+  const fetchLineData = async (period = 'year', year = new Date().getFullYear()) => {
+    try {
+      const response = await axios.get(`/inventory/stock/${period}/${year}`);
+      setStockCountPerPeriod(response.data.data);
+    } catch (error) {
+      toast.error(`${error.response?.status || 'Error'}: ${error.response?.data?.message || 'Failed to fetch data'}`);
+    }
+  };
+
+  const [period, setPeriod] = useState('year');
+  const onPeriodChange = async (e) => {
+    setPeriod(e.target.value);
+  }
+  const [date, setDate] = useState(new Date().getFullYear());
+  const onDateChange = async (e) => {
+    setDate(e.target.value);
+  }
+
+  useEffect(() => {
+    fetchLineData(period, date);
+  }, [period, date]);
+  useEffect(() => {
+    if (categories) {
+      setLineSeries(generateLineSeries(categories, period));
+    }
+  }, [categories, period]);
+
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -148,7 +181,19 @@ export default function Dashboard({ auth }) {
               <Chart data={productEachSupplier && getTop(8, productEachSupplier)} series={barSeries} legendPosition='right' title='Supplier Distribution' className='w-1/2 border rounded-3xl bg-background' />
             </div>
 
-            <Chart data={stockCountPerPeriod && stockCountPerPeriod} series={lineSeries} title='Stock Levels' className=' mt-4 w-full border rounded-3xl bg-background' />
+            <div className='mt-4 w-full border rounded-3xl bg-background pt-4 text-text'>
+              <select name="availdate" id="availdate" className='border-none py-2 px-4 bg-background' onChange={onDateChange}>
+                {
+                  availableDate && availableDate.map((date, index) => <option value={date} key={index}>{date}</option>)
+                }
+              </select>
+              <select name="period" id="period" className='border-none py-2 px-4 bg-background' onChange={onPeriodChange}>
+                {
+                  periods.map((period, index) => <option value={period} key={index}>{period}</option>)
+                }
+              </select>
+              <Chart data={stockCountPerPeriod && stockCountPerPeriod} series={lineSeries} title='Stock Levels' className='' />
+            </div>
 
             <div className='flex gap-4 h-80 mt-4'>
               <div className='w-2/3 flex flex-col gap-2'>
@@ -286,5 +331,6 @@ function generateLineSeries(categories, period) {
     interpolation: {
       type: 'smooth'
     },
+    connectMissingData: true,
   }));
 }

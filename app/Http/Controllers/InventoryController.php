@@ -426,37 +426,42 @@ class InventoryController extends Controller
         return response()->json(['data' => ['total_stock_value' => $totalValue]], 200);
     }
 
-    public function getStockDataByPeriod($period)
+    public function getStockDataByPeriod($period, $year = null)
     {
+        // Use current year if no year is provided
+        $year = $year ?? date('Y');
+
         switch ($period) {
             case 'year':
                 $dateFormat = 'DATE_FORMAT(inventories.created_at, "%Y-%m")';
                 $labelKey = 'month';
                 $range = range(1, 12); // 12 months in a year
-                $formatFunction = function ($i) {
-                    return date("Y") . '-' . str_pad($i, 2, '0', STR_PAD_LEFT);
+                $formatFunction = function ($i) use ($year) {
+                    return $year . '-' . str_pad($i, 2, '0', STR_PAD_LEFT);
                 };
                 break;
+
             case 'quarter':
                 $dateFormat = 'CONCAT(YEAR(inventories.created_at), "-Q", QUARTER(inventories.created_at))';
                 $labelKey = 'quarter';
                 $range = range(1, 4); // 4 quarters
-                $formatFunction = function ($i) {
-                    return date("Y") . "-Q$i";
+                $formatFunction = function ($i) use ($year) {
+                    return $year . "-Q$i";
                 };
                 break;
+
             case 'month':
             default:
                 $dateFormat = 'DATE(inventories.created_at)';
                 $labelKey = 'day';
                 $range = range(1, 30); // 30 days in a month
-                $formatFunction = function ($i) {
-                    return date("Y-m") . '-' . str_pad($i, 2, '0', STR_PAD_LEFT);
+                $formatFunction = function ($i) use ($year) {
+                    return date("$year-m") . '-' . str_pad($i, 2, '0', STR_PAD_LEFT);
                 };
                 break;
         }
 
-        // Fetch stock grouped by period & category
+        // Fetch stock grouped by period & category, filtering by year
         $inventory = Inventory::join('products', 'inventories.product_id', '=', 'products.id')
             ->join('categories', 'products.category_id', '=', 'categories.id')
             ->select(
@@ -464,6 +469,7 @@ class InventoryController extends Controller
                 'categories.name as category',
                 DB::raw('COALESCE(SUM(inventories.quantity), 0) as total_stock') // Ensure NULLs become 0
             )
+            ->whereYear('inventories.created_at', $year) // Filter by selected year
             ->groupBy('period', 'categories.name')
             ->orderBy('period', 'asc')
             ->get();
@@ -489,6 +495,20 @@ class InventoryController extends Controller
                 $formattedData[$index][$category] = $totalStock;
             }
         }
+
+        return response()->json(['data' => $formattedData], 200);
+    }
+
+    public function getAvailableYears()
+    {
+        // Fetch distinct years from the `created_at` column in the inventories table
+        $years = Inventory::selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->orderBy('year', 'desc') // Sort from newest to oldest
+            ->pluck('year'); // Get an array of years
+
+        // Format the response to match your structure
+        $formattedData = $years->toArray();
 
         return response()->json(['data' => $formattedData], 200);
     }

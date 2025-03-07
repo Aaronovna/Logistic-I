@@ -26,10 +26,11 @@ class DatabaseSeeder extends Seeder
         
         $this->call(DispatchTrailSeeder::class);
         $this->call(InventoryTrailSeeder::class);
-
-
+        
+        
         Infrastructure::factory(2)->ofType(100)->create();
         Infrastructure::factory(2)->ofType(101)->create();
         Infrastructure::factory(2)->ofType(102)->create();
+        $this->call(InventorySeeder::class);
     }
 }
