@@ -141,30 +141,30 @@ export const permissions = [
 export const userType = [
     {
         code: 2050,
-        alias: 'superadmin',
+        alias: 'Super Admin',
     },
     {
         code: 2051,
-        alias: 'admin',
+        alias: 'Admin',
     },
     {
         code: 2052,
-        alias: 'inventory',
+        alias: 'Inventory',
     },
     {
         code: 2053,
-        alias: 'infrastructure',
+        alias: 'Infrastructure',
     },
     {
         code: 2054,
-        alias: 'audit',
+        alias: 'Audit',
     },
     {
         code: 2055,
-        alias: 'auditor',
+        alias: 'Auditor',
     },
     {
         code: 2056,
-        alias: 'none',
+        alias: 'None',
     },
 ]

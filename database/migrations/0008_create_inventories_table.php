@@ -21,10 +21,9 @@ return new class extends Migration
 
         Schema::create('inventory_trails', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('restrict');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('restrict');
             $table->foreignId('product_id')->constrained('products')->onDelete('restrict');
             $table->integer('quantity')->default(0);
-            $table->string('log')->default('');
             $table->string('operation');
             $table->boolean('update')->default(false);
             $table->timestamps();

@@ -24,7 +24,8 @@ class DatabaseSeeder extends Seeder
         Product::factory(20)->create();
         User::factory(7)->create();
         
-        //$this->call(DispatchTrailSeeder::class);
+        $this->call(DispatchTrailSeeder::class);
+        $this->call(InventoryTrailSeeder::class);
 
 
         Infrastructure::factory(2)->ofType(100)->create();

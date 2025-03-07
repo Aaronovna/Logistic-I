@@ -79,14 +79,14 @@ Route::middleware(["auth", "verified", PreventBackHistory::class])->group(functi
 //! END: PAGES ROUTES //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // REQUEST ROUTES
-Route::middleware(["auth", "verified", "throttle:60,1"])->group(function () {
+Route::middleware(["auth", "verified"])->group(function () {
 
     Route::post('/tokens/create', function (Request $request) {
         $token = $request->user()->createToken($request->token_name);
-     
+
         return ['token' => $token->plainTextToken];
     });
-    
+
 
     //? START: PRODUCT REQUEST /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -223,7 +223,6 @@ Route::middleware(["auth", "verified", "throttle:60,1"])->group(function () {
     Route::get('/cogs/{productId}/{days}', [InventoryTrailController::class, 'calculateCOGS']);
     Route::get('/inventory/turnover/{productId}/{days}', [InventoryTrailController::class, 'inventoryTurnover']);
     Route::get('/inventory/stock/{period}', [InventoryController::class, 'getStockDataByPeriod'])->where('period', 'month|quarter|year');
-    
     Route::get('/audit/get/{model}', [AuditLogController::class, 'show']);
 });
 
