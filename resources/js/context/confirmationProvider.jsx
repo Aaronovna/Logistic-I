@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react";
-import Modal from "@/components/Modal"; // Import your modal component
+import Modal from "@/Components/Modal";
 
 const ConfirmationContext = createContext();
 
