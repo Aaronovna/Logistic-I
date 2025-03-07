@@ -74,6 +74,17 @@ export const auditLinks = [
     },
 ];
 
+export const auditLinks2 = [
+    {
+        name: 'tasks',
+        Icon: TbCheckbox
+    },
+    {
+        name: ['reports', 'reports-view', 'reports-history'],
+        Icon: TbClipboardData
+    },
+];
+
 ////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////
 
@@ -135,14 +146,14 @@ export const managementLinks2 = [
 export const superAdminPages = [
     'dashboard', /* 'report', */ 'receipt', 'dispatch', 'warehouse', 'product', 'category',
     'depot', 'terminal',
-    'tasks', 'reports', 'assignments',
+    'tasks', 'reports', /* 'assignments', */
     'user', 'infrastructure', 'logs', /* 'module' */,
 ]
 
 export const adminPages = [
     'dashboard', /* 'report', */ 'receipt', 'dispatch', 'warehouse', 'product', 'category',
     'depot', 'terminal',
-    'tasks', 'reports', 'assignments',
+    'tasks', 'reports', /* 'assignments', */
     'user', 'infrastructure',
 ]
 

@@ -3,7 +3,7 @@ import { useStateContext } from "@/context/contextProvider";
 import NavLink from '@/Components/NavLink';
 import NavLinkCategory from '@/Components/NavLinkCategory';
 import Logo from "../Logo";
-import { analyticsLinks, inventoryLinks, infrastructureLinks, auditLinks, managementLinks2 } from '@/Constants/navlinks';
+import { analyticsLinks, inventoryLinks, infrastructureLinks, auditLinks2, managementLinks2 } from '@/Constants/navlinks';
 
 import { TbChartHistogram } from "react-icons/tb";
 import { TbPackages } from "react-icons/tb";
@@ -66,8 +66,8 @@ const AdminSidebar = () => {
           )
         })}
 
-        <NavLinkCategory routes={auditLinks} Icon={TbClipboardCheck} href='tasks' label='Auditing' className='mr-4' />
-        {auditLinks.map((link, index) => {
+        <NavLinkCategory routes={auditLinks2} Icon={TbClipboardCheck} href='tasks' label='Auditing' className='mr-4' />
+        {auditLinks2.map((link, index) => {
           return (
             <NavLink key={index} href={route(Array.isArray(link.name) ? link.name[0] : link.name)} active={Array.isArray(link.name) ? link.name.some(name => route().current(name)) : route().current(link.name)}>
               <span className='flex items-center gap-1 px-1'>
