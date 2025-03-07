@@ -512,4 +512,43 @@ class InventoryController extends Controller
 
         return response()->json(['data' => $formattedData], 200);
     }
+
+    public function getTopProductsByCategory($category_id, $top = 8)
+    {
+        // Validate that category_id exists
+        $categoryExists = DB::table('categories')->where('id', $category_id)->exists();
+        if (!$categoryExists) {
+            return response()->json(['message' => 'Invalid category ID'], 400);
+        }
+
+        // Ensure $top is a positive integer (fallback to default 8 if invalid)
+        $top = is_numeric($top) && $top > 0 ? (int) $top : 8;
+
+        // Fetch top N products by inventory stock in the given category
+        $topProducts = Inventory::join('products', 'inventories.product_id', '=', 'products.id')
+            ->where('products.category_id', $category_id)
+            ->select(
+                'products.id',
+                'products.name',
+                'products.brand',
+                'products.model',
+                'products.price',
+                'products.image_url',
+                DB::raw('SUM(inventories.quantity) as total_stock')
+            )
+            ->groupBy('products.id', 'products.name', 'products.brand', 'products.model', 'products.price', 'products.image_url')
+            ->orderByDesc('total_stock')
+            ->limit($top)
+            ->get()
+            ->map(function ($product) {
+                $product->total_stock = (int) $product->total_stock; // 🔥 Convert string to integer
+                return $product;
+            });
+
+        if ($topProducts->isEmpty()) {
+            return response()->json(['message' => 'No products found for this category'], 404);
+        }
+
+        return response()->json(['data' => $topProducts], 200);
+    }
 }

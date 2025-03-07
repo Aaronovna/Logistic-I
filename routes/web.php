@@ -223,6 +223,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/cogs/{productId}/{days}', [InventoryTrailController::class, 'calculateCOGS']);
     Route::get('/inventory/turnover/{productId}/{days}', [InventoryTrailController::class, 'inventoryTurnover']);
     Route::get('/inventory/stock/{period}/{year?}', [InventoryController::class, 'getStockDataByPeriod'])->where(['period' => 'month|quarter|year', 'year' => '[0-9]{4}']);
+    Route::get('/inventory/top/products/{category_id}/{top?}', [InventoryController::class, 'getTopProductsByCategory']);
     Route::get('/inventory/years', [InventoryController::class, 'getAvailableYears']);
     
     Route::get('/audit/get/{model}', [AuditLogController::class, 'show']);

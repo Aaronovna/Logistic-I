@@ -99,6 +99,11 @@ export default function Dashboard({ auth }) {
     }
   }
 
+  const pieSeriesTop = [{
+    type: 'pie',
+    angleKey: 'total_stock',
+    legendItemKey: 'name',
+  }];
   const pieSeries = [{
     type: 'pie',
     angleKey: 'product_count',
@@ -166,6 +171,22 @@ export default function Dashboard({ auth }) {
       setLineSeries(generateLineSeries(categories, period));
     }
   }, [categories, period]);
+
+  const [topProdInCat, setTopProdInCat] = useState();
+  const fetchTopProductInCategory = async (cat_id = 1000) => {
+    try {
+      const response = await axios.get(`/inventory/top/products/${cat_id}`);
+      setTopProdInCat(response.data.data);
+    } catch (error) {
+
+    }
+  }
+  const onCatChange = (e) => {
+    fetchTopProductInCategory(e.target.value);
+  }
+  useEffect(() => {
+    fetchTopProductInCategory();
+  }, []);
 
   return (
     <AuthenticatedLayout
@@ -280,6 +301,14 @@ export default function Dashboard({ auth }) {
                     })
                   }
                 </div>
+              </div>
+              <div className='w-1/2 border rounded-3xl bg-background text-text flex flex-col'>
+                <Chart data={topProdInCat} series={pieSeriesTop} legendPosition='right' title='Top Products' className='h-3/4' />
+                <select name="cat" id="cat" className='border-none py-2 px-4 bg-background mx-2 mt-auto mb-4 z-10' onChange={onCatChange}>
+                  {
+                    categories && categories.map((cat, index) => <option key={index} value={cat.id} className='text-sm'>{cat.name}</option>)
+                  }
+                </select>
               </div>
 
               <div className='w-2/3 flex gap-2'>
