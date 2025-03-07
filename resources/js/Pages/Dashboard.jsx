@@ -100,9 +100,10 @@ export default function Dashboard({ auth }) {
   }
 
   const pieSeriesTop = [{
-    type: 'pie',
+    type: 'donut',
     angleKey: 'total_stock',
-    legendItemKey: 'name',
+    calloutLabelKey: 'name',
+    innerRadiusRatio: 0.7,
   }];
   const pieSeries = [{
     type: 'pie',
