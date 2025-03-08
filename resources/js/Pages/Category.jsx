@@ -120,7 +120,6 @@ const Category = ({ auth }) => {
   const handleDelete = async (id) => {
     try {
       const response = await axios.delete(`/category/delete/${id}`);
-      console.log(response)
       fetchCategories();
       toast.success(response.data.message);
     } catch (error) {
