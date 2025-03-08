@@ -32,15 +32,15 @@
     background-image: url('../../public/assets/svgs/airport-terminal-cuate.svg');
 }
 
-.bus-1{
+.bus-1 {
     background-image: url('../../public/assets/svgs/city-bus-amico.svg');
 }
 
-.bus-2{
+.bus-2 {
     background-image: url('../../public/assets/svgs/city-bus-rafiki.svg');
 }
 
-.bus-3{
+.bus-3 {
     background-image: url('../../public/assets/svgs/double-decker-bus-amico.svg');
 }
 
@@ -62,4 +62,14 @@
 
 .pattern1 {
     background-image: url('../../public/assets/svgs/pattern.svg');
+}
+
+.g1 {
+    background-color: #0093E9;
+    background-image: linear-gradient(160deg, #0093E9 0%, #80D0C7 100%);
+}
+
+.g2 {
+    background-color: #8EC5FC;
+    background-image: linear-gradient(62deg, #8EC5FC 0%, #E0C3FC 100%);
 }

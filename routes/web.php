@@ -32,7 +32,7 @@ Route::middleware(["auth", "verified", PreventBackHistory::class])->group(functi
     Route::get('/dashboard', fn() => Inertia::render('Dashboard'))->name('dashboard');
     Route::get('/category', fn() => Inertia::render('Category'))->name('category');
     Route::get('/user', fn() => Inertia::render('User'))->name('user');
-    Route::get('/report', fn() => Inertia::render('Report'))->name('report');
+    Route::get('/insight', fn() => Inertia::render('Insight'))->name('insight');
     Route::get('/product', fn() => Inertia::render('Product'))->name('product');
     Route::get('/receipt', fn() => Inertia::render('Receipt'))->name('receipt');
     Route::get('/receipt/history', fn() => Inertia::render('Receipt.History'))->name('receipt-history');

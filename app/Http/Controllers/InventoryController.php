@@ -515,9 +515,11 @@ class InventoryController extends Controller
 
     public function getTopProductsByCategory($category_id, $top = 8)
     {
-        // Validate that category_id exists
-        $categoryExists = DB::table('categories')->where('id', $category_id)->exists();
-        if (!$categoryExists) {
+        // Fetch category details
+        $category = DB::table('categories')->where('id', $category_id)->first();
+
+        // Validate if category exists
+        if (!$category) {
             return response()->json(['message' => 'Invalid category ID'], 400);
         }
 
@@ -541,7 +543,17 @@ class InventoryController extends Controller
             ->limit($top)
             ->get()
             ->map(function ($product) {
-                $product->total_stock = (int) $product->total_stock; // 🔥 Convert string to integer
+                $product->total_stock = (int) $product->total_stock; // Convert string to integer
+
+                // Fetch inventory turnover rate for the product (using last 30 days)
+                $inventoryTrailController = new InventoryTrailController();
+                $turnoverResponse = $inventoryTrailController->inventoryTurnover($product->id, 30);
+                $turnoverData = json_decode($turnoverResponse->getContent(), true);
+
+                // Attach turnover data to product
+                $product->inventory_turnover = $turnoverData['inventory_turnover'] ?? 0;
+                $product->turnover_category = $turnoverData['turnover_category'] ?? 'Unknown';
+
                 return $product;
             });
 
@@ -549,6 +561,12 @@ class InventoryController extends Controller
             return response()->json(['message' => 'No products found for this category'], 404);
         }
 
-        return response()->json(['data' => $topProducts], 200);
+        return response()->json([
+            'category' => [
+                'id' => $category->id,
+                'name' => $category->name
+            ],
+            'data' => $topProducts
+        ], 200);
     }
 }

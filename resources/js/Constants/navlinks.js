@@ -2,17 +2,17 @@
 ////////////////////////////////////////////////////////
 
 import { TbLayoutDashboard } from "react-icons/tb";
-//import { TbClipboardList } from "react-icons/tb";
+import { TbBulb } from "react-icons/tb";
 
 export const analyticsLinks = [
     {
         name: 'dashboard',
         Icon: TbLayoutDashboard
     },
-    /* {
-        name: 'report',
-        Icon: TbClipboardList
-    } */
+    {
+        name: 'insight',
+        Icon: TbBulb
+    }
 ];
 
 ////////////////////////////////////////////////////////
@@ -144,7 +144,7 @@ export const managementLinks2 = [
 ////////////////////////////////////////////////////////
 
 export const superAdminPages = [
-    'dashboard', /* 'report', */ 'receipt', 'dispatch', 'warehouse', 'product', 'category',
+    'dashboard', 'insight', 'receipt', 'dispatch', 'warehouse', 'product', 'category',
     'depot', 'terminal',
     'tasks', 'reports', /* 'assignments', */
     'user', 'infrastructure', 'logs', /* 'module' */,
