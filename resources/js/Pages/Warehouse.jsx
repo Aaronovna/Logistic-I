@@ -39,20 +39,29 @@ const Warehouse = ({ auth }) => {
 
   const fetchInventory = async () => {
     try {
-      const response = await axios.get('/inventory/get');
-      setInventory(response.data.data);
+      if (selectedWarehouse.id === 0) {
+        const response = await axios.get(`/inventory/get`);
+        setInventory(response.data.data);
+      } else {
+        const response = await axios.get(`/inventory/get/warehouse/${selectedWarehouse.id}`);
+        setInventory(response.data.data);
+      }
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
     }
   };
 
-  const [warehouses, setWarehouses] = useState([{ name: 'All Warehouses', id: 0, type: 100 }]);
+  const [warehouses, setWarehouses] = useState([]);
   const fetchInfrastructures = async () => {
     try {
-      const response = await axios.get('/infrastructure/get');
-      setWarehouses(prevWarehouses => [
-        ...prevWarehouses,
-        ...filterArray(response.data.data, 'type', [100])]);
+      const response = await axios.get('/infrastructures/get/access');
+
+      // Conditionally include "All Warehouses" only if auth.user.type is 2050 or 2051
+      setWarehouses(
+        auth.user.type === 2050 || auth.user.type === 2051
+          ? [{ name: 'All Warehouses', id: 0, type: 100 }, ...filterArray(response.data.data, 'type', [100])]
+          : filterArray(response.data.data, 'type', [100])
+      );
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
     }
@@ -117,7 +126,6 @@ const Warehouse = ({ auth }) => {
   };
 
   useEffect(() => {
-    fetchInventory();
     fetchCategories();
     fetchSuppliers();
     fetchProducts();
@@ -151,7 +159,6 @@ const Warehouse = ({ auth }) => {
 
         toast.success(response.data.message);
         fetchInventoryStats();
-        fetchInventory();
         setOpenAddInventoryModal(false);
       } catch (error) {
         toast.error(`${error.status} ${error.response.data.message}`);
@@ -246,7 +253,6 @@ const Warehouse = ({ auth }) => {
 
         toast.success(response.data.message);
         fetchInventoryStats();
-        fetchInventory();
         setOpenEditInventoryModal(false);
       } catch (error) {
         toast.error(`${error.status} ${error.response.data.message}`);
@@ -261,9 +267,16 @@ const Warehouse = ({ auth }) => {
   };
 
   useEffect(() => {
-    setSelectedWarehouse({ name: 'All Warehouses', id: 0, type: 100 });
-  }, [])
+    if (warehouses) {
+      setSelectedWarehouse(warehouses[0]);
+    }
+  }, [warehouses])
 
+  useEffect(()=>{
+    if (selectedWarehouse) {
+      fetchInventory();
+    }
+  },[selectedWarehouse])
 
   return (
     <AuthenticatedLayout
@@ -280,7 +293,7 @@ const Warehouse = ({ auth }) => {
                   backgroundImage: selectedWarehouse?.image_url ? `url(${selectedWarehouse.image_url})` :
                     `url(https://img.freepik.com/free-vector/warehouse-interior-logistics-cargo-delivery_107791-1777.jpg?semt=ais_hybrid)`,
                 }}></div>
-              <div className='flex flex-col flex-1 z-10'>
+              <div className='flex flex-col flex-1 z-10 w-1/2'>
                 <div className='flex'>
                   <select className='p-2 w-full border-none shadow-md text-black tracking-wider bg-white/10 backdrop-blur-lg font-medium text-lg rounded-full' name="warehouse_id" id="warehouse_id" onChange={handleWarehouseChange}>
                     {warehouses && warehouses.map((warehouse, index) => {
@@ -291,7 +304,9 @@ const Warehouse = ({ auth }) => {
                     }
                   </select>
                 </div>
-                <p className='mt-auto w-fit truncate backdrop-blur-lg bg-white/10 rounded-full px-2 py-1'>{selectedWarehouse?.address}</p>
+                <p className="mt-auto w-fit max-w-full truncate whitespace-nowrap overflow-hidden backdrop-blur-lg bg-white/10 rounded-full px-2 py-1">
+                  {selectedWarehouse?.address}
+                </p>
               </div>
 
               <div className='ml-auto md:items-end mb-2 md:mb-0 md:gap-4 overflow-x-auto snap-mandatory snap-x pb-1 whitespace-nowrap'>

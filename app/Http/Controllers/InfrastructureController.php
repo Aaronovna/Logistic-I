@@ -90,4 +90,22 @@ class InfrastructureController extends Controller
 
         return response()->json(['message' => 'Infrastructure deleted successfully'], 200);
     }
+
+    public function indexByAccess()
+    {
+        $user = auth()->user(); // Get authenticated user
+
+        // If the user is Super Admin (2050) or Admin (2051), return all infrastructures
+        if (in_array($user->type, [2050, 2051])) {
+            $infrastructures = Infrastructure::all();
+        } else {
+            // Convert position_id to string to match the JSON structure
+            $positionId = (string) $user->position_id;
+
+            // Query infrastructures where 'access' contains the position_id as a string
+            $infrastructures = Infrastructure::whereJsonContains('access', $positionId)->get();
+        }
+
+        return response()->json(['data' => $infrastructures], 200);
+    }
 }

@@ -141,6 +141,7 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post('/infrastructure/create', [InfrastructureController::class, 'store'])->name('infrastructure.store');
     Route::patch('/infrastructure/update/{id}', [InfrastructureController::class, 'update'])->name('infrastructure.update');
     Route::delete('/infrastructure/delete/{id}', [InfrastructureController::class, 'destroy'])->name('infrastructure.destroy');
+    Route::get('/infrastructures/get/access', [InfrastructureController::class, 'indexByAccess']);
 
     Route::get('/request/get', [RequestMaterialController::class, 'index'])->name('request.index');
     Route::get('/request/get/{id}', [RequestMaterialController::class, 'show'])->name('request.show');
