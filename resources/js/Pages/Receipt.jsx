@@ -102,7 +102,6 @@ const Receipt = ({ auth }) => {
   }
 
   const onAccept = async (id, data) => {
-    console.log(data);
     try {
       const response = await axios.post('/inventory/create/bulk', {
         warehouse_id: data.warehouse_id,
