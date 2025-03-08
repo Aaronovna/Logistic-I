@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('password');
             $table->foreignId('position_id')->nullable()->constrained('positions')->onDelete('restrict');
             $table->integer('type')->default(2056);
+            $table->string('status')->default('active');
             $table->rememberToken();
             $table->timestamps();
         });

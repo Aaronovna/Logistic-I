@@ -258,9 +258,9 @@ export default function User({ auth }) {
     }
   };
 
-  const handleDeleteUser = async (id) => {
+  const handleDeactivateUser = async (id) => {
     try {
-      await axios.delete(`/user/delete/${id}}`);
+      await axios.patch(`/user/update/${id}}`, {status: 'deactivated', type: 2056, position_id: null});
       fetchUsers();
       toast.success(response.data.message);
     } catch (error) {
@@ -274,13 +274,7 @@ export default function User({ auth }) {
     { field: "email", filter: true, flex: 2, maxWidth: 300 },
     {
       field: "email_verified_at", filter: true, flex: 1, headerName: "Status", maxWidth: 150,
-      cellRenderer: (params) => {
-        return (
-          <span className='flex flex-col w-full justify-center items-center h-full'>
-            <p>{params.data.email_verified_at ? 'Verified' : 'Unverified'}</p>
-          </span>
-        )
-      }
+      valueFormatter: (params) => params.data.email_verified_at ? `${params.data.status} (Verified)` : `${params.data.status} (Unverified)`
     },
     {
       field: "position", filter: true, flex: 1,
@@ -400,10 +394,10 @@ export default function User({ auth }) {
                   <p className='text-xl font-semibold h-fit' style={{ color: theme.text }}>User Information</p>
                 </span>
                 <div className='border-card h-96 p-4 relative overflow-hidden flex flex-col'>
-                  {!userSelectedData || userSelectedData.email_verified_at === null ? (
+                  {!userSelectedData || userSelectedData.status === 'deactivated' || userSelectedData.email_verified_at === null ? (
                     <div className='absolute top-0 left-0 w-full h-full bg-black/10 backdrop-blur-md z-10 flex items-center justify-center'>
                       {userSelectedData ? (
-                        <p className='text-2xl font-medium tracking-wider text-gray-500'>User not verified yet</p>
+                        <p className='text-2xl font-medium tracking-wider text-gray-500'>User is not verified yet or deactivated</p>
                       ) : (
                         <p className='text-2xl font-medium tracking-wider text-gray-500'>Select a user first</p>
                       )}
@@ -450,9 +444,9 @@ export default function User({ auth }) {
                     </div>
                     <div className='flex gap-2'>
                       <button className='btn disable w-full bg-red-400 hover:bg-red-500' type='button'
-                        onClick={() => confirm(cm_change, () => handleDeleteUser(userSelectedData.id))}
+                        onClick={() => confirm(cm_deact, () => handleDeactivateUser(userSelectedData.id))}
                         disabled={!hasPermissions([103])}
-                      > Delete User </button>
+                      > Deactivate User </button>
                       <button className='btn disable w-full' disabled={!hasPermissions([102])}>Save</button>
                     </div>
                   </form>
@@ -522,7 +516,7 @@ export default function User({ auth }) {
                       placeholder={positionSelectedData ? positionSelectedData.name : ''}
                       value={editPositionName}
                       onChange={(e) => setEditPositionName(e.target.value)}
-                    />
+                    />  
                     <span className='flex gap-2'>
                       <button type='button' className='flex-1 p-2 mt-2 btn disable bg-red-400 hover:bg-red-500'
                         disabled={!hasPermissions([102])}
@@ -616,7 +610,7 @@ export default function User({ auth }) {
 }
 
 const cm_change = `All changes to users, roles, and positions require a system restart. The application will automatically restart after confirming. Are you sure you want to proceed?`;
-
+const cm_deact = `Deactivating this user is irreversible. Once confirmed, the user will no longer have access to the system. Are you sure you want to proceed?`;
 //SINGLE FIELD SEARCH
 /* const handleSearchEmployee = e => {
   const searchQuery = e.target.value;
