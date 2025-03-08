@@ -12,8 +12,9 @@ import { returnStatus } from '@/Constants/status';
 import { returnCategories } from '@/Constants/categories';
 import { TbX } from "react-icons/tb";
 import { dateTimeFormatShort } from '@/Constants/options';
-import { simpleFlatUnits } from '@/Constants/units';
+import { simpleFlatUnits, flatUnits } from '@/Constants/units';
 import { WeatherCloudChip, WeatherHumidityWindChip, WeatherTempChip } from '@/Components/Chips';
+import { TbHelp } from 'react-icons/tb';
 
 const OPENWEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
@@ -175,7 +176,7 @@ const Terminal = ({ auth }) => {
         infrastructure_id: null,
         type: 'maintenance',
         items: [],
-      });setRequestedItems([]);
+      }); setRequestedItems([]);
       toast.success(response.data.message);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
@@ -276,7 +277,7 @@ const Terminal = ({ auth }) => {
       setItems([
         { category: '', name: '', assoc_product: '', quantityType: 'qty', value: '' }
       ]);
-      setReturnRequestFormData({comment: ''})
+      setReturnRequestFormData({ comment: '' })
       toast.success(response.data.message);
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
@@ -376,6 +377,8 @@ const Terminal = ({ auth }) => {
       fetchWeather(selectedTerminal.lat, selectedTerminal.lng);
     }
   }, [selectedTerminal])
+
+  const [openUnitHelp, setOpenUnitHelp] = useState(false);
 
   return (
     <AuthenticatedLayout
@@ -763,13 +766,27 @@ const Terminal = ({ auth }) => {
                   value={returnRequestFormData.comment}
                   onChange={(e) => handleInputChange(e, setReturnRequestFormData)}
                 />
-                <div className='flex'>
-                  <button type='submit' 
+                <div className='flex items-end'>
+                  <TbHelp size={24} className='text-neutral cursor-pointer' onClick={() => setOpenUnitHelp(true)} />
+
+                  <button type='submit'
                     className='ml-auto btn disable'
                     disabled={!hasPermissions([412])}
                   >Submit</button>
                 </div>
               </form>
+            </Modal>
+
+            <Modal name="Units Abbreviations" show={openUnitHelp} onClose={() => setOpenUnitHelp(false)}>
+              <div className='grid grid-cols-3'>
+                {
+                  simpleFlatUnits.map((unit, index) => {
+                    return (
+                      <p key={index} className='font-medium'>{unit.abbreviation}<span className='text-neutral'> - {unit.name}</span></p>
+                    )
+                  })
+                }
+              </div>
             </Modal>
           </div>
         }

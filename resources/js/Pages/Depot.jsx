@@ -12,8 +12,9 @@ import { returnStatus } from '@/Constants/status';
 import { returnCategories } from '@/Constants/categories';
 import { TbX } from "react-icons/tb";
 import { dateTimeFormatShort } from '@/Constants/options';
-import { simpleFlatUnits } from '@/Constants/units';
+import { simpleFlatUnits, flatUnits } from '@/Constants/units';
 import { WeatherCloudChip, WeatherHumidityWindChip, WeatherTempChip } from '@/Components/Chips';
+import { TbHelp } from 'react-icons/tb';
 
 const OPENWEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
@@ -379,6 +380,8 @@ const Depot = ({ auth }) => {
       fetchWeather(selectedDepot.lat, selectedDepot.lng);
     }
   }, [selectedDepot])
+
+  const [openUnitHelp, setOpenUnitHelp] = useState(false);
 
   return (
     <AuthenticatedLayout
@@ -766,7 +769,8 @@ const Depot = ({ auth }) => {
                   onChange={(e) => handleInputChange(e, setReturnRequestFormData)}
                 />
 
-                <div className='flex'>
+                <div className='flex items-end'>
+                  <TbHelp size={24} className='text-neutral cursor-pointer' onClick={()=>setOpenUnitHelp(true)}/>
                   <button
                     type='submit'
                     className='btn disable ml-auto'
@@ -774,6 +778,18 @@ const Depot = ({ auth }) => {
                   >Submit</button>
                 </div>
               </form>
+            </Modal>
+
+            <Modal name="Units Abbreviations" show={openUnitHelp} onClose={()=>setOpenUnitHelp(false)}>
+              <div className='grid grid-cols-3'>
+                {
+                  simpleFlatUnits.map((unit, index)=>{
+                    return (
+                      <p key={index} className='font-medium'>{unit.abbreviation}<span className='text-neutral'> - {unit.name}</span></p>
+                    )
+                  })
+                }
+              </div>
             </Modal>
           </div>
         }
