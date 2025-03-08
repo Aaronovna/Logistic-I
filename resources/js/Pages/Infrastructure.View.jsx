@@ -4,6 +4,7 @@ import { useStateContext } from '@/context/contextProvider';
 import { useState, useEffect } from 'react';
 import { TbEdit } from "react-icons/tb";
 import { WeatherCloudChip, WeatherHumidityWindChip, WeatherTempChip } from '@/Components/Chips';
+import { TbHelp } from 'react-icons/tb';
 
 const OPENWEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
@@ -110,6 +111,22 @@ export default function Infrastructure_View({ auth }) {
     }
   }, [infrastructure])
 
+  const [positions, setPositions] = useState();
+  const fetchPositions = async () => {
+    try {
+      const response = await axios.get('/position');
+      setPositions(response.data.data);
+    } catch (error) {
+      toast.error(`${error.status} ${error.response.data.message}`);
+    }
+  }
+
+  useEffect(() => {
+    fetchPositions();
+  }, [])
+
+  const [openPositionHelp, setOpenPositionHelp] = useState(false);
+
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -161,32 +178,45 @@ export default function Infrastructure_View({ auth }) {
                   <input type="text" name="name" id="name" placeholder='Name'
                     className='border-card bg-transparent w-full mb-2'
                     style={{ borderColor: theme.border }}
-                    value={editInfrustructureFormData.name}
+                    value={editInfrustructureFormData.name || ''}
                     onChange={handleEditInventoryInputChange}
                   />
                   <input type="text" name="address" id="address" placeholder='Address'
                     className='border-card bg-transparent w-full mb-2'
                     style={{ borderColor: theme.border }}
-                    value={editInfrustructureFormData.address}
+                    value={editInfrustructureFormData.address || ''}
                     onChange={handleEditInventoryInputChange}
                   />
                   <input type="text" name="image_url" id="image_url" placeholder='Image Url'
                     className='border-card bg-transparent w-full mb-2'
                     style={{ borderColor: theme.border }}
-                    value={editInfrustructureFormData.image_url}
+                    value={editInfrustructureFormData.image_url || ''}
                     onChange={handleEditInventoryInputChange}
                   />
-                  <textarea type="text" name="access" id="access" placeholder='Access'
+                  <textarea type="text" name="access" id="access" placeholder='Access (ex. 2000, 2001)'
                     className='border-card bg-transparent w-full resize-none'
                     rows={4}
                     style={{ borderColor: theme.border }}
-                    value={editInfrustructureFormData.access}
+                    value={editInfrustructureFormData.access || ''}
                     onChange={handleEditInventoryInputChange}
                   />
+                  <TbHelp size={24} className='text-neutral cursor-pointer mt-2' onClick={() => setOpenPositionHelp(true)} title='Access?'></TbHelp>
                   <div className='flex'>
                     <button className='border-card ml-auto'>Save Changes</button>
                   </div>
                 </form>
+              </div>
+            </Modal>
+
+            <Modal name="Positions IDs" onClose={() => setOpenPositionHelp(false)} show={openPositionHelp}>
+              <div className='h-96 grid grid-cols-2 overflow-y-auto text-text'>
+                {
+                  positions && positions.map((position, index) => {
+                    return (
+                      <p key={index} className='text-sm font-medium truncate'>{position.id} <span className='text-neutral'> - {position.name}</span></p>
+                    )
+                  })
+                }
               </div>
             </Modal>
           </div>

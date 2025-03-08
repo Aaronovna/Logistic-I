@@ -5,6 +5,7 @@ import { TbPlus } from "react-icons/tb";
 import { useState, useEffect } from 'react';
 import AddressPicker from '@/Components/AddressPicker';
 import InfrastructureCard from '@/Components/cards/InfrastructureCard';
+import { TbHelp } from 'react-icons/tb';
 
 const options = [
   {
@@ -109,6 +110,22 @@ export default function Infrastructure({ auth }) {
 
   const [geoInfo, setGeoInfo] = useState({ name: '', lng: 0, lat: 0 });
 
+  const [positions, setPositions] = useState();
+  const fetchPositions = async () => {
+    try {
+      const response = await axios.get('/position');
+      setPositions(response.data.data);
+    } catch (error) {
+      toast.error(`${error.status} ${error.response.data.message}`);
+    }
+  }
+
+  useEffect(()=>{
+    fetchPositions();
+  },[])
+
+  const [openPositionHelp, setOpenPositionHelp] = useState(false);
+
   return (
     <AuthenticatedLayout
       user={auth.user}
@@ -197,13 +214,14 @@ export default function Infrastructure({ auth }) {
                     value={addInfrustructureFormData.image_url}
                     onChange={handleAddInventoryInputChange}
                   />
-                  <textarea type="text" name="access" id="access" placeholder='Access'
+                  <textarea type="text" name="access" id="access" placeholder='Access (ex. 2000, 2001)'
                     className='border-card bg-transparent w-full resize-none'
                     rows={4}
                     style={{ borderColor: theme.border }}
                     value={addInfrustructureFormData.access}
                     onChange={handleAddInventoryInputChange}
                   />
+                  <TbHelp size={24} className='text-neutral cursor-pointer mt-2' onClick={()=>setOpenPositionHelp(true)} title='Access?'></TbHelp>
                   <div className='flex mt-auto'>
                     <button className='btn w-full disable' disabled={!hasPermissions([122])}>Add Infrastructure</button>
                   </div>
@@ -216,6 +234,18 @@ export default function Infrastructure({ auth }) {
                     </div>
                   </AddressPicker>
                 </div>
+              </div>
+            </Modal>
+
+            <Modal name="Positions IDs" onClose={()=>setOpenPositionHelp(false)} show={openPositionHelp}>
+              <div className='h-96 grid grid-cols-2 overflow-y-auto text-text'>
+                {
+                  positions && positions.map((position, index)=>{
+                    return (
+                      <p key={index} className='text-sm font-medium truncate'>{position.id} <span className='text-neutral'> - {position.name}</span></p>
+                    )
+                  })
+                }
               </div>
             </Modal>
           </div>

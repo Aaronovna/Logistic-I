@@ -62,7 +62,7 @@ class InfrastructureController extends Controller
         }
 
         $validatedData = $request->validate([
-            'name' => 'required|string|max:255|unique:infrastructures,name',
+            'name' => 'required|string|max:255',
             'address' => 'required|string',
             'image_url' => 'nullable|string',
             'access' => 'nullable|json',
