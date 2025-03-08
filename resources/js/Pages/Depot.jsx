@@ -29,7 +29,7 @@ const Depot = ({ auth }) => {
   const [depots, setDepots] = useState();
   const fetchInfrastructures = async () => {
     try {
-      const response = await axios.get('/infrastructure/get');
+      const response = await axios.get('/infrastructures/get/access');
       setDepots(filterArray(response.data.data, 'type', [101]));
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);

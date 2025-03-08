@@ -27,7 +27,7 @@ const Terminal = ({ auth }) => {
   const [terminals, setTerminals] = useState();
   const fetchInfrastructures = async () => {
     try {
-      const response = await axios.get('/infrastructure/get');
+      const response = await axios.get('/infrastructures/get/access');
       setTerminals(filterArray(response.data.data, 'type', [102]));
     } catch (error) {
       toast.error(`${error.status} ${error.response.data.message}`);
