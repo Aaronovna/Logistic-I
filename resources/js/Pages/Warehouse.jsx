@@ -472,7 +472,7 @@ const colDefs = [
     field: "quantity", filter: true, flex: 1, minWidth: 150,
     cellRenderer: (params) => {
       return (
-        <p>{`${formatValue(params.data.quantity)} (${params.data.warehouse_name})`}</p>
+        <p>{`${params.data.quantity} (${params.data.warehouse_name})`}</p>
       )
     }
   },

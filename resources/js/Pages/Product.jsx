@@ -456,23 +456,23 @@ const Product = ({ auth }) => {
                       <span className='font-medium mr-2 text-lg'>{selectedProduct?.name} {selectedProduct?.model}</span>
                     </p>
                     <p className=''>{selectedProduct?.brand}</p>
-                    <p className='text-gray-600 text-sm mt-4'>{selectedProduct?.category_name}</p>
-                    <p className='text-gray-600 font-medium text-sm'>{selectedProduct?.id}</p>
+                    <p className='text-neutral text-sm mt-4'>{selectedProduct?.category_name}</p>
+                    <p className='text-neutral font-medium text-sm'>{selectedProduct?.id}</p>
                     <p className='font-medium text-gray-600 px-1 mt-4'>{selectedProduct?.supplier_name}</p>
                   </div>
                   <div className='w-1/2 flex flex-col'>
                     <p className='flex justify-between text-xl'>
-                      <span className='font-semibold'><span className='font-medium text-base text-gray-300 mr-2'>Stock</span>{selectedProduct?.stock}</span>
-                      <span className='font-semibold'><span className='font-medium text-base text-gray-300 mr-2'>Restock Point</span>{selectedProduct?.restock_point}</span>
+                      <span className='font-semibold'><span className='font-medium text-base text-neutral mr-2'>Stock</span>{selectedProduct?.stock}</span>
+                      <span className='font-semibold'><span className='font-medium text-base text-neutral mr-2'>Restock Point</span>{selectedProduct?.restock_point}</span>
                     </p>
 
                     <p className='font-semibold text-xl mt-2 flex'>
-                      <span className='font-medium text-base text-gray-300'>Safe Stock Level</span>
+                      <span className='font-medium text-base text-neutral'>Safe Stock Level</span>
                       <TbSparkles className='mr-2 text-orange-300' />
                       {prediction}
                     </p>
                     <p className='font-semibold text-lg mt-2 flex items-baseline'>
-                      <span className='font-medium text-base text-gray-300 mr-2'>Turnover Rate</span>
+                      <span className='font-medium text-base text-neutral mr-2'>Turnover Rate</span>
                       {prodTurnoverRate.turnover_category}
                     </p>
 

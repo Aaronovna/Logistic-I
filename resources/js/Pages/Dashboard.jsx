@@ -282,7 +282,7 @@ export default function Dashboard({ auth }) {
             </div>
 
             <div className='flex gap-2 h-80 mt-4'>
-              <div className='border rounded-3xl bg-background text-text w-1/3'>
+              <div className='border rounded-3xl bg-background text-text w-2/3'>
                 <p className='text-center my-2 '>Low on Stock</p>
                 <div className='overflow-y-auto h-64'>
                   {
@@ -294,8 +294,11 @@ export default function Dashboard({ auth }) {
                           />
                           <div className='ml-4 text-sm'>
                             <p className='font-medium text-base truncate'>{product.name} <span className='text-gray-500 text-xs'>{product.model}</span></p>
-                            <p className='text-gray-500'>Restock Point <span className='text-text font-semibold'>{product.restock_point}</span></p>
-                            <p className='text-gray-500'>Price <span className='text-text font-semibold'>{product.price}</span></p>
+                            <p className='text-gray-500'>Stock Left <span className='text-text font-semibold'>{product.quantity}</span></p>
+                            <div className='flex gap-2'>
+                              <p className='text-gray-500'>Restock Point <span className='text-text font-semibold'>{product.restock_point}</span></p>
+                              <p className='text-gray-500'>Price <span className='text-text font-semibold'>{product.price}</span></p>
+                            </div>
                           </div>
                         </div>
                       )
