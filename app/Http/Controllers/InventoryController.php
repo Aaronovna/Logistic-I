@@ -389,7 +389,13 @@ class InventoryController extends Controller
             return response()->json(['message' => 'No low-stock products found.'], 404);
         }
 
-        $products = $inventories->map(function ($inventory) {
+        $inventoryTrailController = new InventoryTrailController(); // Initialize controller for turnover calculation
+
+        $products = $inventories->map(function ($inventory) use ($inventoryTrailController) {
+            // Fetch inventory turnover rate (using last 30 days)
+            $turnoverResponse = $inventoryTrailController->inventoryTurnover($inventory->product_id, 30);
+            $turnoverData = json_decode($turnoverResponse->getContent(), true);
+
             return [
                 'product_id' => $inventory->product_id,
                 'name' => $inventory->product->name ?? 'N/A',
@@ -398,11 +404,14 @@ class InventoryController extends Controller
                 'price' => $inventory->product->price ?? 0,
                 'restock_point' => $inventory->product->restock_point ?? 0,
                 'quantity' => $inventory->quantity,
+                'inventory_turnover' => $turnoverData['inventory_turnover'] ?? 0,
+                'turnover_category' => $turnoverData['turnover_category'] ?? 'Unknown',
             ];
         });
 
         return response()->json(['data' => $products], 200);
     }
+
 
     public function lowStockProductsCount()
     {
