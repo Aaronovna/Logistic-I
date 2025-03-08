@@ -7,8 +7,8 @@ import { useStateContext } from '@/context/contextProvider';
 export default function Login({ status, canResetPassword }) {
   const { theme } = useStateContext();
   const { data, setData, post, processing, errors, reset } = useForm({
-    email: 'ashleigh.koepp@example.net',
-    password: 'password',
+    email: '',
+    password: '',
     remember: false,
   });
 

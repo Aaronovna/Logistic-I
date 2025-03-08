@@ -21,16 +21,16 @@ class DatabaseSeeder extends Seeder
             PositionSeeder::class,
         ]);
         Supplier::factory(10)->create();
-        Product::factory(20)->create();
+        //Product::factory(20)->create();
         User::factory(7)->create();
         
-        $this->call(DispatchTrailSeeder::class);
-        $this->call(InventoryTrailSeeder::class);
+        //$this->call(DispatchTrailSeeder::class);
+        //$this->call(InventoryTrailSeeder::class);
         
         
-        Infrastructure::factory(2)->ofType(100)->create();
-        Infrastructure::factory(2)->ofType(101)->create();
-        Infrastructure::factory(2)->ofType(102)->create();
-        $this->call(InventorySeeder::class);
+        //Infrastructure::factory(2)->ofType(100)->create();
+        //::factory(2)->ofType(101)->create();
+        //Infrastructure::factory(2)->ofType(102)->create();
+        //$this->call(InventorySeeder::class);
     }
 }
