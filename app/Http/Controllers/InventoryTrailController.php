@@ -154,15 +154,87 @@ class InventoryTrailController extends Controller
 
     /**
      * Classify Inventory Turnover as High, Moderate, or Low.
-     */ 
+     */
     private function classifyTurnover($turnover)
     {
         if ($turnover > 6) {
-            return 'High Turnover'; // Fast-moving product, selling quickly
+            return 'High'; // Fast-moving product, selling quickly
         } elseif ($turnover >= 3 && $turnover <= 6) {
-            return 'Moderate Turnover'; // Balanced inventory, good sales rate
+            return 'Moderate'; // Balanced inventory, good sales rate
         } else {
-            return 'Low Turnover'; // Slow-moving product, potential overstock
+            return 'Low'; // Slow-moving product, potential overstock
         }
+    }
+
+    public function getCriticalLevel($productId)
+    {
+        // Define a default minimum lead time (in days) if not stored elsewhere
+        $minimumLeadTime = 2; // Assume 2 days for now
+
+        // Calculate Minimum Usage (lowest daily usage in the last 30 days)
+        $startDate = Carbon::now()->subDays(30);
+
+        $dailyUsage = InventoryTrail::where('product_id', $productId)
+            ->where('created_at', '>=', $startDate)
+            ->get()
+            ->groupBy(function ($entry) {
+                return Carbon::parse($entry->created_at)->format('Y-m-d');
+            })
+            ->map(function ($entries) {
+                return $entries->sum(function ($entry) {
+                    return $entry->operation === 'subtract' ? $entry->quantity : 0;
+                });
+            });
+
+        // Get the minimum daily usage, default to 1 if no data
+        $minimumUsage = $dailyUsage->filter()->min() ?? 1;
+
+        // Calculate Critical Level
+        $criticalLevel = $minimumUsage * $minimumLeadTime;
+
+        return response()->json([
+            'product_id' => $productId,
+            'minimum_usage' => $minimumUsage,
+            'minimum_lead_time' => $minimumLeadTime,
+            'critical_level' => $criticalLevel
+        ]);
+    }
+
+    public function getReorderPoint($productId)
+    {
+        // Define a default lead time (in days)
+        $leadTime = 5; // Assume 5 days for now
+
+        // Calculate Average Daily Usage (last 30 days)
+        $startDate = Carbon::now()->subDays(30);
+
+        $dailyUsage = InventoryTrail::where('product_id', $productId)
+            ->where('created_at', '>=', $startDate)
+            ->get()
+            ->groupBy(function ($entry) {
+                return Carbon::parse($entry->created_at)->format('Y-m-d');
+            })
+            ->map(function ($entries) {
+                return $entries->sum(function ($entry) {
+                    return $entry->operation === 'subtract' ? $entry->quantity : 0;
+                });
+            });
+
+        // Get the average daily usage, default to 1 if no data
+        $averageDailyUsage = $dailyUsage->filter()->avg() ?? 1;
+
+        // Calculate Safety Stock (20% of demand during lead time)
+        $safetyStock = ($averageDailyUsage * $leadTime) * 0.2;
+
+        // Calculate Reorder Point
+        $reorderPoint = ($averageDailyUsage * $leadTime) + $safetyStock;
+
+        return response()->json([
+            'product_id' => $productId,
+            'average_daily_usage' => $averageDailyUsage,
+            'lead_time' => $leadTime,
+            'safety_stock' => $safetyStock,
+            'reorder_point' => $reorderPoint
+        ]);
     }
 }

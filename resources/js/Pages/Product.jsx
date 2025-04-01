@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useStateContext } from '@/context/contextProvider';
+import { router } from '@inertiajs/react';
 
 import useRole from '@/hooks/useRole';
 import Pagination from '@/Components/Pagination';
@@ -16,10 +17,8 @@ import { TbCaretDownFilled } from "react-icons/tb";
 import { TbPackageOff } from "react-icons/tb";
 import { TbAlertTriangle } from 'react-icons/tb';
 import { TbSparkles } from 'react-icons/tb';
-import useGemini from '@/hooks/useGemini';
 import usePrediction from '@/hooks/usePrediction';
 import { generateDemandData } from './Dev';
-import { product_intruction } from '@/Constants/instructions';
 import { useConfirmation } from '@/context/confirmationProvider';
 
 import IMAGE_PLACEHOLDER from "../../../public/assets/images/image-placeholder.png"
@@ -29,12 +28,10 @@ const cardStyle = 'mb-2 snap-center mx-2 md:min-w-64 inline-block min-w-[100%]';
 const Product = ({ auth }) => {
   const { hasAccess, getLayout, hasPermissions } = useRole();
   const Layout = getLayout(auth.user.type);
-  const { confirm } = useConfirmation();
 
   const [products, setProducts] = useState([]);
   const [totalProductValue, setTotalProductValue] = useState(0);
   const [openAddProductModal, setOpenAddProductModal] = useState(false);
-  const { prompt, promptBuilder, loading } = useGemini();
   const [response, setResponse] = useState('');
   const [viewReport, setViewReport] = useState(false);
 
@@ -194,7 +191,6 @@ const Product = ({ auth }) => {
     <ProductCard
       product={product}
       key={index}
-      list={['Edit', 'Delete']}
       onClick={() => onProductClick(product)}
       className='mx-4 hover:scale-[102%] hover:shadow-md mb-3'
     />
@@ -244,17 +240,6 @@ const Product = ({ auth }) => {
     }
   };
 
-  const handleDeleteProduct = async (id) => {
-    try {
-      const response = await axios.delete(`/product/delete/${id}}`);
-      toast.success(response.data.message);
-      setOpenViewProductModal(false);
-      fetchProducts();
-    } catch (error) {
-      toast.error(`${error.status} ${error.response.data.message}`);
-    }
-  };
-
   useEffect(() => {
     if (selectedProduct) {
       setEditProductFormData({
@@ -270,13 +255,6 @@ const Product = ({ auth }) => {
       })
     }
   }, [selectedProduct]);
-
-  const generateReport = () => {
-    if (!response) {
-      prompt(promptBuilder('Product', selectedProduct, product_intruction), setResponse);
-    }
-    setViewReport(true);
-  }
 
   const [prodTurnoverRate, setProdTurnoverRate] = useState('');
 
@@ -475,20 +453,15 @@ const Product = ({ auth }) => {
                       <span className='font-medium text-base text-neutral mr-2'>Turnover Rate</span>
                       {prodTurnoverRate.turnover_category}
                     </p>
-
-
-                    <button className='btn bg-primary mt-auto disable' disabled={loading}
-                      onClick={generateReport}
-                    > Generate Report <TbSparkles size={20} className='ml-2 text-orange-300' /> </button>
                   </div>
                 </div>
 
                 <div className='w-full mt-2 flex gap-2'>
-                  <button className='btn disable text-black bg-red-200 hover:bg-red-400 w-full'
-                    disabled={!hasPermissions([332])}
-                    onClick={() => confirm(cm_delete, () => handleDeleteProduct(selectedProduct?.id))}
-                  > Delete </button>
                   <button className='btn disable w-full' disabled={!hasPermissions([332])} onClick={() => setOpenEditProductModal(true)}>Edit</button>
+                  <button className='btn disable w-full'
+                    disabled={!hasPermissions([332])}
+                    onClick={() => router.get('/product/view', { id: selectedProduct?.id })}
+                  > View Detail </button>
                 </div>
               </div>
             </Modal>
@@ -582,5 +555,3 @@ const Product = ({ auth }) => {
 }
 
 export default Product;
-
-const cm_delete = `Are you sure you want to delete this product entry?`;

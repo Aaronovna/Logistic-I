@@ -39,7 +39,7 @@ export const inventoryLinks = [
         Icon: TbBuildingWarehouse
     },
     {
-        name: 'product',
+        name: ['product', 'product-view'],
         Icon: TbPackage
     },
     {

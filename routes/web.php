@@ -70,6 +70,12 @@ Route::middleware(["auth", "verified", PreventBackHistory::class])->group(functi
         ]);
     })->name('reports-view');
 
+    Route::get('/product/view', function (Request $request) {
+        return Inertia::render('Product.View', [
+            'id' => $request->query('id'),
+        ]);
+    })->name('product-view');
+
     Route::get('/return', fn() => Inertia::render('Return'))->name('return');
     Route::get('/return/history', fn() => Inertia::render('Return.History'))->name('return-history');
 
@@ -95,6 +101,11 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post('/product/store', [ProductController::class, 'store'])->name('product.store');
     Route::patch('/product/update/{id}', [ProductController::class, 'update'])->name('product.update');
     Route::delete('/product/delete/{id}', [ProductController::class, 'destroy'])->name('product.destroy');
+    Route::get('/products/category', [ProductController::class, 'productEachCategory']);
+    Route::get('/products/supplier', [ProductController::class, 'productEachSupplier']);
+    Route::get('/products/recent/{limit?}', [ProductController::class, 'recentProducts']);
+    Route::get('/products/most/{limit?}', [ProductController::class, 'mostExpensiveProducts']);
+    Route::get('/products/least/{limit?}', [ProductController::class, 'leastExpensiveProducts']);
 
     Route::get('/product/stats', [ProductController::class, 'stats'])->name('product.stats');
 
@@ -203,13 +214,6 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::post('file/store', [FileController::class, 'store']);
     Route::delete('/file/delete/{id}', [FileController::class, 'destroy']);
 
-    Route::get('/product/get', [ProductController::class, 'index']);
-    Route::get('/products/category', [ProductController::class, 'productEachCategory']);
-    Route::get('/products/supplier', [ProductController::class, 'productEachSupplier']);
-    Route::get('/products/recent/{limit?}', [ProductController::class, 'recentProducts']);
-    Route::get('/products/most/{limit?}', [ProductController::class, 'mostExpensiveProducts']);
-    Route::get('/products/least/{limit?}', [ProductController::class, 'leastExpensiveProducts']);
-
     Route::get('/inventory/total/stock', [InventoryController::class, 'totalStock']);
     Route::get('/inventory/out/stock/{limit?}', [InventoryController::class, 'outOfStockProducts']);
     Route::get('/inventory/low/stock/{limit?}', [InventoryController::class, 'lowStockProducts']);
@@ -223,6 +227,8 @@ Route::middleware(["auth", "verified"])->group(function () {
     Route::get('/ending/inventory/{productId}', [InventoryTrailController::class, 'getEndingInventory']);
     Route::get('/cogs/{productId}/{days}', [InventoryTrailController::class, 'calculateCOGS']);
     Route::get('/inventory/turnover/{productId}/{days}', [InventoryTrailController::class, 'inventoryTurnover']);
+    Route::get('/inventory/critical/{productId}', [InventoryTrailController::class, 'getCriticalLevel']);
+    Route::get('/inventory/reorder/{productId}', [InventoryTrailController::class, 'getReorderPoint']);
     Route::get('/inventory/stock/{period}/{year?}', [InventoryController::class, 'getStockDataByPeriod'])->where(['period' => 'month|quarter|year', 'year' => '[0-9]{4}']);
     Route::get('/inventory/top/products/{category_id}/{top?}', [InventoryController::class, 'getTopProductsByCategory']);
     Route::get('/inventory/years', [InventoryController::class, 'getAvailableYears']);
