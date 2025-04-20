@@ -119,7 +119,8 @@ export default function Product_View({ auth }) {
                     <p className='font-medium mb-1 p-2 rounded-md flex justify-between pr-4' ><span className='text-neutral'>Price</span> {product?.price}</p>
                     <p className='font-medium mb-1 p-2 rounded-md flex justify-between pr-4' ><span className='text-neutral'>Model</span> {product?.model}</p>
                     <p className='font-medium mb-1 p-2 rounded-md flex justify-between pr-4' ><span className='text-neutral'>Brand</span> {product?.brand}</p>
-                    <p className='font-medium mb-1 p-2 rounded-md flex justify-between pr-4' ><span className='text-neutral'>Auto Replenish</span> True</p>
+                    <p className='font-medium mb-1 p-2 rounded-md flex justify-between pr-4' ><span className='text-neutral'>Auto Replenish</span> {product?.auto_replenish ? 'True' : 'False'}</p>
+                    <p className='font-medium mb-1 p-2 rounded-md flex justify-between pr-4' ><span className='text-neutral'>Perishable</span>{`${product?.perishable ? 'True' : 'False'} ${product?.perishable ? `(${product?.shelf_life} days)` : ''}`}</p>
                   </div>
                   <div className='flex-1'>
                     <p className='font-medium mb-1 p-2 rounded-md flex justify-between pr-4' ><span className='text-neutral'>Stocks</span> {product?.total_stock}</p>

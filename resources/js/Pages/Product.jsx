@@ -19,7 +19,6 @@ import { TbAlertTriangle } from 'react-icons/tb';
 import { TbSparkles } from 'react-icons/tb';
 import usePrediction from '@/hooks/usePrediction';
 import { generateDemandData } from './Dev';
-import { useConfirmation } from '@/context/confirmationProvider';
 
 import IMAGE_PLACEHOLDER from "../../../public/assets/images/image-placeholder.png"
 
@@ -133,11 +132,25 @@ const Product = ({ auth }) => {
     restock_point: '',
     category_id: '',
     supplier_id: '',
+    auto_replenish: false,
+    perishable: false,
+    shelf_life_years: '',
+    shelf_life_months: '',
   });
 
   const handleAddProductInputChange = (e) => {
     const { name, value } = e.target;
     setAddProductFormData({ ...addProductFormData, [name]: value });
+  };
+
+  const handleAddProductCheckboxChange = (e) => {
+    const { name, checked } = e.target;
+    setAddProductFormData({ ...addProductFormData, [name]: checked });
+  };
+
+  const handleEditProductCheckboxChange = (e) => {
+    const { name, checked } = e.target;
+    setEditProductFormData({ ...editProductFormData, [name]: checked });
   };
 
   const handleAddProductSubmit = async (e) => {
@@ -201,6 +214,7 @@ const Product = ({ auth }) => {
 
   const onProductClick = (data) => {
     setSelectedProduct(data);
+    console.log(data)
     setOpenViewProductModal(true);
 
     let demands
@@ -252,6 +266,10 @@ const Product = ({ auth }) => {
         restock_point: selectedProduct.restock_point,
         category_id: selectedProduct.category_id,
         supplier_id: selectedProduct.supplier_id,
+        auto_replenish: selectedProduct.auto_replenish,
+        perishable: selectedProduct.perishable,
+        shelf_life_years: '',
+        shelf_life_months: '',
       })
     }
   }, [selectedProduct]);
@@ -324,7 +342,7 @@ const Product = ({ auth }) => {
               <div style={{ color: theme.text }}>
                 <form onSubmit={handleAddProductSubmit}>
                   <div className='flex gap-2 mb-4'>
-                    <div className='w-48 border-card p-0 overflow-hidden product-placeholder bg-contain'
+                    <div className='w-48 aspect-square h-fit border-card p-0 overflow-hidden product-placeholder bg-contain'
                       style={{ backgroundSize: '100%' }}>
                       {addProductFormData.image_url === ''
                         ? null
@@ -332,7 +350,7 @@ const Product = ({ auth }) => {
                       }
                     </div>
 
-                    <div className='flex flex-col flex-1 gap-2'>
+                    <div className='flex flex-col gap-2'>
                       <select className='border-card bg-transparent' style={{ borderColor: theme.border }} name="category_id" id="category_id" onChange={handleAddProductInputChange}>
                         <option value={null} style={{ background: theme.background }}>Select Category</option>
                         {categories.map((category, index) => {
@@ -364,13 +382,30 @@ const Product = ({ auth }) => {
                           onChange={handleAddProductInputChange}
                         />
                       </div>
-
-                      <input type="text" name="image_url" id="image_url" placeholder="Image URL"
-                        className='border-card bg-transparent'
-                        style={{ borderColor: theme.border }}
-                        value={addProductFormData.image_url}
-                        onChange={handleAddProductInputChange}
-                      />
+                      <div className='flex gap-2 w-full select-none'>
+                        <label htmlFor="auto_replenish" className='flex items-center w-full gap-2'>
+                          <input type="checkbox" name="auto_replenish" id="auto_replenish" className='hidden' onChange={handleAddProductCheckboxChange} checked={addProductFormData.auto_replenish} />
+                          <span className={`p-3 border inline-block rounded shadow-inner cursor-pointer ${addProductFormData.auto_replenish ? 'bg-primary' : null}`}></span>
+                          <span className='text-neutral text-[#a9a9a9]'>Auto Replenish</span>
+                        </label>
+                        <label htmlFor="perishable" className='flex items-center w-full gap-2'>
+                          <input type="checkbox" name="perishable" id="perishable" className='hidden' onChange={handleAddProductCheckboxChange} checked={addProductFormData.perishable} />
+                          <span className={`p-3 border inline-block rounded shadow-inner cursor-pointer ${addProductFormData.perishable ? 'bg-primary' : null}`}></span>
+                          <span className='text-neutral text-[#a9a9a9]'>Perishable</span>
+                        </label>
+                      </div>
+                      <div className='flex gap-2'>
+                        <input type="number" name='shelf_life_years' id='shelf_life_years' placeholder='Year/s' className='p-2 inline-block disable'
+                          disabled={!addProductFormData.perishable}
+                          value={addProductFormData.shelf_life_years}
+                          onChange={handleAddProductInputChange}
+                        />
+                        <input type="number" name='shelf_life_months' id='shelf_life_months' placeholder='Month/s' className='p-2 inline-block disable'
+                          disabled={!addProductFormData.perishable}
+                          value={addProductFormData.shelf_life_months}
+                          onChange={handleAddProductInputChange}
+                        />
+                      </div>
                     </div>
                   </div>
                   <div className='flex flex-col gap-2'>
@@ -394,8 +429,14 @@ const Product = ({ auth }) => {
                       value={addProductFormData.brand}
                       onChange={handleAddProductInputChange}
                     />
+                    <input type="text" name="image_url" id="image_url" placeholder="Image URL"
+                      className='border-card bg-transparent'
+                      style={{ borderColor: theme.border }}
+                      value={addProductFormData.image_url}
+                      onChange={handleAddProductInputChange}
+                    />
                     <textarea type="text" name="description" id="description" placeholder="Description"
-                      rows={6}
+                      rows={4}
                       className='border-card w-full resize-none bg-transparent'
                       style={{ borderColor: theme.border }}
                       value={addProductFormData.description}
@@ -470,7 +511,7 @@ const Product = ({ auth }) => {
               <div>
                 <form onSubmit={handleEditProductSubmit}>
                   <div className='flex gap-2 mb-4'>
-                    <div className='w-52 aspect-square border-card overflow-hidden'
+                    <div className='w-52 aspect-square h-fit border-card overflow-hidden'
                       style={{ background: `url(${product_image_placeholder})`, backgroundSize: '100%' }}>
                       {editProductFormData.image_url === ''
                         ? null
@@ -506,11 +547,30 @@ const Product = ({ auth }) => {
                           onChange={handleEditProductInputChange}
                         />
                       </div>
-                      <input type="text" name="image_url" id="image_url" placeholder="Image URL"
-                        className='border-card'
-                        value={editProductFormData.image_url || ''}
-                        onChange={handleEditProductInputChange}
-                      />
+                      <div className='flex gap-2 w-full select-none'>
+                        <label htmlFor="auto_replenish" className='flex items-center w-full gap-2'>
+                          <input type="checkbox" name="auto_replenish" id="auto_replenish" className='hidden' onChange={handleEditProductCheckboxChange} checked={editProductFormData.auto_replenish} />
+                          <span className={`p-3 border inline-block rounded shadow-inner cursor-pointer ${editProductFormData.auto_replenish ? 'bg-primary' : null}`}></span>
+                          <span className='text-neutral text-[#a9a9a9]'>Auto Replenish</span>
+                        </label>
+                        <label htmlFor="perishable" className='flex items-center w-full gap-2'>
+                          <input type="checkbox" name="perishable" id="perishable" className='hidden' onChange={handleEditProductCheckboxChange} checked={editProductFormData.perishable} />
+                          <span className={`p-3 border inline-block rounded shadow-inner cursor-pointer ${editProductFormData.perishable ? 'bg-primary' : null}`}></span>
+                          <span className='text-neutral text-[#a9a9a9]'>Perishable</span>
+                        </label>
+                      </div>
+                      <div className='flex gap-2'>
+                        <input type="number" name='shelf_life_years' id='shelf_life_years' placeholder='Year/s' className='p-2 inline-block disable'
+                          disabled={!editProductFormData.perishable}
+                          value={editProductFormData.shelf_life_years}
+                          onChange={handleEditProductInputChange}
+                        />
+                        <input type="number" name='shelf_life_months' id='shelf_life_months' placeholder='Month/s' className='p-2 inline-block disable'
+                          disabled={!editProductFormData.perishable}
+                          value={editProductFormData.shelf_life_months}
+                          onChange={handleEditProductInputChange}
+                        />
+                      </div>
                     </div>
                   </div>
                   <div className='flex flex-col gap-2'>
@@ -529,6 +589,11 @@ const Product = ({ auth }) => {
                     <input type="text" name="brand" id="brand" placeholder="Brand"
                       className='border-card w-full'
                       value={editProductFormData.brand || ''}
+                      onChange={handleEditProductInputChange}
+                    />
+                    <input type="text" name="image_url" id="image_url" placeholder="Image URL"
+                      className='border-card'
+                      value={editProductFormData.image_url || ''}
                       onChange={handleEditProductInputChange}
                     />
                     <textarea type="text" name="description" id="description" placeholder="Description"

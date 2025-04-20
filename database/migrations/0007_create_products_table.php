@@ -23,6 +23,9 @@ return new class extends Migration
             $table->mediumText('image_url')->nullable();
             $table->decimal('price')->nullable();
             $table->integer('restock_point')->nullable();
+            $table->boolean('auto_replenish')->default(false);
+            $table->boolean('perishable')->default(false);
+            $table->integer('shelf_life')->nullable();
             $table->timestamps();
         });
 

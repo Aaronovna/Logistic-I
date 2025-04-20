@@ -48,12 +48,29 @@ class ProductController extends Controller
             'restock_point' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
             'supplier_id' => 'required|exists:suppliers,id',
+            'auto_replenish' => 'required|boolean',
+            'perishable' => 'required|boolean',
         ]);
+
+        if ($request->boolean('perishable')) {
+            $years = (int) $request->input('shelf_life_years', 0);
+            $months = (int) $request->input('shelf_life_months', 0);
+
+            $totalShelfLife = $years * 365 + $months * 30;
+
+            $validatedData['shelf_life'] = $totalShelfLife > 0 ? $totalShelfLife : null;
+        } else {
+            $validatedData['shelf_life'] = null;
+        }
 
         $product = Product::create($validatedData);
 
-        return response()->json(['message' => 'Task created successfully.', 'data' => $product,], 201);
+        return response()->json([
+            'message' => 'Product created successfully.',
+            'data' => $product,
+        ], 201);
     }
+
 
     /**
      * Display the specified resource.
@@ -107,11 +124,27 @@ class ProductController extends Controller
             'restock_point' => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
             'supplier_id' => 'required|exists:suppliers,id',
+            'auto_replenish' => 'required|boolean',
+            'perishable' => 'required|boolean',
         ]);
+
+        if ($request->boolean('perishable')) {
+            $years = (int) $request->input('shelf_life_years', 0);
+            $months = (int) $request->input('shelf_life_months', 0);
+
+            $totalShelfLife = ($years * 365) + ($months * 30);
+
+            $validatedData['shelf_life'] = $totalShelfLife > 0 ? $totalShelfLife : null;
+        } else {
+            $validatedData['shelf_life'] = null;
+        }
 
         $product->update($validatedData);
 
-        return response()->json(['message' => 'Product updated successfully', 'product' => $product], 200);
+        return response()->json([
+            'message' => 'Product updated successfully',
+            'product' => $product,
+        ], 200);
     }
 
     /**

@@ -21,6 +21,9 @@ class Product extends Model
         'restock_point',
         'category_id',
         'supplier_id',
+        'auto_replenish',
+        'perishable',
+        'shelf_life',
     ];
 
     public function category()
