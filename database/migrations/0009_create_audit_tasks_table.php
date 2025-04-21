@@ -23,6 +23,7 @@ return new class extends Migration
             $table->boolean('auto_gen')->default(false);
             $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('restrict');
             $table->foreignId('assigned_by')->constrained('users')->onDelete('restrict');
+            $table->string('priority')->default('unknown');
             $table->timestamps();
         });
     }

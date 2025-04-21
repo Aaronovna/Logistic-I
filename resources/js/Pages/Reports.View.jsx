@@ -3,7 +3,7 @@ import { usePage } from "@inertiajs/react";
 import { router } from "@inertiajs/react";
 import useRole from "@/hooks/useRole";
 import { dateTimeFormatLong, dateTimeFormatShort } from "@/Constants/options";
-import { auditReportStatus } from "@/Constants/status";
+import { auditReportStatus, taskPriorityLevel } from "@/Constants/status";
 import Status from "@/Components/Status";
 
 const ReportsView = ({ auth }) => {
@@ -100,7 +100,8 @@ const ReportsView = ({ auth }) => {
               <div className="bg-gray-100 p-4 rounded-md">
                 <div className="flex items-end">
                   <p className="text-lg font-semibold">{report?.task_title}</p>
-                  <Status statusArray={auditReportStatus} status={report?.review_status} className="ml-auto" />
+                  <Status statusArray={auditReportStatus} status={report?.review_status} className="ml-auto mr-2" />
+                  <Status statusArray={taskPriorityLevel} status={report?.task_priority} suffix="Priority" />
                 </div>
                 <p className="font-medium text-gray-600 mt-1">
                   {`${new Date(report?.task_startdate).toLocaleString(undefined, dateTimeFormatShort)} - ${new Date(report?.task_deadline).toLocaleString(undefined, dateTimeFormatShort)}`}

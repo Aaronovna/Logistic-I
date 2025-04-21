@@ -29,6 +29,7 @@ class AuditReportController extends Controller
                 $report['task_assigned_by'] = $selectedReport->audit_task->assigned_by ?? 'N/A';
                 $report['task_assigned_to_name'] = $selectedReport->audit_task->assignedToUser->name ?? 'N/A';
                 $report['task_assigned_by_name'] = $selectedReport->audit_task->assignedByUser->name ?? 'N/A';
+                $report['task_priority'] = $selectedReport->audit_task->priority ?? 'N/A';
 
                 unset($report['audit_task']);
 
@@ -81,6 +82,7 @@ class AuditReportController extends Controller
         $report['task_assigned_by'] = $selectedReport->audit_task->assigned_by ?? 'N/A';
         $report['task_assigned_to_name'] = $selectedReport->audit_task->assignedToUser->name ?? 'N/A';
         $report['task_assigned_by_name'] = $selectedReport->audit_task->assignedByUser->name ?? 'N/A';
+        $report['task_priority'] = $selectedReport->audit_task->priority ?? 'N/A';
 
         return response()->json(['data' => $report], 200);
     }

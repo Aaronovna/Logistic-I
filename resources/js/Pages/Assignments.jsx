@@ -8,7 +8,7 @@ import { filterArray } from "@/functions/filterArray";
 import AuditAssignmentCard from "@/Components/cards/AuditAssignmentCard";
 
 const Assignments = ({ auth }) => {
-  const { hasAccess, getLayout, hasPermissions } = useRole();
+  const { hasAccess, getLayout } = useRole();
   const Layout = getLayout(auth.user.type);
 
   const [tasks, setTasks] = useState([]);

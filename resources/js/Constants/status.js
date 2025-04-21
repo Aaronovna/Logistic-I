@@ -157,3 +157,18 @@ export const shipmentStatus = [
         color: 'bg-red-100 text-red-600',
     },
 ];
+
+export const taskPriorityLevel = [
+    {
+        name:'low',
+        color: 'bg-green-200 text-green-600'
+    },
+    {
+        name:'medium',
+        color: 'bg-yellow-200 text-yellow-600'
+    },
+    {
+        name:'high',
+        color: 'bg-red-200 text-red-600'
+    },
+];

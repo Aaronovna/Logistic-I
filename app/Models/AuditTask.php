@@ -19,7 +19,8 @@ class AuditTask extends Model
         'deadline',
         'description',
         'assigned_to',
-        'assigned_by'
+        'assigned_by',
+        'priority'
     ];
 
     public function auditReport()

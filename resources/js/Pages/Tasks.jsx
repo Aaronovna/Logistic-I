@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useStateContext } from '@/context/contextProvider';
 
 import useRole from '@/hooks/useRole';
 import AuditTaskCard from '@/Components/cards/AuditTaskCard';
 import { handleInputChange } from '@/functions/handleInputChange';
 import { filterArray } from '@/functions/filterArray';
-import { auditTaskStatus } from '@/Constants/status';
+import { auditTaskStatus, taskPriorityLevel } from '@/Constants/status';
 import { auditTasks } from '@/Constants/auditTasks';
 import { dateFormatShort } from '@/Constants/options';
 import { gradients } from "@/Constants/themes";
@@ -22,7 +21,6 @@ const Tasks = ({ auth }) => {
   const Layout = getLayout(auth.user.type);
 
   const { updateStatus } = useUpdateStatus();
-  const { theme } = useStateContext();
   const [openCreateTaskModal, setOpenCreateTaskModal] = useState(false);
 
   const [createTaskFormData, setCreateTaskFormData] = useState({
@@ -34,6 +32,7 @@ const Tasks = ({ auth }) => {
     startdate: new Date().toISOString().split('T')[0],
     deadline: '',/* new Date().toISOString().split('T')[0], */
     description: '',
+    priority: '',
   });
 
   const [tasks, setTasks] = useState([]);
@@ -78,6 +77,7 @@ const Tasks = ({ auth }) => {
       deadline: new Date(createTaskFormData.deadline).toISOString().slice(0, 19).replace('T', ' '),
       assigned_to: '',
       assigned_by: auth.user.id,
+      priority: createTaskFormData.priority
     };
 
     try {
@@ -244,16 +244,24 @@ const Tasks = ({ auth }) => {
               <div>
                 <p className='modal-header'></p>
                 <form onSubmit={handleCreateTaskSubmit}>
-                  <select name="type" id="type" className='border-card w-full' onChange={(e) => handleInputChange(e, setCreateTaskFormData)}>
-                    <option value=''>Select Task</option>
-                    {
-                      auditTasks.map((task, index) => {
-                        return (
-                          <option value={task.name} key={index} className='text-sm'>{task.name}</option>
-                        )
-                      })
-                    }
-                  </select>
+                  <div className='flex gap-2'>
+                    <select name="type" id="type" className='border-card w-full' onChange={(e) => handleInputChange(e, setCreateTaskFormData)}>
+                      <option value=''>Select Task</option>
+                      {
+                        auditTasks.map((task, index) => {
+                          return (
+                            <option value={task.name} key={index} className='text-sm'>{task.name}</option>
+                          )
+                        })
+                      }
+                    </select>
+                    <select name="priority" id="priority" className='border-card' onChange={(e) => handleInputChange(e, setCreateTaskFormData)}>
+                      <option value={null}>Priority Level</option>
+                      {
+                        priority.map((prio, index) => <option key={index} value={prio.level} className={`text-sm ` + prio.color}>{prio.level}</option>)
+                      }
+                    </select>
+                  </div>
                   <div className='flex border-card p-1 mt-2 bg-white'>
                     <div className='w-1/2 flex items-center'>
                       <label htmlFor="startdate" className='px-2 text-nowrap text-gray-500'>Start Date:</label>
@@ -301,14 +309,15 @@ const Tasks = ({ auth }) => {
 
             <Modal show={openViewTaskModal} onClose={() => setOpenViewTaskModal(false)} name={selectedTask?.type}>
               <div className='min-h-96 flex flex-col'>
-                <div className='flex justify-between items-end mb-4'>
+                <div className='flex items-end mb-4'>
                   <p className='text-gray-500 font-medium'>{new Date(selectedTask?.created_at).toLocaleString(undefined, dateTimeFormatLong)}</p>
                   <p className={`
-                      rounded-md py-1 px-2 h-fit w-fit font-medium shadow-sm 
+                      rounded-md py-1 px-2 h-fit w-fit font-medium shadow-sm ml-auto mr-2
                       ${auditTaskStatus.find(status => status.name === selectedTask?.status)?.color}
                   `}>
                     {selectedTask?.status}
                   </p>
+                  <Status statusArray={taskPriorityLevel} status={selectedTask?.priority} suffix="Priority" />
                 </div>
                 <p className='font-medium text-lg'>{selectedTask?.title}</p>
                 <p className='font-medium'>Scope: {selectedTask?.scope}</p>
@@ -376,3 +385,21 @@ const Tasks = ({ auth }) => {
 }
 
 export default Tasks;
+
+const priority = [
+  {
+    level: 'low',
+    name: 'routine',
+    color: 'bg-green-200',
+  },
+  {
+    level: 'medium',
+    name: 'important',
+    color: 'bg-yellow-200',
+  },
+  {
+    level: 'high',
+    name: 'critical',
+    color: 'bg-red-200',
+  },
+];

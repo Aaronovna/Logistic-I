@@ -42,7 +42,8 @@ class AuditTaskController extends Controller
             'startdate' => 'required|date_format:Y-m-d H:i:s',
             'deadline' => 'required|date_format:Y-m-d H:i:s',
             'description' => 'required|string',
-            'assigned_by' => 'required|exists:users,id'
+            'assigned_by' => 'required|exists:users,id',
+            'priority' => 'required|string'
         ]);
 
         $task = AuditTask::create($validatedData);

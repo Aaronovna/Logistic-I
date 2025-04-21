@@ -144,6 +144,7 @@ const Receipt = ({ auth }) => {
       startdate: formatDateTime(new Date()),
       deadline: formatDateTime(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)),
       assigned_by: auth.user.id,
+      priority: 'medium'
     };
 
     try {

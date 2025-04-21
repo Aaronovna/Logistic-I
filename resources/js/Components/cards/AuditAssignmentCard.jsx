@@ -1,6 +1,6 @@
 import { TbClockExclamation } from 'react-icons/tb';
 import Status from '@/Components/Status';
-import { auditTaskStatus } from '@/Constants/status';
+import { auditTaskStatus, taskPriorityLevel } from '@/Constants/status';
 import { dateTimeFormatShort } from '@/Constants/options';
 
 const AuditAssignmentCard = ({ data, onClick = () => { } }) => {
@@ -14,7 +14,8 @@ const AuditAssignmentCard = ({ data, onClick = () => { } }) => {
           <p className={`rounded-md py-1 px-2 h-fit w-fit text-red-600 bg-red-100 flex items-center ml-4`}><TbClockExclamation className="mr-1" />Deadline</p>
         }
 
-        <Status statusArray={auditTaskStatus} status={data.status} className="ml-auto" />
+        <Status statusArray={auditTaskStatus} status={data.status} className="ml-auto mr-2" />
+        <Status statusArray={taskPriorityLevel} status={data.priority} suffix="Priority" />
       </div>
 
       <p className="font-medium text-gray-600 mt-3">Type <span className="font-medium text-black">{data.type}</span></p>

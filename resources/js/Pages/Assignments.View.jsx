@@ -3,7 +3,7 @@ import { usePage } from "@inertiajs/react";
 import { router } from "@inertiajs/react";
 import Status from "@/Components/Status";
 import useRole from "@/hooks/useRole";
-import { auditTaskStatus } from "@/Constants/status";
+import { auditTaskStatus, taskPriorityLevel } from "@/Constants/status";
 import { handleInputChange } from "@/functions/handleInputChange";
 import { dateFormatLong, dateTimeFormatShort } from "@/Constants/options";
 
@@ -190,7 +190,8 @@ const AssignmentsView = ({ auth }) => {
             <div className="border-card p-8">
               <div className="flex items-end">
                 <p className="text-lg font-semibold">{task?.title}</p>
-                <Status statusArray={auditTaskStatus} status={task?.status} className="ml-auto" />
+                <Status statusArray={auditTaskStatus} status={task?.status} className="ml-auto mr-2" />
+                <Status statusArray={taskPriorityLevel} status={task?.priority} suffix="Priority" />
               </div>
               <p className="font-medium text-gray-600 mt-1">
                 {`${new Date(task?.startdate).toLocaleString(undefined, dateTimeFormatShort)} - ${new Date(task?.deadline).toLocaleString(undefined, dateTimeFormatShort)}`}
