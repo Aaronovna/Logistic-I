@@ -20,6 +20,8 @@ return new class extends Migration
             $table->foreignId('position_id')->nullable()->constrained('positions')->onDelete('restrict');
             $table->integer('type')->default(2056);
             $table->string('status')->default('active');
+            $table->string('two_factor_code')->nullable();
+            $table->timestamp('two_factor_expires_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

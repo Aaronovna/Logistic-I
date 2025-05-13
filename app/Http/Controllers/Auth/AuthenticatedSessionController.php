@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\TwoFactorCode;
+use App\Models\User;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -27,22 +32,28 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(LoginRequest $request)
     {
         $request->authenticate();
         $request->session()->regenerate();
 
-        // Determine the user's type based on permissions
         $user = $request->user();
-        $redirectRoute = $this->determineRedirection($user);
 
-        if (!$redirectRoute) {
-            // Handle unauthorized access if no valid redirection
-            return redirect()->route('login')->withErrors(['access' => 'Unauthorized access.']);
-        }
+        // Save code and expiration
+        $user->two_factor_code = rand(100000, 999999);
+        $user->two_factor_expires_at = now()->addMinutes(10);
+        $user->save();
 
-        return redirect()->intended($redirectRoute);
+        // Send code to email
+        Mail::to($user->email)->send(new TwoFactorCode($user));
+
+        // Log out temporarily and store ID in session for 2FA
+        Auth::logout();
+        $request->session()->put('2fa:user:id', $user->id);
+
+        return response()->json(['twofa' => true]);
     }
+
 
     /**
      * Destroy an authenticated session.
@@ -73,5 +84,77 @@ class AuthenticatedSessionController extends Controller
         } //audit
 
         return null;
+    }
+
+    public function verify2fa(Request $request)
+    {
+        $request->validate(['code' => 'required']);
+
+        $userId = $request->session()->get('2fa:user:id');
+
+        if (!$userId) {
+            return response()->json(['success' => false, 'message' => 'Session expired. Please log in again.'], 419);
+        }
+
+        $user = User::find($userId);
+
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not found.'], 404);
+        }
+
+        // Rate limit check
+        $key = '2fa-attempts:' . $user->id;
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $seconds = RateLimiter::availableIn($key);
+            return response()->json([
+                'success' => false,
+                'message' => "Too many attempts. Try again in $seconds seconds."
+            ], 429);
+        }
+
+        // Increment attempts
+        RateLimiter::hit($key, 60); // Limit resets after 60 seconds
+
+        if (
+            $user->two_factor_code === $request->code &&
+            $user->two_factor_expires_at->gt(now())
+        ) {
+            // Clear code and rate limiter
+            $user->two_factor_code = null;
+            $user->two_factor_expires_at = null;
+            $user->save();
+            RateLimiter::clear($key);
+
+            Auth::login($user);
+            $request->session()->forget('2fa:user:id');
+
+            return response()->json(['success' => true, 'user_type' => $user->type]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Invalid or expired code.'], 422);
+    }
+
+    public function resend2faCode(Request $request)
+    {
+        $userId = $request->session()->get('2fa:user:id');
+
+        if (!$userId) {
+            return response()->json(['success' => false, 'message' => 'Session expired. Please log in again.'], 419);
+        }
+
+        $user = User::find($userId);
+
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not found.'], 404);
+        }
+
+        // Update code and expiration
+        $user->two_factor_code = rand(100000, 999999);
+        $user->two_factor_expires_at = now()->addMinutes(10);
+        $user->save();
+
+        Mail::to($user->email)->send(new TwoFactorCode($user));
+
+        return response()->json(['success' => true, 'message' => 'A new 2FA code has been sent.']);
     }
 }

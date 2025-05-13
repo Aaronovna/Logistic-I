@@ -22,9 +22,13 @@ use App\Http\Controllers\ReturnMaterialController;
 use App\Http\Controllers\ReturnRequestController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\InventoryTrailController;
+use App\Http\Controllers\Auth\TwoFactorController;
 use Illuminate\Http\Request;
 
 Route::redirect('/', 'login');
+
+Route::get('/two-factor-challenge', [TwoFactorController::class, 'create'])->name('two-factor.challenge');
+Route::post('/two-factor-challenge', [TwoFactorController::class, 'store']);
 
 //? START: PAGES ROUTES ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
